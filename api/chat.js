@@ -12,6 +12,10 @@
  * It is NEVER sent to the browser / client.
  */
 
+// Static top-level import — required for Vercel's bundler to include the package.
+// Dynamic `await import(...)` inside the function body is NOT reliably bundled by Vercel.
+import { GoogleGenAI } from '@google/genai';
+
 export default async function handler(req, res) {
   // Only allow POST
   if (req.method !== 'POST') {
@@ -21,6 +25,11 @@ export default async function handler(req, res) {
 
   try {
     const { message, patientContext, conversationHistory } = req.body || {};
+
+    if (!message || !String(message).trim()) {
+      res.status(400).json({ status: 'error', available: false, message: 'No message provided.' });
+      return;
+    }
 
     // ── Resolve API key from Vercel environment variables ──────────────────
     const apiKey = (process.env.GEMINI_API_KEY || '').trim().replace(/^["']|["']$/g, '');
@@ -40,8 +49,8 @@ export default async function handler(req, res) {
       patientContext?.patientProfile?.fullName ||
       'the patient';
 
-    // ── Build system prompt (identical to local dev version) ───────────────
-    const systemPrompt = `You are a supportive, calm, patient, and warm AI memory companion for an elderly person named ${patientName}.
+    // ── Build system prompt ────────────────────────────────────────────────
+    const systemInstruction = `You are a supportive, calm, patient, and warm AI memory companion for an elderly person named ${patientName}.
 
 IMPORTANT BEHAVIOR RULES:
 1. When answering casual check-ins or quick questions, speak simply, clearly, and warmly in short sentences.
@@ -52,35 +61,35 @@ IMPORTANT BEHAVIOR RULES:
 6. For personal questions about the patient's life, family, home, medicines, routine, memories, or tasks: ONLY use the information provided in the STORED PATIENT CONTEXT below.
 7. NEVER invent, assume, or hallucinate family members, relatives, dates, anniversaries, medicines, dosages, appointments, locations, or personal facts.
 8. If the patient asks for personal information that is NOT in the stored Patient Context, DO NOT GUESS. Gently say: "I don't have that information yet. You can ask your family member or caregiver to add it." (translated into ${targetLang}).
-9. CRITICAL MEDICAL SAFETY RULE: You are an assistant, NOT a doctor. You must NEVER diagnose dementia, Alzheimer's, or any medical condition. NEVER say "You have worsening dementia", "You need a doctor", or "Your brain health score is bad".
+9. CRITICAL MEDICAL SAFETY RULE: You are an assistant, NOT a doctor. You must NEVER diagnose dementia, Alzheimer's, or any medical condition.
 10. LANGUAGE RULE: The patient's chosen language is "${targetLang}". Compose your reply in ${targetLang} unless the user explicitly speaks/asks in another language.
 
 STORED PATIENT CONTEXT:
 ${JSON.stringify(patientContext, null, 2)}`;
 
-    // ── Build conversation history payload ─────────────────────────────────
-    const contentsPayload = [];
+    // ── Build contents array (always structured — never pass raw string) ───
+    // @google/genai v2.x requires contents to be [{role, parts}] format.
+    const contents = [];
     if (Array.isArray(conversationHistory) && conversationHistory.length > 0) {
       for (const turn of conversationHistory.slice(-6)) {
         if (turn.sender === 'user' && turn.text) {
-          contentsPayload.push({ role: 'user', parts: [{ text: turn.text }] });
+          contents.push({ role: 'user', parts: [{ text: turn.text }] });
         } else if (turn.sender === 'assistant' && turn.text && turn.id !== 'welcome') {
-          contentsPayload.push({ role: 'model', parts: [{ text: turn.text }] });
+          contents.push({ role: 'model', parts: [{ text: turn.text }] });
         }
       }
     }
-    contentsPayload.push({ role: 'user', parts: [{ text: message }] });
+    contents.push({ role: 'user', parts: [{ text: String(message).trim() }] });
 
-    // ── Call Gemini via @google/genai SDK ──────────────────────────────────
-    const { GoogleGenAI } = await import('@google/genai');
+    // ── Call Gemini via @google/genai SDK (static import, correct params) ──
     const ai = new GoogleGenAI({ apiKey });
 
-    // Candidate models in preference order
+    // Candidate models in preference order (valid Gemini model IDs)
     const candidateModels = [
-      'gemini-2.5-flash',
       'gemini-2.0-flash',
       'gemini-1.5-flash',
-      'gemini-1.5-flash-latest'
+      'gemini-1.5-flash-latest',
+      'gemini-2.5-flash'
     ];
 
     let replyText = '';
@@ -91,9 +100,9 @@ ${JSON.stringify(patientContext, null, 2)}`;
       try {
         const sdkResponse = await ai.models.generateContent({
           model: modelName,
-          contents: contentsPayload.length === 1 ? message : contentsPayload,
+          contents,
           config: {
-            systemInstruction: systemPrompt,
+            systemInstruction,
             maxOutputTokens: 2048,
             temperature: 0.4
           }
