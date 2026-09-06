@@ -2,28 +2,31 @@
  * api/chat.js — Vercel Serverless Function
  *
  * Handles POST /api/chat in production (deployed on Vercel).
- * This is the production counterpart of the Vite dev-server middleware
- * defined in vite.config.js (which only works locally during `npm run dev`).
+ * Uses the Gemini REST API directly via native fetch — no SDK import needed.
+ * Native fetch is available in Node.js 18+, which is the Vercel default.
  *
- * Vercel's file-based routing automatically maps:
- *   POST https://your-domain.vercel.app/api/chat  →  this file
- *
- * SECURITY: GEMINI_API_KEY is read from process.env (Vercel env vars).
- * It is NEVER sent to the browser / client.
+ * SECURITY: GEMINI_API_KEY is read from process.env only (Vercel env vars).
+ * It is NEVER sent to the browser or client code.
  */
 
-// Static top-level import — required for Vercel's bundler to include the package.
-// Dynamic `await import(...)` inside the function body is NOT reliably bundled by Vercel.
-import { GoogleGenAI } from '@google/genai';
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+// Models in preference order — verified working with this API key tier.
+// gemini-3.6-flash is the current recommended model per Google's own 404 messages.
+const CANDIDATE_MODELS = [
+  'gemini-3.6-flash',
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+];
 
 export default async function handler(req, res) {
-  // Only allow POST
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
   try {
+    // Vercel auto-parses JSON bodies; req.body is already an object.
     const { message, patientContext, conversationHistory } = req.body || {};
 
     if (!message || !String(message).trim()) {
@@ -31,14 +34,15 @@ export default async function handler(req, res) {
       return;
     }
 
-    // ── Resolve API key from Vercel environment variables ──────────────────
+    // ── Read API key from Vercel environment variable (server-side only) ────
     const apiKey = (process.env.GEMINI_API_KEY || '').trim().replace(/^["']|["']$/g, '');
 
     if (!apiKey) {
+      console.error('[api/chat] GEMINI_API_KEY is not set in environment variables.');
       res.status(200).json({
         status: 'no_key',
         available: false,
-        message: 'No GEMINI_API_KEY configured in server environment.'
+        message: 'AI service is not configured on the server.'
       });
       return;
     }
@@ -49,8 +53,8 @@ export default async function handler(req, res) {
       patientContext?.patientProfile?.fullName ||
       'the patient';
 
-    // ── Build system prompt ────────────────────────────────────────────────
-    const systemInstruction = `You are a supportive, calm, patient, and warm AI memory companion for an elderly person named ${patientName}.
+    // ── System prompt ────────────────────────────────────────────────────────
+    const systemInstructionText = `You are a supportive, calm, patient, and warm AI memory companion for an elderly person named ${patientName}.
 
 IMPORTANT BEHAVIOR RULES:
 1. When answering casual check-ins or quick questions, speak simply, clearly, and warmly in short sentences.
@@ -61,14 +65,13 @@ IMPORTANT BEHAVIOR RULES:
 6. For personal questions about the patient's life, family, home, medicines, routine, memories, or tasks: ONLY use the information provided in the STORED PATIENT CONTEXT below.
 7. NEVER invent, assume, or hallucinate family members, relatives, dates, anniversaries, medicines, dosages, appointments, locations, or personal facts.
 8. If the patient asks for personal information that is NOT in the stored Patient Context, DO NOT GUESS. Gently say: "I don't have that information yet. You can ask your family member or caregiver to add it." (translated into ${targetLang}).
-9. CRITICAL MEDICAL SAFETY RULE: You are an assistant, NOT a doctor. You must NEVER diagnose dementia, Alzheimer's, or any medical condition.
+9. CRITICAL MEDICAL SAFETY RULE: You are an assistant, NOT a doctor. You must NEVER diagnose dementia, Alzheimer's, or any medical condition. NEVER say "You have worsening dementia", "You need a doctor", or "Your brain health score is bad".
 10. LANGUAGE RULE: The patient's chosen language is "${targetLang}". Compose your reply in ${targetLang} unless the user explicitly speaks/asks in another language.
 
 STORED PATIENT CONTEXT:
 ${JSON.stringify(patientContext, null, 2)}`;
 
-    // ── Build contents array (always structured — never pass raw string) ───
-    // @google/genai v2.x requires contents to be [{role, parts}] format.
+    // ── Build contents array (always structured [{role, parts}] format) ──────
     const contents = [];
     if (Array.isArray(conversationHistory) && conversationHistory.length > 0) {
       for (const turn of conversationHistory.slice(-6)) {
@@ -81,42 +84,56 @@ ${JSON.stringify(patientContext, null, 2)}`;
     }
     contents.push({ role: 'user', parts: [{ text: String(message).trim() }] });
 
-    // ── Call Gemini via @google/genai SDK (static import, correct params) ──
-    const ai = new GoogleGenAI({ apiKey });
-
-    // Candidate models in preference order (valid Gemini model IDs)
-    const candidateModels = [
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
-      'gemini-1.5-flash-latest',
-      'gemini-2.5-flash'
-    ];
-
+    // ── Call Gemini REST API directly via native fetch ───────────────────────
+    // No SDK import — avoids all bundling issues in Vercel's serverless environment.
+    // Native fetch is available in Node.js 18+.
     let replyText = '';
     let apiSuccess = false;
-    let lastErr = null;
+    let lastErrMsg = '';
 
-    for (const modelName of candidateModels) {
+    for (const modelName of CANDIDATE_MODELS) {
       try {
-        const sdkResponse = await ai.models.generateContent({
-          model: modelName,
+        const url = `${GEMINI_API_BASE}/${modelName}:generateContent?key=${apiKey}`;
+
+        const geminiBody = {
+          system_instruction: {
+            parts: [{ text: systemInstructionText }]
+          },
           contents,
-          config: {
-            systemInstruction,
+          generationConfig: {
             maxOutputTokens: 2048,
             temperature: 0.4
           }
+        };
+
+        const geminiRes = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(geminiBody)
         });
 
-        const text = sdkResponse.text?.trim();
+        const geminiData = await geminiRes.json();
+
+        if (!geminiRes.ok) {
+          lastErrMsg = `${modelName}: HTTP ${geminiRes.status} — ${geminiData.error?.message || 'unknown error'}`;
+          console.warn('[api/chat]', lastErrMsg);
+          continue;
+        }
+
+        // Extract text from Gemini response structure
+        const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
         if (text) {
           replyText = text;
           apiSuccess = true;
           break;
+        } else {
+          const reason = geminiData.candidates?.[0]?.finishReason || 'no text';
+          lastErrMsg = `${modelName}: response OK but no text (finishReason=${reason})`;
+          console.warn('[api/chat]', lastErrMsg);
         }
-      } catch (modelErr) {
-        lastErr = modelErr;
-        console.warn(`[api/chat] ${modelName} failed:`, modelErr?.message || modelErr);
+      } catch (fetchErr) {
+        lastErrMsg = `${modelName}: fetch error — ${fetchErr.message}`;
+        console.warn('[api/chat]', lastErrMsg);
       }
     }
 
@@ -127,7 +144,7 @@ ${JSON.stringify(patientContext, null, 2)}`;
         reply: replyText
       });
     } else {
-      console.error('[api/chat] All models failed. Last error:', lastErr?.message || lastErr);
+      console.error('[api/chat] All models failed. Last error:', lastErrMsg);
       res.status(200).json({
         status: 'api_unavailable',
         available: false,
@@ -135,7 +152,7 @@ ${JSON.stringify(patientContext, null, 2)}`;
       });
     }
   } catch (err) {
-    console.error('[api/chat] Handler error:', err);
+    console.error('[api/chat] Unhandled handler error:', err);
     res.status(500).json({
       status: 'server_error',
       available: false,

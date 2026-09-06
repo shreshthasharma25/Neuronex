@@ -79,57 +79,53 @@ ${JSON.stringify(patientContext, null, 2)}`;
             // Add current turn
             contentsPayload.push({ role: 'user', parts: [{ text: message }] });
 
-            // Official @google/genai SDK with standard API-key authentication
+            // Call Gemini REST API directly — no SDK, same approach as api/chat.js in production.
+            // Native fetch is available in Node.js 18+.
+            const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+            const candidateModels = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
             let replyText = '';
             let apiSuccess = false;
+            let lastErrMsg = '';
 
-            try {
-              const { GoogleGenAI } = await import('@google/genai');
-              const ai = new GoogleGenAI({ apiKey });
-              
-              // Candidate models in preference order (valid Gemini model names)
-              const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest'];
-              let lastErr = null;
-
-              for (const modelName of candidateModels) {
-                try {
-                  const sdkResponse = await ai.models.generateContent({
-                    model: modelName,
-                    contents: contentsPayload.length === 1 ? message : contentsPayload,
-                    config: {
-                      systemInstruction: systemPrompt,
-                      maxOutputTokens: 2048,
-                      temperature: 0.4
-                    }
-                  });
-
-                  const text = sdkResponse.text?.trim();
-                  if (text) {
-                    replyText = text;
-                    apiSuccess = true;
-                    break;
-                  }
-                } catch (modelErr) {
-                  lastErr = modelErr;
-                  console.warn(`@google/genai attempt with ${modelName} failed:`, modelErr?.message || modelErr);
+            for (const modelName of candidateModels) {
+              try {
+                const url = `${GEMINI_BASE}/${modelName}:generateContent?key=${apiKey}`;
+                const geminiBody = {
+                  system_instruction: { parts: [{ text: systemPrompt }] },
+                  contents: contentsPayload,
+                  generationConfig: { maxOutputTokens: 2048, temperature: 0.4 }
+                };
+                const geminiRes = await fetch(url, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(geminiBody)
+                });
+                const geminiData = await geminiRes.json();
+                if (!geminiRes.ok) {
+                  lastErrMsg = `${modelName}: HTTP ${geminiRes.status} — ${geminiData.error?.message || ''}`;
+                  console.warn('[dev/api/chat]', lastErrMsg);
+                  continue;
                 }
+                const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+                if (text) {
+                  replyText = text;
+                  apiSuccess = true;
+                  break;
+                } else {
+                  lastErrMsg = `${modelName}: no text in response`;
+                  console.warn('[dev/api/chat]', lastErrMsg);
+                }
+              } catch (fetchErr) {
+                lastErrMsg = `${modelName}: ${fetchErr.message}`;
+                console.warn('[dev/api/chat]', lastErrMsg);
               }
-
-              if (!apiSuccess && lastErr) {
-                throw lastErr;
-              }
-            } catch (sdkError) {
-              console.warn('@google/genai SDK error in /api/chat:', sdkError?.message || sdkError);
             }
 
             res.setHeader('Content-Type', 'application/json');
             if (apiSuccess && replyText) {
-              res.end(JSON.stringify({
-                status: 'success',
-                available: true,
-                reply: replyText
-              }));
+              res.end(JSON.stringify({ status: 'success', available: true, reply: replyText }));
             } else {
+              console.error('[dev/api/chat] All models failed:', lastErrMsg);
               res.end(JSON.stringify({
                 status: 'api_unavailable',
                 available: false,
