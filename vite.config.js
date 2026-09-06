@@ -87,8 +87,8 @@ ${JSON.stringify(patientContext, null, 2)}`;
               const { GoogleGenAI } = await import('@google/genai');
               const ai = new GoogleGenAI({ apiKey });
               
-              // Candidate models in preference order (supported by modern keys and quotas)
-              const candidateModels = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.6-flash'];
+              // Candidate models in preference order (valid Gemini model names)
+              const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-latest'];
               let lastErr = null;
 
               for (const modelName of candidateModels) {
