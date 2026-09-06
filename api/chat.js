@@ -35,16 +35,36 @@ export default async function handler(req, res) {
     }
 
     // ── Read API key from Vercel environment variable (server-side only) ────
-    const apiKey = (process.env.GEMINI_API_KEY || '').trim().replace(/^["']|["']$/g, '');
+    let rawApiKey = '';
+    let foundKeyName = '';
+
+    // Robust search: Look for ANY environment variable that looks like a Gemini API key.
+    // This perfectly bypasses trailing spaces, VITE_ prefixes, or capitalization errors in Vercel.
+    for (const [key, value] of Object.entries(process.env)) {
+      const upperKey = key.toUpperCase();
+      if (upperKey.includes('GEMINI') && upperKey.includes('API_KEY')) {
+        rawApiKey = value;
+        foundKeyName = key;
+        break;
+      }
+    }
+
+    const apiKey = (rawApiKey || '').trim().replace(/^["']|["']$/g, '');
 
     if (!apiKey) {
-      console.error('[api/chat] GEMINI_API_KEY is not set in environment variables.');
+      // Safe diagnostic logging: list the names of the environment variables (NOT the values)
+      const envKeys = Object.keys(process.env).join(', ');
+      console.error(`[api/chat] GEMINI_API_KEY is not set. Keys currently available in Vercel runtime: ${envKeys}`);
+      
       res.status(200).json({
         status: 'no_key',
         available: false,
         message: 'AI service is not configured on the server.'
       });
       return;
+    } else {
+      // Confirm which key name was actually found to aid debugging
+      console.log(`[api/chat] Successfully loaded API key from environment variable: "${foundKeyName}"`);
     }
 
     const targetLang = patientContext?.patientProfile?.language || 'English';

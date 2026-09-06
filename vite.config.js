@@ -25,15 +25,32 @@ function aiChatApiPlugin(env) {
               const fs = await import('fs');
               if (fs.existsSync('.env')) {
                 const envContent = fs.readFileSync('.env', 'utf8');
-                const match = envContent.match(/^GEMINI_API_KEY\s*=\s*(["']?)(.*?)\1\s*$/m);
+                const match = envContent.match(/^.*GEMINI.*API_KEY\s*=\s*(["']?)(.*?)\1\s*$/im);
                 if (match && match[2] && match[2].trim()) {
                   fileEnvKey = match[2].trim();
                 }
               }
             } catch (e) {}
 
-            const rawApiKey = process.env.GEMINI_API_KEY || fileEnvKey || env.GEMINI_API_KEY || '';
-            const apiKey = String(rawApiKey).trim().replace(/^["']|["']$/g, '');
+            let rawApiKey = fileEnvKey;
+            if (!rawApiKey) {
+              for (const [key, value] of Object.entries(process.env)) {
+                if (key.toUpperCase().includes('GEMINI') && key.toUpperCase().includes('API_KEY')) {
+                  rawApiKey = value;
+                  break;
+                }
+              }
+            }
+            if (!rawApiKey && env) {
+              for (const [key, value] of Object.entries(env)) {
+                if (key.toUpperCase().includes('GEMINI') && key.toUpperCase().includes('API_KEY')) {
+                  rawApiKey = value;
+                  break;
+                }
+              }
+            }
+
+            const apiKey = String(rawApiKey || '').trim().replace(/^["']|["']$/g, '');
 
             if (!apiKey) {
               res.setHeader('Content-Type', 'application/json');
