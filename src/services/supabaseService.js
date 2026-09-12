@@ -4,6 +4,7 @@
  * All functions degrade gracefully to localStorage when Supabase is not configured.
  */
 import { supabase, isSupabaseEnabled } from "./supabaseClient";
+import { calculatePatientStatus } from "../utils/patientStatusEngine";
 
 // ─── PATIENT PROFILE ────────────────────────────────────────────────────────
 
@@ -373,3 +374,281 @@ export function subscribeToPatient(patientId, onUpdate) {
   // Cleanup function
   return () => channels.forEach(ch => supabase.removeChannel(ch));
 }
+
+// ─── MULTI-PATIENT CAREGIVER MANAGEMENT ──────────────────────────────────────
+
+/**
+ * Loads all assigned patients for a caregiver with real cognitive scores,
+ * recent activity, alerts, and attention status.
+ */
+export async function loadCaregiverPatients(caregiverId) {
+  if (!isSupabaseEnabled || !caregiverId) return null;
+  try {
+    // 1. Fetch assigned patient IDs from caregiver_patients
+    const { data: links, error: linkErr } = await supabase
+      .from("caregiver_patients")
+      .select("patient_id, created_at")
+      .eq("caregiver_id", caregiverId)
+      .order("created_at", { ascending: false });
+
+    if (linkErr) {
+      console.error("loadCaregiverPatients link error:", linkErr);
+      return null;
+    }
+    if (!links || links.length === 0) {
+      return [];
+    }
+
+    const patientIds = links.map(l => l.patient_id).filter(Boolean);
+    if (patientIds.length === 0) return [];
+
+    // 2. Fetch profiles, cognitive sessions, alerts, and medicines for all assigned patients in parallel
+    const [
+      { data: patientRows, error: pErr },
+      { data: sessionRows },
+      { data: alertRows },
+      { data: medicineRows },
+    ] = await Promise.all([
+      supabase.from("patients").select("*").in("id", patientIds),
+      supabase.from("cognitive_sessions").select("*").in("patient_id", patientIds).order("created_at", { ascending: false }).limit(200),
+      supabase.from("alerts").select("*").in("patient_id", patientIds).eq("resolved", false),
+      supabase.from("medicines").select("*").in("patient_id", patientIds),
+    ]);
+
+    if (pErr) {
+      console.error("loadCaregiverPatients patients fetch error:", pErr);
+      return null;
+    }
+
+    // Map grouped data by patient_id
+    const sessionsByPatient = {};
+    (sessionRows || []).forEach(s => {
+      if (!sessionsByPatient[s.patient_id]) sessionsByPatient[s.patient_id] = [];
+      sessionsByPatient[s.patient_id].push(s);
+    });
+
+    const alertsByPatient = {};
+    (alertRows || []).forEach(a => {
+      if (!alertsByPatient[a.patient_id]) alertsByPatient[a.patient_id] = [];
+      alertsByPatient[a.patient_id].push(a);
+    });
+
+    const medicinesByPatient = {};
+    (medicineRows || []).forEach(m => {
+      if (!medicinesByPatient[m.patient_id]) medicinesByPatient[m.patient_id] = [];
+      medicinesByPatient[m.patient_id].push(m);
+    });
+
+    const todayDateString = new Date().toDateString();
+
+    return (patientRows || []).map(p => {
+      const pSessions = sessionsByPatient[p.id] || [];
+      const pAlerts = alertsByPatient[p.id] || [];
+      const pMeds = medicinesByPatient[p.id] || [];
+      const cognitiveStats = buildCognitiveStats(pSessions, p);
+
+      // Format recent sessions for display
+      const latestSession = pSessions[0] || null;
+      let recentActivity = "No exercise yet";
+      let todayGamesCount = 0;
+
+      if (latestSession) {
+        const sessionDate = new Date(latestSession.created_at);
+        if (sessionDate.toDateString() === todayDateString) {
+          recentActivity = `Played today at ${sessionDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+        } else {
+          recentActivity = sessionDate.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+        }
+      }
+
+      // Count games played today
+      todayGamesCount = pSessions.filter(s => {
+        if (!s.created_at) return false;
+        return new Date(s.created_at).toDateString() === todayDateString;
+      }).length;
+
+      const patientSummary = {
+        id: p.id,
+        patientId: p.id,
+        fullName: p.full_name || "Unnamed Patient",
+        preferredName: p.preferred_name || p.full_name || "Patient",
+        age: p.age ? Number(p.age) || p.age : "N/A",
+        gender: p.gender || "Female",
+        language: p.language || "English",
+        avatar: p.avatar_url || "",
+        profile: {
+          fullName: p.full_name || "Unnamed Patient",
+          preferredName: p.preferred_name || p.full_name || "Patient",
+          age: p.age || "",
+          gender: p.gender || "Female",
+          language: p.language || "English",
+          avatar: p.avatar_url || "",
+          phone: p.phone || "",
+        },
+        homeLocation: {
+          address: p.home_address || "",
+          city: p.home_city || "",
+          safeZoneRadius: p.safe_zone_radius || 500,
+        },
+        cognitiveStats,
+        latestGameName: latestSession ? latestSession.game_name : null,
+        latestGameAccuracy: latestSession ? latestSession.accuracy : null,
+        recentActivity,
+        todayGamesCount,
+        unresolvedAlertsCount: pAlerts.length,
+        medicinesCount: pMeds.length,
+        medicinesTakenCount: pMeds.filter(m => m.taken).length,
+        alerts: pAlerts,
+        medicines: pMeds,
+        brainExercise: {
+          dailyCompleted: p.daily_exercise_done || todayGamesCount > 0,
+        },
+      };
+
+      // Calculate status from real data
+      patientSummary.status = calculatePatientStatus(patientSummary);
+      return patientSummary;
+    });
+  } catch (err) {
+    console.error("loadCaregiverPatients exception:", err);
+    return null;
+  }
+}
+
+/**
+ * Verifies if a caregiver has authorized access to a specific patient.
+ * Prevents unauthorized access via direct URL manipulation.
+ */
+export async function verifyCaregiverPatientAccess(caregiverId, patientId) {
+  if (!isSupabaseEnabled || !caregiverId || !patientId) return true;
+  try {
+    const { data, error } = await supabase
+      .from("caregiver_patients")
+      .select("id")
+      .eq("caregiver_id", caregiverId)
+      .eq("patient_id", patientId)
+      .maybeSingle();
+
+    if (error || !data) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Links an existing patient to the caregiver in caregiver_patients.
+ */
+export async function linkPatientToCaregiverDB(caregiverId, patientId) {
+  if (!isSupabaseEnabled) return { success: true };
+  try {
+    // First verify that the patient actually exists in the database
+    const { data: patient, error: pErr } = await supabase
+      .from("patients")
+      .select("id, full_name, preferred_name")
+      .eq("id", patientId)
+      .maybeSingle();
+
+    if (pErr || !patient) {
+      return { success: false, error: `No registered patient found with ID "${patientId}".` };
+    }
+
+    const linkId = "cgp-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+    const { error } = await supabase
+      .from("caregiver_patients")
+      .upsert(
+        {
+          id: linkId,
+          caregiver_id: caregiverId,
+          patient_id: patientId,
+        },
+        { onConflict: "caregiver_id,patient_id" }
+      );
+
+    if (error) throw error;
+    return { success: true, patient };
+  } catch (err) {
+    console.error("linkPatientToCaregiverDB error:", err);
+    return { success: false, error: err.message || "Failed to link patient" };
+  }
+}
+
+/**
+ * Unlinks a patient from the caregiver.
+ */
+export async function unlinkPatientFromCaregiverDB(caregiverId, patientId) {
+  if (!isSupabaseEnabled) return true;
+  try {
+    await supabase
+      .from("caregiver_patients")
+      .delete()
+      .eq("caregiver_id", caregiverId)
+      .eq("patient_id", patientId);
+    return true;
+  } catch (err) {
+    console.error("unlinkPatientFromCaregiverDB error:", err);
+    return false;
+  }
+}
+
+/**
+ * Creates a new patient in the database and links them to the caregiver.
+ */
+export async function createAndLinkPatientDB(caregiverId, patientFields) {
+  const newPid = "pat-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+  if (!isSupabaseEnabled) return { success: true, patientId: newPid };
+
+  try {
+    const { error: pErr } = await supabase.from("patients").insert({
+      id: newPid,
+      full_name: patientFields.fullName,
+      preferred_name: patientFields.preferredName || patientFields.fullName,
+      age: String(patientFields.age || ""),
+      gender: patientFields.gender || "Female",
+      email: patientFields.email || "",
+      phone: patientFields.phone || "",
+      language: patientFields.language || "English",
+      avatar_url: patientFields.avatar || "",
+      difficulty_level: 1,
+    });
+    if (pErr) throw pErr;
+
+    const linkId = "cgp-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+    const { error: lErr } = await supabase.from("caregiver_patients").insert({
+      id: linkId,
+      caregiver_id: caregiverId,
+      patient_id: newPid,
+    });
+    if (lErr) throw lErr;
+
+    return { success: true, patientId: newPid };
+  } catch (err) {
+    console.error("createAndLinkPatientDB error:", err);
+    return { success: false, error: err.message || "Failed to create patient" };
+  }
+}
+
+/**
+ * Subscribes to changes in caregiver_patients for real-time multi-patient updates
+ */
+export function subscribeToCaregiverPatients(caregiverId, onUpdate) {
+  if (!isSupabaseEnabled || !caregiverId) return () => {};
+
+  const channel = supabase
+    .channel(`caregiver_patients:${caregiverId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "caregiver_patients",
+        filter: `caregiver_id=eq.${caregiverId}`,
+      },
+      onUpdate
+    )
+    .subscribe();
+
+  return () => supabase.removeChannel(channel);
+}
+
+

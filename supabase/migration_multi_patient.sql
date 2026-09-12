@@ -1,119 +1,9 @@
 -- ================================================================
--- NeuroNex — Supabase SQL Migration Script
--- Paste this entire block into: Supabase → SQL Editor → Run
+-- NeuroNex — Multi-Patient Caregiver Dashboard Migration
+-- Run this in: Supabase Dashboard → SQL Editor → Run
 -- ================================================================
 
--- 1. PATIENTS (core profile + settings)
-CREATE TABLE IF NOT EXISTS patients (
-  id                    TEXT PRIMARY KEY,
-  full_name             TEXT,
-  preferred_name        TEXT,
-  age                   TEXT,
-  gender                TEXT DEFAULT 'Female',
-  email                 TEXT,
-  phone                 TEXT,
-  language              TEXT DEFAULT 'English',
-  avatar_url            TEXT,
-
-  home_address          TEXT,
-  home_city             TEXT,
-  safe_zone_radius      INT  DEFAULT 500,
-  home_coordinates      JSONB,
-
-  doctor_name           TEXT,
-  doctor_phone          TEXT,
-
-  difficulty_level      INT  DEFAULT 1,
-  consecutive_high_scores INT DEFAULT 0,
-  daily_exercise_done   BOOLEAN DEFAULT FALSE,
-  exercise_time         TEXT DEFAULT '10:00 AM',
-
-  created_at            TIMESTAMPTZ DEFAULT NOW(),
-  updated_at            TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 2. FAMILY MEMBERS
-CREATE TABLE IF NOT EXISTS family_members (
-  id            TEXT PRIMARY KEY,
-  patient_id    TEXT REFERENCES patients(id) ON DELETE CASCADE,
-  name          TEXT NOT NULL,
-  relation      TEXT,
-  phone         TEXT,
-  photo_url     TEXT,
-  notes         TEXT,
-  is_emergency  BOOLEAN DEFAULT FALSE,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_family_patient ON family_members(patient_id);
-
--- 3. MEDICINES
-CREATE TABLE IF NOT EXISTS medicines (
-  id            TEXT PRIMARY KEY,
-  patient_id    TEXT REFERENCES patients(id) ON DELETE CASCADE,
-  name          TEXT NOT NULL,
-  dosage        TEXT,
-  time          TEXT,
-  instructions  TEXT,
-  taken         BOOLEAN DEFAULT FALSE,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_medicines_patient ON medicines(patient_id);
-
--- 4. TODOS / DAILY TASKS
-CREATE TABLE IF NOT EXISTS todos (
-  id            TEXT PRIMARY KEY,
-  patient_id    TEXT REFERENCES patients(id) ON DELETE CASCADE,
-  title         TEXT NOT NULL,
-  time          TEXT,
-  recurrence    TEXT,
-  completed     BOOLEAN DEFAULT FALSE,
-  active        BOOLEAN DEFAULT TRUE,
-  is_med        BOOLEAN DEFAULT FALSE,
-  is_exercise   BOOLEAN DEFAULT FALSE,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_todos_patient ON todos(patient_id);
-
--- 5. MEMORIES
-CREATE TABLE IF NOT EXISTS memories (
-  id            TEXT PRIMARY KEY,
-  patient_id    TEXT REFERENCES patients(id) ON DELETE CASCADE,
-  title         TEXT NOT NULL,
-  date          TEXT,
-  description   TEXT,
-  photo_url     TEXT,
-  tags          TEXT[],
-  created_at    TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_memories_patient ON memories(patient_id);
-
--- 6. ALERTS (caregiver safety notifications)
-CREATE TABLE IF NOT EXISTS alerts (
-  id            TEXT PRIMARY KEY,
-  patient_id    TEXT REFERENCES patients(id) ON DELETE CASCADE,
-  type          TEXT DEFAULT 'warning',  -- 'warning' | 'success'
-  title         TEXT NOT NULL,
-  message       TEXT,
-  resolved      BOOLEAN DEFAULT FALSE,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_alerts_patient ON alerts(patient_id);
-
--- 7. COGNITIVE SESSIONS (game history)
-CREATE TABLE IF NOT EXISTS cognitive_sessions (
-  id            TEXT PRIMARY KEY,
-  patient_id    TEXT REFERENCES patients(id) ON DELETE CASCADE,
-  game_id       TEXT,
-  game_name     TEXT NOT NULL,
-  accuracy      INT  NOT NULL,
-  time_taken    TEXT,
-  difficulty    TEXT,
-  category      TEXT,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_sessions_patient ON cognitive_sessions(patient_id);
-
--- 8. CAREGIVER-PATIENT RELATIONSHIPS (Multi-Patient Caregiver Support)
+-- 1. Create caregiver_patients junction table
 CREATE TABLE IF NOT EXISTS caregiver_patients (
   id            TEXT PRIMARY KEY,
   caregiver_id  TEXT NOT NULL,
@@ -121,25 +11,14 @@ CREATE TABLE IF NOT EXISTS caregiver_patients (
   created_at    TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(caregiver_id, patient_id)
 );
+
 CREATE INDEX IF NOT EXISTS idx_cg_patients_caregiver ON caregiver_patients(caregiver_id);
 CREATE INDEX IF NOT EXISTS idx_cg_patients_patient ON caregiver_patients(patient_id);
 
--- ================================================================
--- ENABLE REAL-TIME for all tables (required for live sync)
--- ================================================================
-ALTER PUBLICATION supabase_realtime ADD TABLE patients;
-ALTER PUBLICATION supabase_realtime ADD TABLE family_members;
-ALTER PUBLICATION supabase_realtime ADD TABLE medicines;
-ALTER PUBLICATION supabase_realtime ADD TABLE todos;
-ALTER PUBLICATION supabase_realtime ADD TABLE memories;
-ALTER PUBLICATION supabase_realtime ADD TABLE alerts;
-ALTER PUBLICATION supabase_realtime ADD TABLE cognitive_sessions;
+-- 2. Add to real-time replication
 ALTER PUBLICATION supabase_realtime ADD TABLE caregiver_patients;
 
--- ================================================================
--- ROW LEVEL SECURITY (RLS) POLICIES
--- Enforces Caregiver Isolation: Caregivers can ONLY access assigned patients
--- ================================================================
+-- 3. Enable RLS on caregiver_patients
 ALTER TABLE caregiver_patients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE patients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cognitive_sessions ENABLE ROW LEVEL SECURITY;
@@ -149,7 +28,7 @@ ALTER TABLE memories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE family_members ENABLE ROW LEVEL SECURITY;
 
--- 1. caregiver_patients policies
+-- 4. caregiver_patients policies
 DROP POLICY IF EXISTS "Caregivers can view their own patient assignments" ON caregiver_patients;
 CREATE POLICY "Caregivers can view their own patient assignments"
   ON caregiver_patients FOR SELECT
@@ -174,7 +53,7 @@ CREATE POLICY "Caregivers can remove patient links"
     OR auth.role() = 'anon'
   );
 
--- 2. patients policies: Caregiver can only view patients assigned to them in caregiver_patients
+-- 5. patients policy: Caregivers can only select patients linked to them
 DROP POLICY IF EXISTS "Caregivers and self can view patients" ON patients;
 CREATE POLICY "Caregivers and self can view patients"
   ON patients FOR SELECT
@@ -193,7 +72,7 @@ CREATE POLICY "Allow patient upsert"
   USING (true)
   WITH CHECK (true);
 
--- 3. cognitive_sessions policies: Caregiver can only view sessions of assigned patients
+-- 6. cognitive_sessions policy: Caregivers can only view assigned patient sessions
 DROP POLICY IF EXISTS "Caregivers can view assigned patient cognitive sessions" ON cognitive_sessions;
 CREATE POLICY "Caregivers can view assigned patient cognitive sessions"
   ON cognitive_sessions FOR SELECT
@@ -211,7 +90,7 @@ CREATE POLICY "Allow cognitive sessions insert"
   ON cognitive_sessions FOR INSERT
   WITH CHECK (true);
 
--- 4. medicines policies: Caregiver can view medicines of assigned patients
+-- 7. medicines policy: Caregiver can view medicines of assigned patients
 DROP POLICY IF EXISTS "Caregivers can view assigned patient medicines" ON medicines;
 CREATE POLICY "Caregivers can view assigned patient medicines"
   ON medicines FOR ALL
@@ -224,7 +103,7 @@ CREATE POLICY "Caregivers can view assigned patient medicines"
     )
   );
 
--- 5. todos policies: Caregiver can view and manage todos of assigned patients
+-- 8. todos policy: Caregiver can view and manage todos of assigned patients
 DROP POLICY IF EXISTS "Caregivers can manage assigned patient todos" ON todos;
 CREATE POLICY "Caregivers can manage assigned patient todos"
   ON todos FOR ALL
@@ -237,7 +116,7 @@ CREATE POLICY "Caregivers can manage assigned patient todos"
     )
   );
 
--- 6. alerts policies: Caregiver can view and resolve alerts of assigned patients
+-- 9. alerts policy: Caregiver can view and resolve alerts of assigned patients
 DROP POLICY IF EXISTS "Caregivers can manage assigned patient alerts" ON alerts;
 CREATE POLICY "Caregivers can manage assigned patient alerts"
   ON alerts FOR ALL
@@ -250,7 +129,7 @@ CREATE POLICY "Caregivers can manage assigned patient alerts"
     )
   );
 
--- 7. memories policies: Caregiver can view memories of assigned patients
+-- 10. memories policy: Caregiver can view memories of assigned patients
 DROP POLICY IF EXISTS "Caregivers can view assigned patient memories" ON memories;
 CREATE POLICY "Caregivers can view assigned patient memories"
   ON memories FOR ALL
@@ -263,7 +142,7 @@ CREATE POLICY "Caregivers can view assigned patient memories"
     )
   );
 
--- 8. family_members policies: Caregiver can view family members of assigned patients
+-- 11. family_members policy: Caregiver can view family members of assigned patients
 DROP POLICY IF EXISTS "Caregivers can view assigned patient family members" ON family_members;
 CREATE POLICY "Caregivers can view assigned patient family members"
   ON family_members FOR ALL

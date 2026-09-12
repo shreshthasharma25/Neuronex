@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
-import { defaultPatientData } from "../data/defaultData";
+import { defaultPatientData, demoPatientsById, getDemoCaregiverPatients } from "../data/defaultData";
 import { emptyPatientData } from "../data/emptyData";
 import { sounds } from "../utils/soundPlayer";
 import { evaluateAdaptiveDifficulty } from "../utils/adaptiveEngine";
@@ -14,7 +14,14 @@ import {
   addAlertDB, resolveAlertDB,
   addCognitiveSessionDB,
   subscribeToPatient,
+  loadCaregiverPatients,
+  linkPatientToCaregiverDB,
+  unlinkPatientFromCaregiverDB,
+  createAndLinkPatientDB,
+  verifyCaregiverPatientAccess,
+  subscribeToCaregiverPatients,
 } from "../services/supabaseService";
+import { calculatePatientStatus } from "../utils/patientStatusEngine";
 
 import {
   translate,
@@ -29,6 +36,9 @@ const STORAGE_KEY = "neuronex_data_v2";
 const ROLE_KEY = "neuronex_role_v2";
 const ONBOARDING_KEY = "neuronex_onboarding_v2";
 const PATIENT_ID_KEY = "neuronex_patient_id";
+const CAREGIVER_ID_KEY = "neuronex_caregiver_id";
+const CAREGIVER_PATIENTS_KEY = "neuronex_caregiver_patients_v2";
+const SELECTED_PATIENT_KEY = "neuronex_selected_patient_id";
 const CURRENT_USER_KEY = "neuronex_current_user";
 const DEMO_MODE_KEY = "neuronex_is_demo";
 const LANGUAGE_KEY = "neuronex_language";
@@ -44,6 +54,20 @@ function getOrCreatePatientId() {
     return id;
   } catch {
     return "pat-local";
+  }
+}
+
+// Stable caregiver ID for caregiver account
+function getOrCreateCaregiverId() {
+  try {
+    let id = localStorage.getItem(CAREGIVER_ID_KEY);
+    if (!id) {
+      id = "cg-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+      localStorage.setItem(CAREGIVER_ID_KEY, id);
+    }
+    return id;
+  } catch {
+    return "cg-local";
   }
 }
 
@@ -65,8 +89,9 @@ export function AppProvider({ children }) {
 
   const [isDemoMode, setIsDemoMode] = useState(() => {
     try {
-      return localStorage.getItem(DEMO_MODE_KEY) === "true";
-    } catch { return false; }
+      const val = localStorage.getItem(DEMO_MODE_KEY);
+      return val === null ? true : val === "true";
+    } catch { return true; }
   });
 
   const [supabaseLoaded, setSupabaseLoaded] = useState(false);
@@ -84,6 +109,51 @@ export function AppProvider({ children }) {
     try { return localStorage.getItem(ROLE_KEY) || "patient"; }
     catch { return "patient"; }
   });
+
+  // ── Multi-Patient Caregiver State ─────────────────────────────────────────
+  const [caregiverId, setCaregiverIdState] = useState(() => {
+    try {
+      return localStorage.getItem(CAREGIVER_ID_KEY) || getOrCreateCaregiverId();
+    } catch {
+      return "cg-local";
+    }
+  });
+
+  const [selectedPatientId, setSelectedPatientId] = useState(() => {
+    try {
+      return localStorage.getItem(SELECTED_PATIENT_KEY) || null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [assignedPatients, setAssignedPatients] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CAREGIVER_PATIENTS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Merge with any new demo patients like Bikram if missing
+          const demoPatients = getDemoCaregiverPatients();
+          const map = {};
+          demoPatients.forEach(p => { map[p.id] = p; });
+          parsed.forEach(p => { map[p.id] = p; });
+          return Object.values(map);
+        }
+      }
+      return getDemoCaregiverPatients();
+    } catch {
+      return getDemoCaregiverPatients();
+    }
+  });
+
+  const [assignedPatientsLoading, setAssignedPatientsLoading] = useState(false);
+  const [assignedPatientsError, setAssignedPatientsError] = useState(null);
+  const [accessDeniedNotice, setAccessDeniedNotice] = useState(null);
+  const [patientDetailsLoading, setPatientDetailsLoading] = useState(false);
+  const [patientDetailsError, setPatientDetailsError] = useState(null);
+  const activeRequestIdRef = useRef(0);
+  const patientCacheRef = useRef({ ...demoPatientsById });
 
   // ── Language / i18n State (Persisted across sessions and navigation) ──────
   const [language, setLanguageState] = useState(() => {
@@ -194,11 +264,22 @@ export function AppProvider({ children }) {
     return unsubscribe;
   }, [patientId]);
 
-  // ── Sync localStorage ─────────────────────────────────────────────────────
+  // ── Sync localStorage (Per-patient isolated storage) ─────────────────────
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(patientData)); }
-    catch (e) { console.warn("localStorage write failed", e); }
-  }, [patientData]);
+    if (!patientData || !patientData.profile) return;
+    const curPid = patientData.profile.patientId;
+    if (curPid) {
+      patientCacheRef.current[curPid] = patientData;
+      try {
+        localStorage.setItem(`neuronex_patient_${curPid}`, JSON.stringify(patientData));
+      } catch (e) { console.warn("Per-patient storage write failed", e); }
+    }
+    // Only update global default storage if viewing default patient or no multi-patient selection
+    if (!selectedPatientId || curPid === patientId) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(patientData)); }
+      catch (e) { console.warn("localStorage write failed", e); }
+    }
+  }, [patientData, selectedPatientId, patientId]);
 
   useEffect(() => {
     try { localStorage.setItem(ROLE_KEY, userRole); } catch {}
@@ -222,6 +303,425 @@ export function AppProvider({ children }) {
   useEffect(() => {
     try { localStorage.setItem(DEMO_MODE_KEY, String(isDemoMode)); } catch {}
   }, [isDemoMode]);
+
+  // ── Multi-Patient Caregiver Synchronization ───────────────────────────────
+  const refreshCaregiverPatients = useCallback(async () => {
+    if (!caregiverId) return;
+    setAssignedPatientsLoading(true);
+    setAssignedPatientsError(null);
+
+    if (isSupabaseEnabled) {
+      try {
+        const patients = await loadCaregiverPatients(caregiverId);
+        if (patients !== null) {
+          setAssignedPatients(patients);
+          try { localStorage.setItem(CAREGIVER_PATIENTS_KEY, JSON.stringify(patients)); } catch {}
+        }
+      } catch (err) {
+        console.error("Error loading caregiver patients:", err);
+        setAssignedPatientsError("Could not retrieve patients from database.");
+      } finally {
+        setAssignedPatientsLoading(false);
+      }
+      return;
+    }
+
+    // LocalStorage / Demo Mode Fallback
+    try {
+      if (isDemoMode) {
+        const demoPatients = getDemoCaregiverPatients();
+        const saved = localStorage.getItem(CAREGIVER_PATIENTS_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const map = {};
+          demoPatients.forEach(p => { map[p.id] = p; });
+          parsed.forEach(p => { map[p.id] = p; });
+          const merged = Object.values(map);
+          setAssignedPatients(merged);
+        } else {
+          setAssignedPatients(demoPatients);
+          localStorage.setItem(CAREGIVER_PATIENTS_KEY, JSON.stringify(demoPatients));
+        }
+      } else {
+        const saved = localStorage.getItem(CAREGIVER_PATIENTS_KEY);
+        setAssignedPatients(saved ? JSON.parse(saved) : []);
+      }
+    } catch (e) {
+      console.warn("Local caregiver patients load failed", e);
+    } finally {
+      setAssignedPatientsLoading(false);
+    }
+  }, [caregiverId, isDemoMode]);
+
+  // Sync caregiverId & selectedPatientId to localStorage
+  useEffect(() => {
+    try { localStorage.setItem(CAREGIVER_ID_KEY, caregiverId); } catch {}
+  }, [caregiverId]);
+
+  useEffect(() => {
+    try {
+      if (selectedPatientId) localStorage.setItem(SELECTED_PATIENT_KEY, selectedPatientId);
+      else localStorage.removeItem(SELECTED_PATIENT_KEY);
+    } catch {}
+  }, [selectedPatientId]);
+
+  // Load assigned patients when caregiver role is activated
+  useEffect(() => {
+    if (userRole === "caregiver") {
+      refreshCaregiverPatients();
+    }
+  }, [userRole, refreshCaregiverPatients]);
+
+  // Real-time subscription to caregiver_patients
+  useEffect(() => {
+    if (!isSupabaseEnabled || userRole !== "caregiver") return;
+    const unsub = subscribeToCaregiverPatients(caregiverId, () => {
+      refreshCaregiverPatients();
+    });
+    return unsub;
+  }, [caregiverId, userRole, refreshCaregiverPatients]);
+
+  // ── Multi-Patient Caregiver Actions ───────────────────────────────────────
+  const selectPatient = useCallback(async (targetPatientId) => {
+    if (!targetPatientId) return false;
+    const cleanId = String(targetPatientId).trim();
+
+    // Security Verification: A caregiver must only be able to see assigned patients
+    let isAuthorized = false;
+    if (isSupabaseEnabled) {
+      isAuthorized = await verifyCaregiverPatientAccess(caregiverId, cleanId);
+    } else {
+      isAuthorized = assignedPatients.some(p => (p.id || p.patientId) === cleanId);
+      if (!isAuthorized) {
+        try {
+          const saved = JSON.parse(localStorage.getItem(CAREGIVER_PATIENTS_KEY) || '[]');
+          isAuthorized = saved.some(p => (p.id || p.patientId) === cleanId);
+        } catch {}
+      }
+      if (!isAuthorized && (isDemoMode || demoPatientsById[cleanId])) {
+        isAuthorized = true;
+      }
+    }
+
+    if (!isAuthorized) {
+      setAccessDeniedNotice(`Access Denied: Patient "${cleanId}" is not assigned to your caregiver account.`);
+      sounds.playReminderChime?.();
+      return false;
+    }
+
+    // Increment request ID to ignore responses from older async fetches (prevents race conditions)
+    const currentRequestId = ++activeRequestIdRef.current;
+
+    setAccessDeniedNotice(null);
+    setSelectedPatientId(cleanId);
+    setPatientIdState(cleanId);
+    setPatientDetailsLoading(true);
+    setPatientDetailsError(null);
+
+    try {
+      localStorage.setItem(SELECTED_PATIENT_KEY, cleanId);
+      localStorage.setItem(PATIENT_ID_KEY, cleanId);
+    } catch {}
+
+    // Check in-memory cache and localStorage first
+    let cachedData = patientCacheRef.current[cleanId] || demoPatientsById[cleanId];
+    if (!cachedData) {
+      try {
+        const saved = localStorage.getItem(`neuronex_patient_${cleanId}`);
+        if (saved) cachedData = JSON.parse(saved);
+      } catch {}
+    }
+    if (!cachedData) {
+      const pSummary = assignedPatients.find(p => (p.id || p.patientId) === cleanId);
+      if (pSummary && pSummary.profile) {
+        cachedData = {
+          profile: pSummary.profile,
+          medicines: pSummary.medicines || [],
+          todos: pSummary.todos || [],
+          brainExercise: pSummary.brainExercise || { dailyCompleted: false },
+          cognitiveStats: pSummary.cognitiveStats || { gamesCompleted: 0, averageAccuracy: 0, history: [] },
+          alerts: pSummary.alerts || [],
+          homeLocation: pSummary.homeLocation || {},
+          family: pSummary.family || [],
+          places: pSummary.places || [],
+          routine: pSummary.routine || [],
+          emergencyContacts: pSummary.emergencyContacts || [],
+        };
+      }
+    }
+
+    if (cachedData) {
+      patientCacheRef.current[cleanId] = cachedData;
+      setPatientData(cachedData);
+    }
+
+    // Local / Demo mode: complete immediately once cache is populated
+    if (!isSupabaseEnabled) {
+      if (cachedData) {
+        setPatientDetailsLoading(false);
+        sounds.playGentleTap();
+        return true;
+      } else {
+        setPatientDetailsError(`Patient "${cleanId}" could not be found.`);
+        setPatientDetailsLoading(false);
+        return false;
+      }
+    }
+
+    // Supabase Mode: Async fetch remote patient data
+    setSyncStatus("syncing");
+    try {
+      const data = await loadPatientData(cleanId);
+      // If another patient selection occurred while this was fetching, ignore!
+      if (activeRequestIdRef.current !== currentRequestId) {
+        return true;
+      }
+      if (data) {
+        patientCacheRef.current[cleanId] = data;
+        setPatientData(data);
+        setSyncStatus("synced");
+        setPatientDetailsLoading(false);
+        sounds.playGentleTap();
+        return true;
+      } else {
+        if (cachedData) {
+          setPatientDetailsLoading(false);
+          sounds.playGentleTap();
+          return true;
+        }
+        setPatientDetailsError(`Patient "${cleanId}" record was not found in the database.`);
+        setPatientDetailsLoading(false);
+        return false;
+      }
+    } catch (err) {
+      if (activeRequestIdRef.current !== currentRequestId) return false;
+      console.error("Error loading selected patient data:", err);
+      if (cachedData) {
+        setPatientDetailsLoading(false);
+        return true;
+      }
+      setPatientDetailsError(`Error loading patient "${cleanId}". Please check your network connection.`);
+      setPatientDetailsLoading(false);
+      return false;
+    }
+  }, [caregiverId, assignedPatients, isDemoMode]);
+
+  const backToAllPatients = useCallback(() => {
+    activeRequestIdRef.current++;
+    setSelectedPatientId(null);
+    setPatientDetailsLoading(false);
+    setPatientDetailsError(null);
+    setAccessDeniedNotice(null);
+    setUserRole("caregiver");
+    setCaregiverTab("overview");
+
+    try {
+      localStorage.removeItem(SELECTED_PATIENT_KEY);
+    } catch {}
+
+    // Clear URL hash immediately so hash listeners don't re-trigger patient selection
+    try {
+      if (window.location.hash && window.location.hash.includes("patient")) {
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        } else {
+          window.location.hash = "";
+        }
+      }
+    } catch {}
+
+    refreshCaregiverPatients();
+    sounds.playGentleTap();
+  }, [refreshCaregiverPatients, setUserRole, setCaregiverTab]);
+
+  const openPatientPortal = useCallback(async (targetPatientId) => {
+    if (!targetPatientId) return false;
+    const cleanId = String(targetPatientId).trim();
+    const success = await selectPatient(cleanId);
+    if (success) {
+      setUserRole("patient");
+      setActiveTab("home");
+      sounds.playSuccess?.();
+      return true;
+    }
+    return false;
+  }, [selectPatient, setUserRole, setActiveTab]);
+
+  const linkPatientToCaregiver = useCallback(async (targetPatientId) => {
+    if (!targetPatientId || !String(targetPatientId).trim()) {
+      return { success: false, error: "Please enter a valid Patient ID" };
+    }
+    const cleanId = String(targetPatientId).trim();
+
+    const alreadyLinked = assignedPatients.some(p => (p.id || p.patientId) === cleanId);
+    if (alreadyLinked) {
+      return { success: false, error: `Patient "${cleanId}" is already linked to your account.` };
+    }
+
+    if (isSupabaseEnabled) {
+      const res = await linkPatientToCaregiverDB(caregiverId, cleanId);
+      if (!res.success) return res;
+      await refreshCaregiverPatients();
+      sounds.playSuccess();
+      return { success: true };
+    }
+
+    // Local / Demo mode fallback
+    let foundPatient = demoPatientsById[cleanId];
+    if (!foundPatient) {
+      if (cleanId === patientId && patientData?.profile?.fullName) {
+        foundPatient = patientData;
+      } else {
+        foundPatient = {
+          profile: {
+            fullName: `Patient ${cleanId.slice(-4)}`,
+            preferredName: "Patient",
+            age: 70,
+            gender: "Female",
+            language: "English",
+            avatar: "",
+            patientId: cleanId,
+            registered: true,
+          },
+          homeLocation: { address: "Residential Home", safeZoneRadius: 500 },
+          cognitiveStats: { gamesCompleted: 0, averageAccuracy: 0, history: [] },
+          medicines: [],
+          alerts: [],
+          brainExercise: { dailyCompleted: false },
+        };
+      }
+    }
+
+    const history = foundPatient.cognitiveStats?.history || [];
+    const newSummary = {
+      id: cleanId,
+      patientId: cleanId,
+      fullName: foundPatient.profile?.fullName || "Patient",
+      preferredName: foundPatient.profile?.preferredName || "Patient",
+      age: foundPatient.profile?.age || "N/A",
+      gender: foundPatient.profile?.gender || "Female",
+      language: foundPatient.profile?.language || "English",
+      avatar: foundPatient.profile?.avatar || "",
+      profile: foundPatient.profile,
+      homeLocation: foundPatient.homeLocation || {},
+      cognitiveStats: foundPatient.cognitiveStats || { gamesCompleted: 0, averageAccuracy: 0, history: [] },
+      latestGameName: history[0]?.gameName || null,
+      latestGameAccuracy: history[0]?.accuracy || null,
+      recentActivity: history[0]?.date || "No recent activity",
+      todayGamesCount: history.filter(h => (h.date || "").toLowerCase().includes("today")).length,
+      unresolvedAlertsCount: (foundPatient.alerts || []).filter(a => !a.resolved).length,
+      medicinesCount: (foundPatient.medicines || []).length,
+      medicinesTakenCount: (foundPatient.medicines || []).filter(m => m.taken).length,
+      alerts: foundPatient.alerts || [],
+      medicines: foundPatient.medicines || [],
+      brainExercise: foundPatient.brainExercise || { dailyCompleted: false },
+    };
+    newSummary.status = calculatePatientStatus(newSummary);
+
+    const updatedList = [newSummary, ...assignedPatients];
+    setAssignedPatients(updatedList);
+    try {
+      localStorage.setItem(CAREGIVER_PATIENTS_KEY, JSON.stringify(updatedList));
+    } catch {}
+
+    sounds.playSuccess();
+    return { success: true };
+  }, [caregiverId, assignedPatients, patientId, patientData, refreshCaregiverPatients]);
+
+  const createAndLinkPatient = useCallback(async (patientFields) => {
+    if (!patientFields.fullName?.trim()) {
+      return { success: false, error: "Please enter the patient's full name" };
+    }
+
+    if (isSupabaseEnabled) {
+      const res = await createAndLinkPatientDB(caregiverId, patientFields);
+      if (!res.success) return res;
+      await refreshCaregiverPatients();
+      sounds.playSuccess();
+      return { success: true, patientId: res.patientId };
+    }
+
+    // Local / Demo mode fallback
+    const newPid = "pat-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+    const newSummary = {
+      id: newPid,
+      patientId: newPid,
+      fullName: patientFields.fullName,
+      preferredName: patientFields.preferredName || patientFields.fullName,
+      age: patientFields.age || "N/A",
+      gender: patientFields.gender || "Female",
+      language: patientFields.language || "English",
+      avatar: patientFields.avatar || "",
+      profile: {
+        fullName: patientFields.fullName,
+        preferredName: patientFields.preferredName || patientFields.fullName,
+        age: patientFields.age || "",
+        gender: patientFields.gender || "Female",
+        language: patientFields.language || "English",
+        avatar: patientFields.avatar || "",
+        phone: patientFields.phone || "",
+        registered: true,
+        patientId: newPid,
+      },
+      homeLocation: { address: "", city: "", safeZoneRadius: 500 },
+      cognitiveStats: { gamesCompleted: 0, averageAccuracy: 0, history: [] },
+      latestGameName: null,
+      latestGameAccuracy: null,
+      recentActivity: "No exercise yet",
+      todayGamesCount: 0,
+      unresolvedAlertsCount: 0,
+      medicinesCount: 0,
+      medicinesTakenCount: 0,
+      alerts: [],
+      medicines: [],
+      brainExercise: { dailyCompleted: false },
+    };
+    newSummary.status = calculatePatientStatus(newSummary);
+
+    const fullPatientData = {
+      profile: newSummary.profile,
+      homeLocation: newSummary.homeLocation,
+      cognitiveStats: newSummary.cognitiveStats,
+      alerts: [],
+      medicines: [],
+      todos: [],
+      routine: [],
+      memories: [],
+      places: [],
+      family: [],
+      emergencyContacts: [],
+      brainExercise: { dailyCompleted: false, scheduledTime: "10:00 AM", todaysGames: ["memory-twin", "picture-memory"], dayCycle: 1 }
+    };
+    patientCacheRef.current[newPid] = fullPatientData;
+    try {
+      localStorage.setItem(`neuronex_patient_${newPid}`, JSON.stringify(fullPatientData));
+    } catch {}
+
+    const updated = [newSummary, ...assignedPatients];
+    setAssignedPatients(updated);
+    try {
+      localStorage.setItem(CAREGIVER_PATIENTS_KEY, JSON.stringify(updated));
+    } catch {}
+
+    sounds.playSuccess();
+    return { success: true, patientId: newPid };
+  }, [caregiverId, assignedPatients, refreshCaregiverPatients]);
+
+  const unlinkPatientFromCaregiver = useCallback(async (targetPatientId) => {
+    if (!targetPatientId) return;
+    if (isSupabaseEnabled) {
+      await unlinkPatientFromCaregiverDB(caregiverId, targetPatientId);
+    }
+    const updated = assignedPatients.filter(p => (p.id || p.patientId) !== targetPatientId);
+    setAssignedPatients(updated);
+    try {
+      localStorage.setItem(CAREGIVER_PATIENTS_KEY, JSON.stringify(updated));
+    } catch {}
+    if (selectedPatientId === targetPatientId) {
+      setSelectedPatientId(null);
+    }
+    sounds.playGentleTap();
+  }, [caregiverId, assignedPatients, selectedPatientId]);
 
   // ═══════════════════════════════════════════════════════════════════════════
   // ACTIONS
@@ -723,6 +1223,7 @@ export function AppProvider({ children }) {
   const registerPatientAsCaregiver = useCallback(({ patientFields, caregiverInfo, targetPatientId }) => {
     const pid = targetPatientId || patientId || ("pat-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6));
     const user = {
+      id: caregiverId,
       role: "caregiver",
       name: caregiverInfo.name || "Caregiver",
       relationOrTitle: caregiverInfo.title || "Primary Caregiver",
@@ -739,6 +1240,7 @@ export function AppProvider({ children }) {
     setCurrentUser(user);
     setUserRole("caregiver");
     setIsDemoMode(false);
+    linkPatientToCaregiverDB(caregiverId, pid);
     setPatientData(prev => {
       const updatedProfile = patientFields
         ? { ...prev.profile, ...patientFields, registered: true, patientId: pid }
@@ -755,15 +1257,17 @@ export function AppProvider({ children }) {
         updated.cognitiveStats?.currentLevel);
       return updated;
     });
+    refreshCaregiverPatients();
     setIsOnboarded(true);
     sounds.playSuccess();
-  }, [patientId]);
+  }, [patientId, caregiverId, refreshCaregiverPatients]);
 
   const connectExistingPatient = useCallback(async ({ targetPatientId, role, userInfo }) => {
     if (!targetPatientId) return false;
     const cleanId = targetPatientId.trim();
     setPatientIdState(cleanId);
     const user = {
+      id: role === "caregiver" ? caregiverId : undefined,
       role: role || "patient",
       name: userInfo?.name || (role === "caregiver" ? "Caregiver" : role === "family" ? "Family Member" : "Patient"),
       relationOrTitle: userInfo?.relationOrTitle || (role === "caregiver" ? "Caregiver" : role === "family" ? "Relative" : "Self"),
@@ -772,6 +1276,11 @@ export function AppProvider({ children }) {
     setCurrentUser(user);
     setUserRole(role || "patient");
     setIsDemoMode(false);
+
+    if (role === "caregiver") {
+      await linkPatientToCaregiverDB(caregiverId, cleanId);
+      refreshCaregiverPatients();
+    }
 
     if (isSupabaseEnabled) {
       setSyncStatus("syncing");
@@ -797,7 +1306,7 @@ export function AppProvider({ children }) {
     setIsOnboarded(true);
     sounds.playSuccess();
     return true;
-  }, []);
+  }, [caregiverId, refreshCaregiverPatients]);
 
   const logoutOrSwitchUser = useCallback(() => {
     setCurrentUser(null);
@@ -810,32 +1319,58 @@ export function AppProvider({ children }) {
   // ── Demo / Reset ──────────────────────────────────────────────────────────
   const resetToDemoData = () => {
     const demoPid = "pat-maa-7788";
+    const demoCgId = "cg-bose-101";
     setPatientIdState(demoPid);
+    setCaregiverIdState(demoCgId);
+    setSelectedPatientId(null);
+    setAccessDeniedNotice(null);
+    setPatientDetailsLoading(false);
+    setPatientDetailsError(null);
+    patientCacheRef.current = { ...demoPatientsById };
     setIsDemoMode(true);
     setCurrentUser({
+      id: demoCgId,
       role: "patient",
       name: "Maa",
       relationOrTitle: "Self",
       phone: "9876543210"
     });
+    const demoPatients = getDemoCaregiverPatients();
+    setAssignedPatients(demoPatients);
     setPatientData(defaultPatientData);
     setIsOnboarded(true);
     setUserRole("patient");
     setActiveTab("home");
     setActiveGame(null);
     setGameResult(null);
+    try {
+      localStorage.setItem(CAREGIVER_ID_KEY, demoCgId);
+      localStorage.setItem(CAREGIVER_PATIENTS_KEY, JSON.stringify(demoPatients));
+      localStorage.removeItem(SELECTED_PATIENT_KEY);
+    } catch {}
     sounds.playSuccess();
   };
 
   const resetToEmptyData = () => {
+    patientCacheRef.current = {};
+    setPatientDetailsLoading(false);
+    setPatientDetailsError(null);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(ROLE_KEY);
     localStorage.removeItem(ONBOARDING_KEY);
     localStorage.removeItem(CURRENT_USER_KEY);
     localStorage.removeItem(DEMO_MODE_KEY);
+    localStorage.removeItem(CAREGIVER_PATIENTS_KEY);
+    localStorage.removeItem(SELECTED_PATIENT_KEY);
     const newPid = "pat-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+    const newCgId = "cg-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
     localStorage.setItem(PATIENT_ID_KEY, newPid);
+    localStorage.setItem(CAREGIVER_ID_KEY, newCgId);
     setPatientIdState(newPid);
+    setCaregiverIdState(newCgId);
+    setAssignedPatients([]);
+    setSelectedPatientId(null);
+    setAccessDeniedNotice(null);
     setIsDemoMode(false);
     setCurrentUser(null);
     setPatientData(emptyPatientData);
@@ -868,6 +1403,22 @@ export function AppProvider({ children }) {
       isSupabaseEnabled,
       patientId,
       hasSpokenGreeting, markGreetingSpoken,
+      // Multi-Patient Caregiver
+      caregiverId,
+      assignedPatients,
+      assignedPatientsLoading,
+      assignedPatientsError,
+      patientDetailsLoading,
+      patientDetailsError,
+      selectedPatientId,
+      selectPatient,
+      openPatientPortal,
+      backToAllPatients,
+      linkPatientToCaregiver,
+      createAndLinkPatient,
+      unlinkPatientFromCaregiver,
+      refreshCaregiverPatients,
+      accessDeniedNotice,
       // Actions
       registerPatientAsSelf,
       registerPatientAsFamily,

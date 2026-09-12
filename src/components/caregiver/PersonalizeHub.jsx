@@ -176,7 +176,7 @@ export default function PersonalizeHub() {
             Personalize Patient Companion
           </h2>
           <p className="text-sm text-slate-600 font-medium">
-            Everything you enter here immediately updates {patientData.profile.preferredName || patientData.profile.fullName || 'the patient'}'s experience.
+            Everything you enter here immediately updates {patientData?.profile?.preferredName || patientData?.profile?.fullName || 'the patient'}'s experience.
           </p>
         </div>
         <div className="w-12 h-12 rounded-2xl bg-white text-[#2F6FED] flex items-center justify-center text-2xl shadow-sm">
@@ -617,7 +617,7 @@ export default function PersonalizeHub() {
               Game Difficulty & Cognitive Pacing
             </h3>
             <p className="text-xs text-slate-500 font-medium">
-              Caregiver-controlled difficulty. Controls complexity across all 7 games for {patientData.profile.preferredName || 'the patient'}.
+              Caregiver-controlled difficulty. Controls complexity across all 7 games for {patientData?.profile?.preferredName || 'the patient'}.
             </p>
           </div>
         </div>

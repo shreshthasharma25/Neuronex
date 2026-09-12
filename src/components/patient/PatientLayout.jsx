@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { Home, Brain, Heart, User, Volume2, Shield } from 'lucide-react';
+import { Home, Brain, Heart, User, Volume2, Shield, ArrowLeft } from 'lucide-react';
 import PatientHome from './PatientHome';
 import MyMemories from './MyMemories';
 import GameLibrary from '../games/GameLibrary';
@@ -16,10 +16,11 @@ export default function PatientLayout({ onStartExercise, onOpenGame }) {
     setUserRole,
     activeModal,
     setActiveModal,
-    patientData
+    patientData,
+    backToAllPatients
   } = useApp();
 
-  const preferredName = patientData.profile.preferredName || 'Maa';
+  const preferredName = patientData?.profile?.preferredName || patientData?.profile?.fullName || 'Maa';
 
   const navItems = [
     { id: 'home', label: 'HOME', icon: Home, emoji: '🏠' },
@@ -34,6 +35,38 @@ export default function PatientLayout({ onStartExercise, onOpenGame }) {
 
   return (
     <div className="flex flex-col h-full bg-[#FAFBFD] relative overflow-hidden">
+      {/* Top Navigation Banner: Back to All Patients */}
+      <div className="bg-[#1E293B] text-white px-3 sm:px-4 py-2 flex items-center justify-between z-30 text-xs shadow-md border-b border-slate-700">
+        <button
+          type="button"
+          onClick={() => {
+            sounds.playGentleTap();
+            backToAllPatients();
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2F6FED] hover:bg-blue-600 text-white font-extrabold transition-all shadow-sm active:scale-95 touch-target"
+          title="Return to Caregiver Portal showing all patients"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>← Back to All Patients</span>
+        </button>
+
+        <div className="flex items-center gap-2">
+          <span className="text-slate-300 hidden sm:inline text-[11px]">
+            Viewing: <strong className="text-white">{preferredName}</strong>
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playGentleTap();
+              setUserRole('caregiver');
+            }}
+            className="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold transition-all text-xs"
+            title="Switch to Caregiver Dashboard"
+          >
+            Caregiver 🩺
+          </button>
+        </div>
+      </div>
       {/* Top Patient Header */}
       <header className="px-5 py-3.5 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-2.5">

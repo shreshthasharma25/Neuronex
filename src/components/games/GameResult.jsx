@@ -16,7 +16,7 @@ export default function GameResult({
   onReturnHome
 }) {
   const { patientData, t, language } = useApp();
-  const preferredName = patientData.profile.preferredName || patientData.profile.fullName || 'Friend';
+  const preferredName = patientData?.profile?.preferredName || patientData?.profile?.fullName || 'Friend';
   const currentLevel = patientData.cognitiveStats?.currentLevel || 1;
   const displayDifficulty = difficulty || `${t('games.level', { level: currentLevel })}`;
 

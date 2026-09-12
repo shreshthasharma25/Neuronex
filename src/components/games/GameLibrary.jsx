@@ -15,7 +15,7 @@ export default function GameLibrary({ onOpenGame }) {
     setCaregiverTab
   } = useApp();
 
-  const preferredName = patientData.profile.preferredName || patientData.profile.fullName || 'Friend';
+  const preferredName = patientData?.profile?.preferredName || patientData?.profile?.fullName || 'Friend';
   const currentLevel = patientData.cognitiveStats?.currentLevel || 1;
   const familyList = patientData.family || [];
   const hasFamily = familyList.length > 0;

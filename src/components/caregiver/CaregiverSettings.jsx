@@ -7,8 +7,8 @@ import { sounds } from '../../utils/soundPlayer';
 
 export default function CaregiverSettings() {
   const { patientData, updateProfile, setPatientData, language, setLanguage, t } = useApp();
-  const [exerciseTime, setExerciseTime] = useState(patientData.brainExercise.scheduledTime || '10:00 AM');
-  const [selectedLanguage, setSelectedLanguage] = useState(patientData.profile.language || language || 'en');
+  const [exerciseTime, setExerciseTime] = useState(patientData?.brainExercise?.scheduledTime || '10:00 AM');
+  const [selectedLanguage, setSelectedLanguage] = useState(patientData?.profile?.language || language || 'en');
   const [difficultyPreset, setDifficultyPreset] = useState('Adaptive (Automatic)');
   const [savedNotice, setSavedNotice] = useState(false);
 

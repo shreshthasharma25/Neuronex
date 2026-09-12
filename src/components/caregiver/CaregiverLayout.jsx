@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import Dashboard from './Dashboard';
 import CaregiverMedicines from './CaregiverMedicines';
@@ -16,17 +16,80 @@ export default function CaregiverLayout() {
     setCaregiverTab,
     patientData,
     setUserRole,
+    assignedPatients = [],
+    selectedPatientId,
+    selectPatient,
+    openPatientPortal,
+    backToAllPatients,
     t
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const programmaticHashChangeRef = useRef(false);
 
-  const { profile, alerts } = patientData;
-  const preferredName = profile.preferredName || 'Maa';
+  // Check URL hash ONLY on initial mount (runs once on page load)
+  useEffect(() => {
+    const initialHash = window.location.hash || '';
+    const initialMatch = initialHash.match(/#\/?patient[=/]([a-zA-Z0-9_-]+)/);
+    if (initialMatch && initialMatch[1]) {
+      selectPatient(initialMatch[1]);
+    }
+  }, []);
+
+  // Listen to external hash changes (e.g. user pressing browser Back/Forward)
+  useEffect(() => {
+    const handleHashChange = async () => {
+      if (programmaticHashChangeRef.current) {
+        programmaticHashChangeRef.current = false;
+        return;
+      }
+      const hash = window.location.hash || '';
+      const match = hash.match(/#\/?patient[=/]([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        const targetId = match[1];
+        if (targetId !== selectedPatientId) {
+          await selectPatient(targetId);
+        }
+      } else if (!hash && selectedPatientId) {
+        // Hash was cleared via browser Back button -> reliably return to All Patients
+        backToAllPatients();
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [selectedPatientId, selectPatient, backToAllPatients]);
+
+  // Update hash when selectedPatientId changes without triggering feedback loop
+  useEffect(() => {
+    const currentHash = window.location.hash || '';
+    if (selectedPatientId) {
+      const targetHash = `#patient=${selectedPatientId}`;
+      if (currentHash !== targetHash) {
+        programmaticHashChangeRef.current = true;
+        window.location.hash = targetHash;
+      }
+    } else {
+      if (currentHash.includes('patient')) {
+        programmaticHashChangeRef.current = true;
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        } else {
+          window.location.hash = '';
+        }
+      }
+    }
+  }, [selectedPatientId]);
+
+  const selectedSummary = assignedPatients.find(p => (p.id || p.patientId) === selectedPatientId);
+  const { profile = {}, alerts = [] } = patientData || {};
+  const preferredName = selectedSummary?.preferredName || profile?.preferredName || selectedSummary?.fullName || 'Patient';
   const pendingAlertsCount = alerts.filter(a => !a.resolved).length;
 
   const tabs = [
-    { id: 'overview', label: t('caregiverPortal.overview'), icon: LayoutDashboard },
+    { id: 'overview', label: selectedPatientId ? 'Patient Dashboard' : 'My Patients', icon: LayoutDashboard },
     { id: 'medicines', label: t('caregiverPortal.medicines'), icon: Pill },
     { id: 'todos', label: t('caregiverPortal.todos'), icon: CheckSquare },
     { id: 'routine', label: t('caregiverPortal.routine'), icon: Clock },
@@ -40,6 +103,10 @@ export default function CaregiverLayout() {
 
   const handleTabClick = (tabId) => {
     sounds.playGentleTap();
+    // If clicking a patient-specific tab and no patient is selected, auto-select first assigned patient
+    if (tabId !== 'overview' && !selectedPatientId && assignedPatients.length > 0) {
+      selectPatient(assignedPatients[0].id || assignedPatients[0].patientId);
+    }
     setCaregiverTab(tabId);
     setMobileMenuOpen(false);
   };
@@ -64,16 +131,53 @@ export default function CaregiverLayout() {
             </button>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
+                {selectedPatientId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sounds.playGentleTap();
+                      backToAllPatients();
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 text-xs font-extrabold transition-all flex items-center gap-1.5 border border-blue-200 shadow-sm"
+                    title="Return to all patients list"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>← Back to All Patients</span>
+                  </button>
+                )}
                 <h1 className="text-sm sm:text-lg font-extrabold text-[#172B4D] truncate">
-                  {t('caregiverPortal.title')}
+                  {selectedPatientId ? preferredName : t('caregiverPortal.title')}
                 </h1>
                 <span className="px-1.5 sm:px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#B45309] text-[10px] sm:text-xs font-extrabold flex-shrink-0">
-                  {t('role.caregiverRole')}
+                  {selectedPatientId ? 'Patient Details' : `${assignedPatients.length} Patients`}
                 </span>
               </div>
-              <p className="text-[10px] sm:text-xs text-slate-500 font-semibold truncate">
-                {preferredName} ({profile.fullName || 'Patient'})
-              </p>
+
+              {selectedPatientId ? (
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  <p className="text-[10px] sm:text-xs text-slate-500 font-semibold truncate">
+                    {profile.fullName || 'Patient'} ({selectedPatientId})
+                  </p>
+                  {assignedPatients.length > 1 && (
+                    <select
+                      value={selectedPatientId}
+                      onChange={(e) => selectPatient(e.target.value)}
+                      className="text-[10px] sm:text-[11px] font-extrabold bg-[#EAF2FF] text-[#2F6FED] border border-[#CFE1FF] rounded-lg px-2 py-0.5 outline-none cursor-pointer"
+                      title="Switch patient"
+                    >
+                      {assignedPatients.map(p => (
+                        <option key={p.id || p.patientId} value={p.id || p.patientId}>
+                          Switch to {p.preferredName || p.fullName}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              ) : (
+                <p className="text-[10px] sm:text-xs text-slate-500 font-semibold truncate">
+                  Multi-Patient Caregiver Dashboard • Monitoring All Patients
+                </p>
+              )}
             </div>
           </div>
 
@@ -88,8 +192,12 @@ export default function CaregiverLayout() {
             </button>
 
             <button
-              onClick={() => setUserRole('patient')}
+              onClick={() => {
+                sounds.playGentleTap();
+                openPatientPortal(selectedPatientId || assignedPatients[0]?.id || assignedPatients[0]?.patientId);
+              }}
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-all"
+              title="Open Patient Portal view"
             >
               <span>{t('role.patientRole')} 🧓</span>
             </button>
@@ -251,7 +359,7 @@ export default function CaregiverLayout() {
                   <button
                     onClick={() => {
                       sounds.playGentleTap();
-                      setUserRole('patient');
+                      openPatientPortal(selectedPatientId || assignedPatients[0]?.id || assignedPatients[0]?.patientId);
                       setMobileMenuOpen(false);
                     }}
                     className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold border border-slate-200 transition-all min-h-[42px] touch-target"
@@ -269,25 +377,25 @@ export default function CaregiverLayout() {
       {/* Caregiver Content Area */}
       <main className="flex-1 overflow-y-auto px-3 sm:px-6 py-3.5 sm:py-6 max-w-4xl mx-auto w-full">
         {caregiverTab === 'overview' && (
-          <Dashboard onNavigateTab={(tab) => setCaregiverTab(tab)} />
+          <Dashboard key={selectedPatientId || 'overview-all'} onNavigateTab={(tab) => setCaregiverTab(tab)} />
         )}
         {caregiverTab === 'medicines' && (
-          <CaregiverMedicines />
+          <CaregiverMedicines key={selectedPatientId || 'medicines-default'} />
         )}
         {caregiverTab === 'todos' && (
-          <CaregiverTodos />
+          <CaregiverTodos key={selectedPatientId || 'todos-default'} />
         )}
         {caregiverTab === 'routine' && (
-          <CaregiverRoutine />
+          <CaregiverRoutine key={selectedPatientId || 'routine-default'} />
         )}
         {caregiverTab === 'safety' && (
-          <CaregiverSafety />
+          <CaregiverSafety key={selectedPatientId || 'safety-default'} />
         )}
         {caregiverTab === 'monitoring' && (
-          <CognitiveAnalytics />
+          <CognitiveAnalytics key={selectedPatientId || 'monitoring-default'} />
         )}
         {caregiverTab === 'alerts' && (
-          <AlertCenter />
+          <AlertCenter key={selectedPatientId || 'alerts-default'} />
         )}
       </main>
     </div>
