@@ -1,6 +1,7 @@
 import React from 'react';
 import Card from '../common/Card';
 import Button from '../common/Button';
+import LiveLocationMap from '../common/LiveLocationMap';
 import { useApp } from '../../context/AppContext';
 import { Heart, ShieldAlert, Sparkles, Brain, Clock, Users, MapPin, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { sounds } from '../../utils/soundPlayer';
@@ -77,6 +78,24 @@ export default function FamilyOverview({ onNavigateTab }) {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Live Patient Location */}
+      {patientData.homeLocation?.coordinates?.currentLat && (
+        <Card variant="white" className="p-4 sm:p-6">
+          <h3 className="text-sm sm:text-base font-extrabold text-[#172B4D] mb-3 flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-[#2F6FED]" />
+            <span>Live Patient Location</span>
+          </h3>
+          <LiveLocationMap 
+            currentLat={patientData.homeLocation.coordinates.currentLat}
+            currentLng={patientData.homeLocation.coordinates.currentLng}
+            lastUpdate={patientData.homeLocation.coordinates.lastUpdate}
+            homeLat={patientData.homeLocation.coordinates.lat}
+            homeLng={patientData.homeLocation.coordinates.lng}
+            safeZoneRadius={patientData.homeLocation.safeZoneRadius}
+          />
+        </Card>
       )}
 
       {/* Personalization Stats Grid */}

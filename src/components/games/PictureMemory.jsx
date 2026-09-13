@@ -6,9 +6,9 @@ import { Eye, CheckCircle2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { GAME_LEVEL_CONFIGS } from '../../utils/adaptiveEngine';
 
-export default function PictureMemory({ onComplete, onExit }) {
+export default function PictureMemory({ onComplete, onExit, reshuffleKey = 0, initialLevel = 1 }) {
   const { patientData } = useApp();
-  const currentLevel = patientData.cognitiveStats?.currentLevel || 1;
+  const currentLevel = initialLevel;
   const levelConfig = GAME_LEVEL_CONFIGS['picture-memory'][currentLevel] || GAME_LEVEL_CONFIGS['picture-memory'][1];
 
   const allQuestions = [

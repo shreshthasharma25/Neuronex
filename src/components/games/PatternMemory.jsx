@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import GameContainer from './GameContainer';
 import Button from '../common/Button';
 import { sounds } from '../../utils/soundPlayer';
 import { useApp } from '../../context/AppContext';
 import { GAME_LEVEL_CONFIGS } from '../../utils/adaptiveEngine';
 
-export default function PatternMemory({ onComplete, onExit }) {
+export default function PatternMemory({ onComplete, onExit, reshuffleKey = 0, initialLevel = 1 }) {
   const { patientData } = useApp();
-  const currentLevel = patientData.cognitiveStats?.currentLevel || 1;
+  const currentLevel = initialLevel;
   const levelConfig = GAME_LEVEL_CONFIGS['pattern-memory'][currentLevel] || GAME_LEVEL_CONFIGS['pattern-memory'][1];
 
   const [phase, setPhase] = useState('show'); // 'show' | 'ask'
@@ -17,37 +17,63 @@ export default function PatternMemory({ onComplete, onExit }) {
   const [correctCount, setCorrectCount] = useState(0);
   const [startTime] = useState(Date.now());
 
-  // Define rounds scaled by level
-  const rounds = [
-    {
-      type: 'number',
-      title: 'Number Memory',
-      sequence: currentLevel === 1 
-        ? [4, 7, 2] 
-        : currentLevel === 2 
-        ? [3, 8, 5, 2] 
-        : [1, 6, 4, 9, 7],
-      question: 'What was the last number in the sequence?',
-      subtext: currentLevel === 1 
-        ? '4  →  7  →  ?' 
-        : currentLevel === 2 
-        ? '3  →  8  →  5  →  ?' 
-        : '1  →  6  →  4  →  9  →  ?',
-      options: currentLevel === 3 ? [7, 4, 9, 2] : [2, 7, 5, 9],
-      correct: currentLevel === 3 ? 7 : 2
-    },
-    {
-      type: 'colors',
-      title: 'Color Pattern',
-      sequence: currentLevel === 1 
-        ? ['🔴', '🔵', '🟢'] 
-        : ['🔴', '🔵', '🟢', '🔴'],
-      question: 'Which color came right after the blue circle (🔵)?',
-      subtext: '🔴  →  🔵  →  ?  →  ...',
-      options: ['🟢 Green', '🟡 Yellow', '🟣 Purple', '🔴 Red'],
-      correct: '🟢 Green'
+  // Define rounds scaled dynamically by levelConfig.sequenceLength
+  const rounds = useMemo(() => {
+    const seqLen = levelConfig.sequenceLength || 3;
+    
+    // Generate random numbers sequence
+    const nums = [];
+    for(let i=0; i<seqLen; i++) nums.push(Math.floor(Math.random() * 9) + 1);
+    
+    // Last number is the answer for round 1
+    const correctNum = nums[nums.length - 1];
+    let numOptions = [correctNum];
+    while(numOptions.length < 4) {
+      let r = Math.floor(Math.random() * 9) + 1;
+      if (!numOptions.includes(r)) numOptions.push(r);
     }
-  ];
+    numOptions.sort(() => 0.5 - Math.random());
+
+    // Generate colors sequence
+    const colorsList = ['🔴', '🔵', '🟢', '🟡', '🟣', '🟠'];
+    const colors = [];
+    for(let i=0; i<seqLen; i++) colors.push(colorsList[Math.floor(Math.random() * colorsList.length)]);
+    
+    // The answer is the color after the blue circle (if blue exists, otherwise just the last one)
+    let blueIdx = colors.indexOf('🔵');
+    if(blueIdx === -1 || blueIdx === colors.length - 1) {
+      blueIdx = colors.length - 2;
+      colors[blueIdx] = '🔵'; // force it to be there
+    }
+    const correctColor = colors[blueIdx + 1];
+    let colorOptions = [correctColor];
+    while(colorOptions.length < 4) {
+      let r = colorsList[Math.floor(Math.random() * colorsList.length)];
+      if (!colorOptions.includes(r)) colorOptions.push(r);
+    }
+    colorOptions.sort(() => 0.5 - Math.random());
+
+    return [
+      {
+        type: 'number',
+        title: 'Number Memory',
+        sequence: nums,
+        question: 'What was the last number in the sequence?',
+        subtext: nums.slice(0, -1).join('  →  ') + '  →  ?',
+        options: numOptions,
+        correct: correctNum
+      },
+      {
+        type: 'colors',
+        title: 'Color Pattern',
+        sequence: colors,
+        question: 'Which color came right after the blue circle (🔵)?',
+        subtext: colors.slice(0, blueIdx + 1).join('  →  ') + '  →  ?  →  ...',
+        options: colorOptions,
+        correct: correctColor
+      }
+    ];
+  }, [currentLevel, levelConfig.sequenceLength]);
 
   const currentRound = rounds[step];
 

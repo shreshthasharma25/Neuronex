@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, CheckCircle2, Clock, Volume2, Pill, AlertTriangle, CheckSquare } from 'lucide-react';
+import { Bell, CheckCircle2, Clock, Volume2, Pill, AlertTriangle, CheckSquare, AlertCircle } from 'lucide-react';
 import Button from '../common/Button';
 import { sounds } from '../../utils/soundPlayer';
 import { useApp } from '../../context/AppContext';
 import { translateDynamicContent } from '../../i18n';
+import { calculatePriority } from '../../utils/priorityLogic';
 
 export default function ReminderBanner({ alert, medicine, onMarkDone, onRemindLater, preferredName = 'Friend' }) {
-  const { t, language } = useApp();
+  const { t, language, patientData } = useApp();
   const [snoozed, setSnoozed] = useState(false);
   const spokenAlertIdRef = useRef(null);
 
@@ -48,6 +49,9 @@ export default function ReminderBanner({ alert, medicine, onMarkDone, onRemindLa
 
   const isMissed = item.status === 'MISSED';
   const isUpcoming = item.status === 'UPCOMING';
+  
+  const priority = calculatePriority(item.rawItem || item, patientData);
+  const isHighPriority = priority === 'High';
 
   const handleSpeak = () => {
     sounds.playReminderChime();
@@ -86,27 +90,40 @@ export default function ReminderBanner({ alert, medicine, onMarkDone, onRemindLa
   };
 
   return (
-    <div className={`border-2 rounded-3xl p-5 shadow-sm transition-all duration-200 ${
-      isMissed 
-        ? 'bg-[#FFF8E1] border-amber-400' 
-        : isUpcoming 
-          ? 'bg-[#EAF2FF] border-[#93C5FD]' 
-          : 'bg-[#FFF8E1] border-[#FFC857]'
+    <div className={`border-2 rounded-3xl p-5 shadow-sm transition-all duration-200 relative overflow-hidden ${
+      isHighPriority
+        ? 'bg-rose-50 border-rose-400 shadow-rose-100 shadow-md'
+        : isMissed 
+          ? 'bg-[#FFF8E1] border-amber-400' 
+          : isUpcoming 
+            ? 'bg-[#EAF2FF] border-[#93C5FD]' 
+            : 'bg-[#FFF8E1] border-[#FFC857]'
     }`}>
+      {isHighPriority && (
+        <div className="absolute top-0 right-0 left-0 h-1 bg-rose-500" />
+      )}
+      
       {/* Top Status Bar */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 font-bold text-sm min-w-0 flex-1">
           <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-            isMissed 
-              ? 'bg-rose-500 animate-ping' 
-              : isUpcoming 
-                ? 'bg-blue-500' 
-                : 'bg-amber-500 animate-pulse'
+            isHighPriority
+              ? 'bg-rose-600 animate-pulse'
+              : isMissed 
+                ? 'bg-rose-500 animate-ping' 
+                : isUpcoming 
+                  ? 'bg-blue-500' 
+                  : 'bg-amber-500 animate-pulse'
           }`} />
-          <Bell className={`w-4 h-4 flex-shrink-0 ${isMissed ? 'text-rose-600' : isUpcoming ? 'text-[#2F6FED]' : 'text-amber-600'}`} />
-          <span className={`uppercase tracking-wider text-xs font-extrabold truncate ${
-            isMissed ? 'text-rose-800' : isUpcoming ? 'text-[#2F6FED]' : 'text-[#854D0E]'
+          {isHighPriority ? (
+            <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+          ) : (
+            <Bell className={`w-4 h-4 flex-shrink-0 ${isMissed ? 'text-rose-600' : isUpcoming ? 'text-[#2F6FED]' : 'text-amber-600'}`} />
+          )}
+          <span className={`uppercase tracking-wider text-xs font-extrabold truncate flex items-center gap-2 ${
+            isHighPriority ? 'text-rose-700' : isMissed ? 'text-rose-800' : isUpcoming ? 'text-[#2F6FED]' : 'text-[#854D0E]'
           }`}>
+            {isHighPriority && <span className="bg-rose-600 text-white px-1.5 py-0.5 rounded text-[9px]">HIGH PRIORITY</span>}
             {isMissed ? `MISSED • ${item.time}` : isUpcoming ? `UPCOMING • ${item.time}` : `${t('home.medicineDue')} • ${item.time || ''}`}
           </span>
         </div>

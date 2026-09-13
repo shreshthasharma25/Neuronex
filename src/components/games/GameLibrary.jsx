@@ -6,9 +6,10 @@ import { useApp } from '../../context/AppContext';
 import { Sparkles, Brain, ArrowRight, Play, RotateCw, Lock } from 'lucide-react';
 import { sounds } from '../../utils/soundPlayer';
 
-export default function GameLibrary({ onOpenGame }) {
+export default function GameLibrary({ onOpenGame, onStartExercise }) {
   const {
     patientData,
+    setPatientData,
     gameSessionCycle,
     setGameSessionCycle,
     setUserRole,
@@ -32,13 +33,31 @@ export default function GameLibrary({ onOpenGame }) {
     setGameSessionCycle(prev => prev + 1);
   };
 
+  const handleManualLevelChange = (direction) => {
+    setPatientData(prev => {
+      const oldLevel = prev.cognitiveStats?.currentLevel || 1;
+      let newLevel = oldLevel + direction;
+      if (newLevel < 1) newLevel = 1;
+      if (newLevel > 10) newLevel = 10;
+      
+      return {
+        ...prev,
+        cognitiveStats: {
+          ...prev.cognitiveStats,
+          currentLevel: newLevel,
+          gameLevels: {} // Reset individual game levels to track the new global baseline
+        }
+      };
+    });
+  };
+
   return (
     <div className="p-4 sm:p-6 space-y-6 pb-28">
       {/* Header */}
       <div className="bg-[#EAF2FF] p-5 rounded-3xl border border-[#CFE1FF] flex items-center justify-between">
         <div>
           <span className="text-xs font-bold text-[#2F6FED] uppercase tracking-wider">
-            Cognitive Activities • Level {currentLevel}
+            Cognitive Activities
           </span>
           <h2 className="text-2xl font-extrabold text-[#172B4D] mt-0.5">
             Brain Exercise Library
@@ -52,61 +71,94 @@ export default function GameLibrary({ onOpenGame }) {
         </div>
       </div>
 
-      {/* Recommended Section with Rotation Control */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-500" />
-            <h3 className="text-lg font-extrabold text-[#172B4D]">
-              Selected for You Today
-            </h3>
-          </div>
-
-          {/* Quick Rotation Button */}
-          <button
-            onClick={handleRotateActivities}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-[#2F6FED] text-xs font-extrabold border border-slate-200 shadow-sm transition-all"
-            title="Rotate activities set"
+      {/* Manual Level Control */}
+      <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <span className="text-sm font-extrabold text-[#172B4D]">Current Level: {currentLevel}/10</span>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => handleManualLevelChange(-1)} 
+            disabled={currentLevel <= 1}
+            className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-lg ${currentLevel <= 1 ? 'bg-slate-100 text-slate-300' : 'bg-slate-100 text-[#2F6FED] active:bg-slate-200'}`}
           >
-            <RotateCw className="w-3.5 h-3.5" />
-            <span>Rotate Set</span>
+            -
+          </button>
+          <button 
+            onClick={() => handleManualLevelChange(1)} 
+            disabled={currentLevel >= 10}
+            className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-lg ${currentLevel >= 10 ? 'bg-slate-100 text-slate-300' : 'bg-slate-100 text-[#2F6FED] active:bg-slate-200'}`}
+          >
+            +
           </button>
         </div>
+      </div>
 
-        <div className="space-y-3">
-          {recommendedGames.map((game, idx) => (
-            <div
-              key={game.id}
-              onClick={() => handleLaunch(game)}
-              className="group p-4 rounded-3xl bg-white border-2 border-slate-200 hover:border-[#2F6FED] shadow-sm hover:shadow-md transition-all duration-150 cursor-pointer flex items-center justify-between touch-target active:scale-98"
-            >
-              <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-[#EAF2FF] text-[#2F6FED] flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition-transform">
-                  {game.category === 'memory' ? '❤️' : game.category === 'recall' ? '🍎' : game.category === 'attention' ? '👀' : '🧩'}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-base font-extrabold text-[#172B4D]">
-                      {game.name}
-                    </h4>
-                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#B45309]">
-                      Level {currentLevel}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">
-                    {game.description}
-                  </p>
-                </div>
+      {/* Top Banner Section: Today's Exercise OR Train More */}
+      <section>
+        {patientData.brainExercise?.dailyCompleted ? (
+          // Train Your Brain More (if today's exercise is completed)
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#EAF2FF] to-[#F8FAFC] border-2 border-[#2F6FED] p-5 sm:p-6 shadow-sm">
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#CFE1FF] text-[#2F6FED] text-xs font-extrabold uppercase tracking-wider">
+                <Brain className="w-3.5 h-3.5" />
+                <span>Level {currentLevel}</span>
               </div>
-
-              <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                <div className="w-9 h-9 rounded-xl bg-[#2F6FED] text-white flex items-center justify-center group-hover:bg-[#2052b8] transition-colors shadow-sm">
-                  <Play className="w-4 h-4 fill-current ml-0.5" />
-                </div>
-              </div>
+              <span className="text-3xl">🚀</span>
             </div>
-          ))}
-        </div>
+            
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#172B4D] tracking-tight mb-2">
+              Train Your Brain More
+            </h2>
+            <p className="text-sm sm:text-base text-slate-700 font-medium mb-5 max-w-sm">
+              Keep exercising your memory and cognitive skills.
+            </p>
+            
+            <Button
+              onClick={() => {
+                sounds.playGentleTap();
+                onStartExercise(); // Re-trigger AI selection
+              }}
+              variant="primary"
+              size="xl"
+              fullWidth
+              icon={Sparkles}
+              className="text-lg shadow-md font-extrabold"
+            >
+              Play Brain Exercise Again
+            </Button>
+          </div>
+        ) : (
+          // Today's Brain Exercise (First priority)
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#FFF8E1] via-[#FEF3C7] to-[#FFFBEB] border-2 border-[#FFC857] p-5 sm:p-6 shadow-sm">
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-amber-300 text-amber-900 text-xs font-extrabold uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                <span>Level {currentLevel}</span>
+              </div>
+              <span className="text-3xl">🧠</span>
+            </div>
+            
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#172B4D] tracking-tight mb-2">
+              Today's Brain Exercise
+            </h2>
+            <p className="text-sm sm:text-base text-slate-700 font-medium mb-5 max-w-sm">
+              Your recommended daily cognitive session.
+            </p>
+            
+            <Button
+              onClick={() => {
+                sounds.playGentleTap();
+                onStartExercise();
+              }}
+              variant="yellow"
+              size="xl"
+              fullWidth
+              icon={Play}
+              className="text-lg shadow-md font-extrabold"
+            >
+              Start Today's Exercise
+            </Button>
+          </div>
+        )}
       </section>
 
       {/* All Available Games Section */}
@@ -114,7 +166,7 @@ export default function GameLibrary({ onOpenGame }) {
         <div className="flex items-center gap-2 mb-3">
           <Brain className="w-5 h-5 text-[#2F6FED]" />
           <h3 className="text-lg font-extrabold text-[#172B4D]">
-            All Cognitive Activities
+            Brain Exercise Library
           </h3>
         </div>
 

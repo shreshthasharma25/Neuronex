@@ -1,59 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import GameContainer from './GameContainer';
 import Button from '../common/Button';
 import { sounds } from '../../utils/soundPlayer';
 import { useApp } from '../../context/AppContext';
 import { GAME_LEVEL_CONFIGS } from '../../utils/adaptiveEngine';
 
-export default function OddOneOut({ onComplete, onExit }) {
+export default function OddOneOut({ onComplete, onExit, reshuffleKey = 0, initialLevel = 1 }) {
   const { patientData } = useApp();
-  const currentLevel = patientData.cognitiveStats?.currentLevel || 1;
-  const levelConfig = GAME_LEVEL_CONFIGS['odd-one-out'][currentLevel] || GAME_LEVEL_CONFIGS['odd-one-out'][1];
+  // initialLevel passed as prop
+  const [localLevel, setLocalLevel] = useState(initialLevel);
+  const levelConfig = GAME_LEVEL_CONFIGS['odd-one-out'][localLevel] || GAME_LEVEL_CONFIGS['odd-one-out'][1];
 
   const [round, setRound] = useState(0);
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [feedback, setFeedback] = useState(null);
+  const [stuckMessage, setStuckMessage] = useState(null);
   const [correctCount, setCorrectCount] = useState(0);
+  const [consecutiveMistakes, setConsecutiveMistakes] = useState(0);
   const [startTime] = useState(Date.now());
+  const timerRef = useRef(null);
 
-  // Generate rounds scaled by level
-  const rounds = [
-    {
-      title: "Find the odd fruit",
-      items: currentLevel === 1 
-        ? ['🍎', '🍎', '🍌', '🍎']
-        : currentLevel === 2
-        ? ['🍎', '🍎', '🍎', '🍌', '🍎']
-        : ['🍎', '🍎', '🍎', '🍎', '🍌', '🍎'],
-      oddIndex: currentLevel === 1 ? 2 : currentLevel === 2 ? 3 : 4,
-      oddName: 'Banana 🍌',
-    },
-    {
-      title: "Find the odd shape",
-      items: currentLevel === 1 
-        ? ['⭐', '🔵', '⭐', '⭐']
-        : currentLevel === 2
-        ? ['⭐', '⭐', '🔵', '⭐', '⭐']
-        : ['⭐', '⭐', '⭐', '🔵', '⭐', '⭐'],
-      oddIndex: currentLevel === 1 ? 1 : currentLevel === 2 ? 2 : 3,
-      oddName: 'Blue Circle 🔵',
-    },
-    {
-      title: "Find the different item",
-      items: currentLevel === 1 
-        ? ['🌸', '🌸', '☕', '🌸']
-        : currentLevel === 2
-        ? ['🌸', '🌸', '🌸', '☕', '🌸']
-        : ['🌸', '🌸', '🌸', '🌸', '☕', '🌸'],
-      oddIndex: currentLevel === 1 ? 2 : currentLevel === 2 ? 3 : 4,
-      oddName: 'Tea Cup ☕',
+  // Generate rounds dynamically based on config
+  const rounds = useMemo(() => {
+    const config = GAME_LEVEL_CONFIGS['odd-one-out'][localLevel] || GAME_LEVEL_CONFIGS['odd-one-out'][10];
+    const generated = [];
+    const pool = [
+      { common: '🍎', odd: '🍌', oddName: 'Banana 🍌', title: 'Find the odd fruit' },
+      { common: '⭐', odd: '🔵', oddName: 'Blue Circle 🔵', title: 'Find the odd shape' },
+      { common: '🌸', odd: '☕', oddName: 'Tea Cup ☕', title: 'Find the different item' },
+      { common: '🚗', odd: '🚲', oddName: 'Bicycle 🚲', title: 'Find the different vehicle' },
+      { common: '🐶', odd: '🐱', oddName: 'Cat 🐱', title: 'Find the different animal' },
+      { common: '🌞', odd: '🌙', oddName: 'Moon 🌙', title: 'Find the odd sky object' },
+      { common: '🎸', odd: '🎻', oddName: 'Violin 🎻', title: 'Find the odd instrument' },
+      { common: '⚽', odd: '🏀', oddName: 'Basketball 🏀', title: 'Find the different ball' },
+      { common: '🌳', odd: '🌵', oddName: 'Cactus 🌵', title: 'Find the different plant' },
+      { common: '🍔', odd: '🍕', oddName: 'Pizza 🍕', title: 'Find the different food' },
+    ];
+    
+    // Pick enough round templates to satisfy levelConfig.rounds
+    const templates = [...pool].sort(() => 0.5 - Math.random()).slice(0, config.rounds);
+    
+    // Fallback if config asks for > 10 rounds
+    while(templates.length < config.rounds) {
+      templates.push(pool[Math.floor(Math.random() * pool.length)]);
     }
-  ];
 
-  const current = rounds[round];
+    templates.forEach((t) => {
+      const items = Array(config.itemsInRow).fill(t.common);
+      const oddIndex = Math.floor(Math.random() * config.itemsInRow);
+      items[oddIndex] = t.odd;
+      generated.push({
+        title: t.title,
+        items,
+        oddIndex,
+        oddName: t.oddName
+      });
+    });
+    
+    return generated;
+  }, [localLevel]);
+
+  const current = rounds[round] || rounds[rounds.length - 1];
+
+  const handleStuck = () => {
+    if (localLevel > 1) {
+      sounds.playGentleTap(); // Friendly chime
+      setLocalLevel(prev => prev - 1);
+      setStuckMessage("Let's try a little easier one.");
+      setConsecutiveMistakes(0);
+      setSelectedIdx(null); // Reset choice for current round if they were failing it
+      setFeedback(null);
+      setTimeout(() => setStuckMessage(null), 3000);
+    }
+  };
+
+  // Inactivity Timer (Demo configured to 15s)
+  useEffect(() => {
+    if (selectedIdx !== null) return; // Paused if already answered
+    timerRef.current = setTimeout(() => {
+      handleStuck();
+    }, 15000); 
+    
+    return () => clearTimeout(timerRef.current);
+  }, [round, selectedIdx, localLevel]);
 
   const handleTap = (index) => {
     if (selectedIdx !== null) return;
+    clearTimeout(timerRef.current);
     sounds.playGentleTap();
     setSelectedIdx(index);
 
@@ -62,8 +95,17 @@ export default function OddOneOut({ onComplete, onExit }) {
       sounds.playSuccess();
       setFeedback({ type: 'success', text: `❤️ Well spotted! The ${current.oddName} is different!` });
       setCorrectCount(c => c + 1);
+      setConsecutiveMistakes(0);
     } else {
       setFeedback({ type: 'gentle', text: `😊 Almost! The different one was the ${current.oddName}.` });
+      
+      const newMistakes = consecutiveMistakes + 1;
+      setConsecutiveMistakes(newMistakes);
+      
+      // Auto-reduce difficulty on repeated mistakes
+      if (newMistakes >= 2 && localLevel > 1) {
+        setTimeout(handleStuck, 1500); 
+      }
     }
 
     setTimeout(() => {
@@ -86,7 +128,7 @@ export default function OddOneOut({ onComplete, onExit }) {
           incorrectAnswers: rounds.length - finalCorrect,
           responseTime: avgResp,
           timeTaken: `${totalSecs} seconds`,
-          difficulty: `Level ${currentLevel}`
+          difficulty: `Level ${localLevel}` // Use local level because it might have adapted mid-game!
         });
       }
     }, 1800);
@@ -95,11 +137,18 @@ export default function OddOneOut({ onComplete, onExit }) {
   return (
     <GameContainer
       title="Odd One Out"
-      subtitle={`Level ${currentLevel} • Challenge ${round + 1} of ${rounds.length}`}
+      subtitle={`Level ${localLevel} • Challenge ${round + 1} of ${rounds.length}`}
       onExit={onExit}
       instructionText="Which one is different? Tap the object that does not match the others."
     >
       <div className="space-y-6">
+        
+        {stuckMessage && (
+          <div className="p-3 bg-blue-50 border border-blue-200 text-blue-800 font-bold rounded-2xl text-sm text-center animate-in fade-in slide-in-from-top-2">
+            😊 {stuckMessage}
+          </div>
+        )}
+
         <div className="bg-[#EAF2FF] p-4 rounded-2xl border border-[#CFE1FF] text-center">
           <h3 className="text-xl font-extrabold text-[#172B4D]">
             Which one is different?

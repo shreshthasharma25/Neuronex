@@ -27,12 +27,15 @@ function MainApp() {
     userRole,
     setUserRole,
     viewMode,
+    activeTab,
+    setActiveTab,
     activeGame,
     setActiveGame,
     gameResult,
     setGameResult,
     recordGameCompletion,
     patientData,
+    setPatientData,
     gameSessionCycle
   } = useApp();
 
@@ -54,13 +57,17 @@ function MainApp() {
   // Handlers for starting games
   const handleStartTodayExercise = () => {
     const recommended = getRecommendedGames(
-      gameSessionCycle || patientData.brainExercise.dayCycle || 1,
+      gameSessionCycle,
       patientData.family || [],
       patientData.cognitiveStats?.history || []
     );
-    setExercisePlaylist(recommended);
+    // Shuffle the top 3 personalized recommendations so repeated clicks pick different AI games
+    const shuffled = [...recommended].sort(() => 0.5 - Math.random());
+    
+    // Launch 3 games (as originally requested) for the daily brain exercise
+    setExercisePlaylist(shuffled.slice(0, 3));
     setPlaylistIndex(0);
-    setActiveGame(recommended[0]);
+    setActiveGame(shuffled[0]);
     setGameResult(null);
   };
 
@@ -72,8 +79,8 @@ function MainApp() {
   };
 
   const handleGameComplete = (resultData) => {
-    recordGameCompletion(resultData);
-    setGameResult(resultData);
+    const enrichedStats = recordGameCompletion(resultData);
+    setGameResult({ ...resultData, ...enrichedStats });
   };
 
   const handleNextGameInSet = () => {
@@ -84,22 +91,27 @@ function MainApp() {
       setGameResult(null);
     } else {
       // Completed all
-      setActiveGame(null);
-      setGameResult(null);
+      handleExitGame();
     }
   };
 
   const handleExitGame = () => {
     setActiveGame(null);
     setGameResult(null);
+    setExercisePlaylist([]);
+    setPlaylistIndex(0);
   };
 
-  // Reshuffle counter to trigger fresh generation
+  // Reshuffle counter to trigger fresh generation and remount components
   const [reshuffleKey, setReshuffleKey] = useState(0);
 
-  const handleReshufflePlayAgain = () => {
+  const handleReshufflePlayAgain = (gameId) => {
     setReshuffleKey(k => k + 1);
-    setGameResult(null);
+    // Generate new cards/questions immediately
+    const game = ALL_GAMES.find(g => g.id === gameId);
+    if (game) {
+      handleOpenSingleGame(game);
+    }
   };
 
   // Render current active game component
@@ -108,16 +120,23 @@ function MainApp() {
       const hasNext = playlistIndex < exercisePlaylist.length - 1;
       return (
         <GameResult
-          gameName={gameResult.gameName}
+          gameName={gameResult.gameName || activeGame.name}
           accuracy={gameResult.accuracy}
           timeTaken={gameResult.timeTaken}
           difficulty={gameResult.difficulty}
+          levelNotice={gameResult.levelNotice}
+          changeDirection={gameResult.changeDirection}
           onReshufflePlayAgain={handleReshufflePlayAgain}
           onPlayAgain={() => {
             setGameResult(null);
           }}
           onNextGame={hasNext ? handleNextGameInSet : null}
+          onStartNewAIRecommendedGame={!hasNext ? handleStartTodayExercise : null}
           onReturnHome={handleExitGame}
+          onExploreGames={() => {
+            handleExitGame();
+            setTimeout(() => setActiveTab('games'), 50);
+          }}
         />
       );
     }
@@ -125,24 +144,25 @@ function MainApp() {
     if (!activeGame) return null;
 
     const gameKey = `${activeGame.id}-${reshuffleKey}`;
+    const initialLevel = patientData.cognitiveStats?.gameLevels?.[activeGame.id] || patientData.cognitiveStats?.currentLevel || 1;
 
     switch (activeGame.id) {
       case 'memory-twin':
-        return <MemoryTwin key={gameKey} reshuffleKey={reshuffleKey} onComplete={handleGameComplete} onExit={handleExitGame} />;
+        return <MemoryTwin key={gameKey} reshuffleKey={reshuffleKey} initialLevel={initialLevel} onComplete={handleGameComplete} onExit={handleExitGame} />;
       case 'memory-basket':
-        return <MemoryBasket key={gameKey} reshuffleKey={reshuffleKey} onComplete={handleGameComplete} onExit={handleExitGame} />;
+        return <MemoryBasket key={gameKey} reshuffleKey={reshuffleKey} initialLevel={initialLevel} onComplete={handleGameComplete} onExit={handleExitGame} />;
       case 'family-memory':
-        return <FamilyMemory key={gameKey} reshuffleKey={reshuffleKey} onComplete={handleGameComplete} onExit={handleExitGame} />;
+        return <FamilyMemory key={gameKey} reshuffleKey={reshuffleKey} initialLevel={initialLevel} onComplete={handleGameComplete} onExit={handleExitGame} />;
       case 'picture-memory':
-        return <PictureMemory key={gameKey} reshuffleKey={reshuffleKey} onComplete={handleGameComplete} onExit={handleExitGame} />;
+        return <PictureMemory key={gameKey} reshuffleKey={reshuffleKey} initialLevel={initialLevel} onComplete={handleGameComplete} onExit={handleExitGame} />;
       case 'pattern-memory':
-        return <PatternMemory key={gameKey} reshuffleKey={reshuffleKey} onComplete={handleGameComplete} onExit={handleExitGame} />;
+        return <PatternMemory key={gameKey} reshuffleKey={reshuffleKey} initialLevel={initialLevel} onComplete={handleGameComplete} onExit={handleExitGame} />;
       case 'daily-routine':
-        return <DailyRoutine key={gameKey} reshuffleKey={reshuffleKey} onComplete={handleGameComplete} onExit={handleExitGame} />;
+        return <DailyRoutine key={gameKey} reshuffleKey={reshuffleKey} initialLevel={initialLevel} onComplete={handleGameComplete} onExit={handleExitGame} />;
       case 'odd-one-out':
-        return <OddOneOut key={gameKey} reshuffleKey={reshuffleKey} onComplete={handleGameComplete} onExit={handleExitGame} />;
+        return <OddOneOut key={gameKey} reshuffleKey={reshuffleKey} initialLevel={initialLevel} onComplete={handleGameComplete} onExit={handleExitGame} />;
       default:
-        return <MemoryTwin key={gameKey} reshuffleKey={reshuffleKey} onComplete={handleGameComplete} onExit={handleExitGame} />;
+        return <MemoryTwin key={gameKey} reshuffleKey={reshuffleKey} initialLevel={initialLevel} onComplete={handleGameComplete} onExit={handleExitGame} />;
     }
   };
 

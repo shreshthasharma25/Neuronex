@@ -117,44 +117,77 @@ export async function loadPatientData(patientId) {
 }
 
 function buildCognitiveStats(sessions, profile) {
-  const history = sessions.map(s => ({
-    id: s.id,
-    gameName: s.game_name,
-    date: new Date(s.created_at).toLocaleDateString("en-IN", { weekday: "short", hour: "2-digit", minute: "2-digit" }),
-    accuracy: s.accuracy,
-    time: s.time_taken,
-    difficulty: s.difficulty || "Level 1",
-  }));
-
-  const total = history.length;
-  const avgAccuracy = total > 0
-    ? Math.round(history.reduce((sum, h) => sum + h.accuracy, 0) / total)
-    : 0;
-
-  const categoryScores = { memory: 0, attention: 0, recall: 0, sequencing: 0 };
-  const categoryCounts = { memory: 0, attention: 0, recall: 0, sequencing: 0 };
-  sessions.forEach(s => {
-    const cat = (s.category || "memory").toLowerCase();
-    if (categoryScores[cat] !== undefined) {
-      categoryScores[cat] += s.accuracy;
-      categoryCounts[cat]++;
-    }
+  const history = sessions.map(s => {
+    // Map sequencing to focus for the new cognitive domains
+    let cat = (s.category || "memory").toLowerCase();
+    if (cat === 'sequencing') cat = 'focus';
+    
+    return {
+      id: s.id,
+      gameName: s.game_name,
+      date: new Date(s.created_at).toLocaleDateString("en-IN", { weekday: "short", hour: "2-digit", minute: "2-digit" }),
+      timestamp: new Date(s.created_at).getTime(),
+      accuracy: s.accuracy,
+      time: s.time_taken,
+      difficulty: s.difficulty || "Level 1",
+      category: cat
+    };
   });
-  Object.keys(categoryScores).forEach(k => {
-    categoryScores[k] = categoryCounts[k] > 0
-      ? Math.round(categoryScores[k] / categoryCounts[k])
-      : 0;
-  });
+
+  const now = Date.now();
+  const oneWeek = 7 * 24 * 60 * 60 * 1000;
+  
+  const recentSessions = history.filter(s => now - s.timestamp <= oneWeek);
+  const baselineSessions = history.filter(s => now - s.timestamp > oneWeek);
+
+  const calculateDomainScores = (sessList) => {
+    const scores = { memory: 0, recall: 0, attention: 0, focus: 0 };
+    const counts = { memory: 0, recall: 0, attention: 0, focus: 0 };
+    sessList.forEach(s => {
+      if (scores[s.category] !== undefined) {
+        scores[s.category] += s.accuracy;
+        counts[s.category]++;
+      }
+    });
+    Object.keys(scores).forEach(k => {
+      scores[k] = counts[k] > 0 ? Math.round(scores[k] / counts[k]) : null;
+    });
+    return { scores, counts };
+  };
+
+  const currentData = calculateDomainScores(recentSessions);
+  const baselineData = calculateDomainScores(baselineSessions);
+  const allTimeData = calculateDomainScores(history);
+
+  // Group by day for the trend chart
+  const weeklyTrends = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now - i * 24 * 60 * 60 * 1000);
+    const dayName = d.toLocaleDateString("en-IN", { weekday: "short" });
+    const startOfDay = new Date(d.setHours(0,0,0,0)).getTime();
+    const endOfDay = new Date(d.setHours(23,59,59,999)).getTime();
+    
+    const daySessions = history.filter(s => s.timestamp >= startOfDay && s.timestamp <= endOfDay);
+    const dayScores = calculateDomainScores(daySessions).scores;
+    
+    weeklyTrends.push({
+      day: dayName,
+      memory: dayScores.memory,
+      recall: dayScores.recall,
+      attention: dayScores.attention,
+      focus: dayScores.focus,
+    });
+  }
 
   return {
     currentLevel: profile.difficulty_level || 1,
     consecutiveHighScores: profile.consecutive_high_scores || 0,
-    gamesCompleted: total,
-    averageAccuracy: avgAccuracy,
-    averageResponseSecs: 0,
-    daysCompletedThisWeek: 0,
-    categories: categoryScores,
-    weeklyTrends: [],
+    gamesCompleted: history.length,
+    recentGamesCompleted: recentSessions.length,
+    currentScores: currentData.scores,
+    baselineScores: baselineData.scores,
+    allTimeScores: allTimeData.scores,
+    weeklyTrends,
     history,
   };
 }

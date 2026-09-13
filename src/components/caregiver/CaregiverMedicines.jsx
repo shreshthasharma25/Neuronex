@@ -3,13 +3,16 @@ import Card from '../common/Card';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import { useApp } from '../../context/AppContext';
-import { Pill, Plus, Clock, Edit3, Trash2, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { Pill, Plus, Clock, Edit3, Trash2, CheckCircle2, AlertCircle, Sparkles, ArrowUpCircle } from 'lucide-react';
 import { sounds } from '../../utils/soundPlayer';
+import { calculatePriority, sortItemsByPriority } from '../../utils/priorityLogic';
 
 export default function CaregiverMedicines() {
   const { patientData, addMedicine, updateMedicine, toggleMedicine, deleteMedicine } = useApp();
   const medicines = patientData.medicines || [];
   const preferredName = patientData.profile?.preferredName || 'Maa';
+  
+  const sortedMedicines = sortItemsByPriority(medicines, patientData);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -146,8 +149,9 @@ export default function CaregiverMedicines() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {medicines.map((med) => {
+          {sortedMedicines.map((med) => {
             const isTaken = med.taken;
+            const priority = calculatePriority(med, patientData);
             return (
               <div
                 key={med.id}
@@ -175,6 +179,18 @@ export default function CaregiverMedicines() {
                         <Clock className="w-3 h-3" />
                         <span>{med.time}</span>
                       </span>
+                      {priority === 'High' && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold">
+                          <AlertCircle className="w-3 h-3" />
+                          High Priority
+                        </span>
+                      )}
+                      {priority === 'Medium' && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">
+                          <ArrowUpCircle className="w-3 h-3" />
+                          Medium
+                        </span>
+                      )}
                     </div>
 
                     <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">
@@ -182,7 +198,7 @@ export default function CaregiverMedicines() {
                       {med.frequency && ` • ${med.frequency}`}
                     </p>
 
-                    <div className="mt-2 flex items-center gap-2">
+                    <div className="mt-2 flex items-center flex-wrap gap-2">
                       <span className={`inline-flex items-center gap-1 text-[11px] sm:text-xs font-extrabold px-2.5 py-0.5 rounded-full ${
                         isTaken
                           ? 'bg-emerald-600 text-white'
@@ -190,6 +206,23 @@ export default function CaregiverMedicines() {
                       }`}>
                         {isTaken ? '✓ Taken by Patient' : '⏳ Pending Confirmation'}
                       </span>
+                      
+                      <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-lg">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase">Priority:</span>
+                        <select
+                          value={med.manualPriority || 'auto'}
+                          onChange={(e) => {
+                            const newPrio = e.target.value === 'auto' ? null : e.target.value;
+                            updateMedicine(med.id, { ...med, manualPriority: newPrio });
+                          }}
+                          className="text-[11px] font-bold text-slate-700 bg-transparent outline-none cursor-pointer"
+                        >
+                          <option value="auto">Auto (Reset)</option>
+                          <option value="High">High</option>
+                          <option value="Medium">Medium</option>
+                          <option value="Low">Low</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>

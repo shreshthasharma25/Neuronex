@@ -27,7 +27,7 @@ import {
 } from '../../utils/geoUtils';
 
 export default function MyHomeModal({ isOpen, onClose }) {
-  const { patientData, triggerSafetyAlert, t, language } = useApp();
+  const { patientData, updateHomeLocation, triggerSafetyAlert, t, language } = useApp();
   const [isNavigating, setIsNavigating] = useState(false);
   
   // Real GPS State
@@ -41,6 +41,7 @@ export default function MyHomeModal({ isOpen, onClose }) {
   const watchIdRef = useRef(null);
   const lastAlertTimeRef = useRef(0);
   const lastSpokenBearingRef = useRef(null);
+  const lastSyncTimeRef = useRef(0);
 
   const home = patientData.homeLocation || {};
   const preferredName = patientData.profile?.preferredName || patientData.profile?.fullName || 'Friend';
@@ -79,6 +80,19 @@ export default function MyHomeModal({ isOpen, onClose }) {
       setGpsAccuracy(Math.round(accuracy));
       setGpsStatus('ACTIVE');
       setGpsErrorMessage(null);
+
+      // Throttle Supabase updates to every 10 seconds to avoid spamming the DB
+      if (Date.now() - lastSyncTimeRef.current > 10000) {
+        updateHomeLocation({
+          coordinates: {
+            ...(home.coordinates || {}),
+            currentLat: lat,
+            currentLng: lng,
+            lastUpdate: Date.now()
+          }
+        });
+        lastSyncTimeRef.current = Date.now();
+      }
 
       // Append to movement history buffer (keep last 30 points)
       setCoordsHistory(prev => {

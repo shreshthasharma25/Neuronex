@@ -3,13 +3,16 @@ import Card from '../common/Card';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import { useApp } from '../../context/AppContext';
-import { CheckSquare, Plus, Clock, Edit3, Trash2, Calendar, CheckCircle2, Bell, Sparkles } from 'lucide-react';
+import { CheckSquare, Plus, Clock, Edit3, Trash2, Calendar, CheckCircle2, Bell, Sparkles, AlertCircle, ArrowUpCircle } from 'lucide-react';
 import { sounds } from '../../utils/soundPlayer';
+import { calculatePriority, sortItemsByPriority } from '../../utils/priorityLogic';
 
 export default function CaregiverTodos() {
   const { patientData, addTodo, updateTodo, toggleTodo, deleteTodo, addReminder } = useApp();
   const todos = patientData.todos || [];
   const preferredName = patientData.profile?.preferredName || 'Maa';
+  
+  const sortedTodos = sortItemsByPriority(todos, patientData);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -162,8 +165,9 @@ export default function CaregiverTodos() {
         </Card>
       ) : (
         <div className="space-y-2.5 sm:space-y-3">
-          {todos.map((todo) => {
+          {sortedTodos.map((todo) => {
             const isDone = todo.completed;
+            const priority = calculatePriority(todo, patientData);
             return (
               <div
                 key={todo.id}
@@ -193,8 +197,20 @@ export default function CaregiverTodos() {
                       }`}>
                         {todo.title}
                       </h4>
+                      {priority === 'High' && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold">
+                          <AlertCircle className="w-3 h-3" />
+                          High Priority
+                        </span>
+                      )}
+                      {priority === 'Medium' && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">
+                          <ArrowUpCircle className="w-3 h-3" />
+                          Medium Priority
+                        </span>
+                      )}
                       {todo.isMed && (
-                        <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded-full bg-blue-100 text-[#2F6FED] text-[10px] font-bold">
                           Medicine
                         </span>
                       )}

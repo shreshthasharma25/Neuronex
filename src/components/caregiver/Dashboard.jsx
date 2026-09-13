@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import Card from '../common/Card';
 import Button from '../common/Button';
+import LiveLocationMap from '../common/LiveLocationMap';
 import { useApp } from '../../context/AppContext';
 import PatientSummaryBar from './PatientSummaryBar';
 import PatientCard from './PatientCard';
@@ -814,27 +815,60 @@ export default function Dashboard({ onNavigateTab }) {
           <div className="w-16 h-16 rounded-3xl bg-[#EAF2FF] text-[#2F6FED] flex items-center justify-center text-3xl mx-auto shadow-sm">
             👥
           </div>
-          <div>
-            <h3 className="text-lg font-extrabold text-[#172B4D]">
-              No patients linked yet.
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto mt-1 font-medium leading-relaxed">
-              You do not have any patients assigned to your caregiver account. Add a patient using their unique ID or register a new patient profile.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              sounds.playGentleTap();
-              setIsAddModalOpen(true);
-            }}
-            className="inline-flex items-center justify-center gap-1.5 px-5 py-3 rounded-2xl bg-[#2F6FED] hover:bg-[#2557be] text-white font-extrabold text-sm shadow-md transition-all touch-target"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>+ Add Your First Patient</span>
-          </button>
-        </div>
-      )}
+<div>
+  <h3 className="text-lg font-extrabold text-[#172B4D]">
+    No patients linked yet.
+  </h3>
+  <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto mt-1 font-medium leading-relaxed">
+    You do not have any patients assigned to your caregiver account. Add a patient using their unique ID or register a new patient profile.
+  </p>
+</div>
+<button
+  type="button"
+  onClick={() => {
+    sounds.playGentleTap();
+    setIsAddModalOpen(true);
+  }}
+  className="inline-flex items-center justify-center gap-1.5 px-5 py-3 rounded-2xl bg-[#2F6FED] hover:bg-[#2557be] text-white font-extrabold text-sm shadow-md"
+>
+  <Plus className="w-4 h-4 stroke-[2.5]" />
+  <span>Add Your First Patient</span>
+</button>
+</div>
+)}
+
+<div className="p-4 rounded-2xl bg-[#EAF2FF] border border-[#CFE1FF] space-y-2 mb-4">
+  <div className="flex items-center justify-between">
+    <span className="text-xs font-bold text-slate-600">Registered Home:</span>
+    <span className="text-xs font-bold text-[#172B4D] text-right">
+      {homeLocation.address || 'Not specified'}
+    </span>
+  </div>
+  <div className="flex items-center justify-between">
+    <span className="text-xs font-bold text-slate-600">Safe-Zone Radius:</span>
+    <span className="text-xs font-extrabold text-[#2F6FED]">
+      {homeLocation.safeZoneRadius} meters
+    </span>
+  </div>
+  <div className="flex items-center justify-between border-t border-[#CFE1FF] pt-2">
+    <span className="text-xs font-bold text-slate-600">Live Status:</span>
+    <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#2E7D32]">
+      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+      Within Safe Boundary
+    </span>
+  </div>
+</div>
+
+{homeLocation.coordinates?.currentLat && (
+  <LiveLocationMap
+    currentLat={homeLocation.coordinates.currentLat}
+    currentLng={homeLocation.coordinates.currentLng}
+    lastUpdate={homeLocation.coordinates.lastUpdate}
+    homeLat={homeLocation.coordinates.lat}
+    homeLng={homeLocation.coordinates.lng}
+    safeZoneRadius={homeLocation.safeZoneRadius}
+  />
+)}
 
       {/* EMPTY STATE 2: FILTER / SEARCH YIELDS NO RESULTS */}
       {!assignedPatientsLoading && assignedPatients.length > 0 && filteredPatients.length === 0 && (

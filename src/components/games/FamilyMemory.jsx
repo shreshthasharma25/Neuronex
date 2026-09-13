@@ -7,13 +7,13 @@ import { sounds } from '../../utils/soundPlayer';
 import { Heart, CheckCircle2, User, Sparkles } from 'lucide-react';
 import { generateFamilyMemorySession } from '../../utils/adaptiveEngine';
 
-export default function FamilyMemory({ onComplete, onExit, reshuffleKey = 0 }) {
+export default function FamilyMemory({ onComplete, onExit, reshuffleKey = 0, initialLevel = 1 }) {
   const { patientData } = useApp();
   const familyList = patientData.family || [];
   const memoriesList = patientData.memories || [];
   const preferredName = patientData.profile?.preferredName || patientData.profile?.fullName || 'Friend';
   const catLevels = patientData.cognitiveStats?.categoryLevels || {};
-  const currentLevel = catLevels.memory || patientData.cognitiveStats?.currentLevel || 1;
+  const currentLevel = initialLevel;
 
   // If no family entered, display clear notice without inventing fake data
   if (familyList.length === 0 && memoriesList.length === 0) {

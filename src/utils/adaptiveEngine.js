@@ -82,89 +82,131 @@ export const ALL_GAMES = [
   },
 ];
 
-// 5-Level Adaptive Configuration for Every Cognitive Game
+// 10-Level Adaptive Configuration for Every Cognitive Game
 export const GAME_LEVEL_CONFIGS = {
   'memory-twin': {
-    1: { pairsCount: 2, label: 'Level 1 (2 Pairs)', timeLimit: 45 },
-    2: { pairsCount: 3, label: 'Level 2 (3 Pairs)', timeLimit: 60 },
-    3: { pairsCount: 4, label: 'Level 3 (4 Pairs)', timeLimit: 75 },
-    4: { pairsCount: 5, label: 'Level 4 (5 Pairs)', timeLimit: 90 },
-    5: { pairsCount: 6, label: 'Level 5 (6 Pairs)', timeLimit: 120 },
+    1: { pairsCount: 2, label: 'Level 1 (Very Easy)', timeLimit: 60 },
+    2: { pairsCount: 3, label: 'Level 2 (Easy)', timeLimit: 60 },
+    3: { pairsCount: 4, label: 'Level 3 (Easy-Medium)', timeLimit: 75 },
+    4: { pairsCount: 5, label: 'Level 4 (Medium)', timeLimit: 90 },
+    5: { pairsCount: 6, label: 'Level 5 (Medium+)', timeLimit: 120 },
+    6: { pairsCount: 7, label: 'Level 6 (Moderately Hard)', timeLimit: 120 },
+    7: { pairsCount: 8, label: 'Level 7 (Hard)', timeLimit: 135 },
+    8: { pairsCount: 10, label: 'Level 8 (Very Hard)', timeLimit: 150 },
+    9: { pairsCount: 12, label: 'Level 9 (Expert)', timeLimit: 160 },
+    10: { pairsCount: 15, label: 'Level 10 (Maximum)', timeLimit: 180 },
   },
   'memory-basket': {
-    1: { itemCount: 3, viewSeconds: 10, label: 'Level 1 (3 Items • 10s)' },
-    2: { itemCount: 4, viewSeconds: 8, label: 'Level 2 (4 Items • 8s)' },
-    3: { itemCount: 5, viewSeconds: 7, label: 'Level 3 (5 Items • 7s)' },
-    4: { itemCount: 6, viewSeconds: 6, label: 'Level 4 (6 Items • 6s)' },
-    5: { itemCount: 7, viewSeconds: 5, label: 'Level 5 (7 Items • 5s)' },
+    1: { itemCount: 3, viewSeconds: 15, label: 'Level 1 (Very Easy)' },
+    2: { itemCount: 4, viewSeconds: 12, label: 'Level 2 (Easy)' },
+    3: { itemCount: 5, viewSeconds: 10, label: 'Level 3 (Easy-Medium)' },
+    4: { itemCount: 6, viewSeconds: 8, label: 'Level 4 (Medium)' },
+    5: { itemCount: 7, viewSeconds: 7, label: 'Level 5 (Medium+)' },
+    6: { itemCount: 8, viewSeconds: 6, label: 'Level 6 (Moderately Hard)' },
+    7: { itemCount: 9, viewSeconds: 5, label: 'Level 7 (Hard)' },
+    8: { itemCount: 10, viewSeconds: 4, label: 'Level 8 (Very Hard)' },
+    9: { itemCount: 12, viewSeconds: 4, label: 'Level 9 (Expert)' },
+    10: { itemCount: 15, viewSeconds: 3, label: 'Level 10 (Maximum)' },
   },
   'family-memory': {
-    1: { questionCount: 2, optionsCount: 2, label: 'Level 1 (2 Questions • 2 Options)' },
-    2: { questionCount: 3, optionsCount: 3, label: 'Level 2 (3 Questions • 3 Options)' },
-    3: { questionCount: 4, optionsCount: 3, label: 'Level 3 (4 Questions • 3 Options)' },
-    4: { questionCount: 4, optionsCount: 4, label: 'Level 4 (4 Questions • 4 Options)' },
-    5: { questionCount: 5, optionsCount: 4, label: 'Level 5 (5 Questions • 4 Options)' },
+    1: { questionCount: 2, optionsCount: 2, label: 'Level 1 (Very Easy)' },
+    2: { questionCount: 3, optionsCount: 2, label: 'Level 2 (Easy)' },
+    3: { questionCount: 3, optionsCount: 3, label: 'Level 3 (Easy-Medium)' },
+    4: { questionCount: 4, optionsCount: 3, label: 'Level 4 (Medium)' },
+    5: { questionCount: 4, optionsCount: 4, label: 'Level 5 (Medium+)' },
+    6: { questionCount: 5, optionsCount: 4, label: 'Level 6 (Moderately Hard)' },
+    7: { questionCount: 6, optionsCount: 4, label: 'Level 7 (Hard)' },
+    8: { questionCount: 7, optionsCount: 5, label: 'Level 8 (Very Hard)' },
+    9: { questionCount: 8, optionsCount: 5, label: 'Level 9 (Expert)' },
+    10: { questionCount: 10, optionsCount: 6, label: 'Level 10 (Maximum)' },
   },
   'picture-memory': {
-    1: { viewSeconds: 10, questionCount: 2, label: 'Level 1 (10s View • 2 Questions)' },
-    2: { viewSeconds: 8, questionCount: 3, label: 'Level 2 (8s View • 3 Questions)' },
-    3: { viewSeconds: 6, questionCount: 3, label: 'Level 3 (6s View • 3 Questions)' },
-    4: { viewSeconds: 5, questionCount: 4, label: 'Level 4 (5s View • 4 Questions)' },
-    5: { viewSeconds: 4, questionCount: 4, label: 'Level 5 (4s View • 4 Questions)' },
+    1: { viewSeconds: 15, questionCount: 2, label: 'Level 1 (Very Easy)' },
+    2: { viewSeconds: 12, questionCount: 2, label: 'Level 2 (Easy)' },
+    3: { viewSeconds: 10, questionCount: 3, label: 'Level 3 (Easy-Medium)' },
+    4: { viewSeconds: 8, questionCount: 3, label: 'Level 4 (Medium)' },
+    5: { viewSeconds: 6, questionCount: 4, label: 'Level 5 (Medium+)' },
+    6: { viewSeconds: 5, questionCount: 4, label: 'Level 6 (Moderately Hard)' },
+    7: { viewSeconds: 4, questionCount: 5, label: 'Level 7 (Hard)' },
+    8: { viewSeconds: 3, questionCount: 6, label: 'Level 8 (Very Hard)' },
+    9: { viewSeconds: 3, questionCount: 7, label: 'Level 9 (Expert)' },
+    10: { viewSeconds: 2, questionCount: 8, label: 'Level 10 (Maximum)' },
   },
   'pattern-memory': {
-    1: { sequenceLength: 3, label: 'Level 1 (3 Steps)' },
-    2: { sequenceLength: 4, label: 'Level 2 (4 Steps)' },
-    3: { sequenceLength: 5, label: 'Level 3 (5 Steps)' },
-    4: { sequenceLength: 6, label: 'Level 4 (6 Steps)' },
-    5: { sequenceLength: 7, label: 'Level 5 (7 Steps)' },
+    1: { sequenceLength: 3, label: 'Level 1 (Very Easy)' },
+    2: { sequenceLength: 4, label: 'Level 2 (Easy)' },
+    3: { sequenceLength: 5, label: 'Level 3 (Easy-Medium)' },
+    4: { sequenceLength: 6, label: 'Level 4 (Medium)' },
+    5: { sequenceLength: 7, label: 'Level 5 (Medium+)' },
+    6: { sequenceLength: 8, label: 'Level 6 (Moderately Hard)' },
+    7: { sequenceLength: 9, label: 'Level 7 (Hard)' },
+    8: { sequenceLength: 10, label: 'Level 8 (Very Hard)' },
+    9: { sequenceLength: 12, label: 'Level 9 (Expert)' },
+    10: { sequenceLength: 15, label: 'Level 10 (Maximum)' },
   },
   'daily-routine': {
-    1: { questionCount: 2, optionsCount: 2, label: 'Level 1 (2 Steps • 2 Options)' },
-    2: { questionCount: 3, optionsCount: 3, label: 'Level 2 (3 Steps • 3 Options)' },
-    3: { questionCount: 4, optionsCount: 3, label: 'Level 3 (4 Steps • 3 Options)' },
-    4: { questionCount: 4, optionsCount: 4, label: 'Level 4 (4 Steps • 4 Options)' },
-    5: { questionCount: 5, optionsCount: 4, label: 'Level 5 (5 Steps • 4 Options)' },
+    1: { questionCount: 2, optionsCount: 2, label: 'Level 1 (Very Easy)' },
+    2: { questionCount: 3, optionsCount: 2, label: 'Level 2 (Easy)' },
+    3: { questionCount: 3, optionsCount: 3, label: 'Level 3 (Easy-Medium)' },
+    4: { questionCount: 4, optionsCount: 3, label: 'Level 4 (Medium)' },
+    5: { questionCount: 4, optionsCount: 4, label: 'Level 5 (Medium+)' },
+    6: { questionCount: 5, optionsCount: 4, label: 'Level 6 (Moderately Hard)' },
+    7: { questionCount: 6, optionsCount: 4, label: 'Level 7 (Hard)' },
+    8: { questionCount: 7, optionsCount: 5, label: 'Level 8 (Very Hard)' },
+    9: { questionCount: 8, optionsCount: 5, label: 'Level 9 (Expert)' },
+    10: { questionCount: 10, optionsCount: 6, label: 'Level 10 (Maximum)' },
   },
   'odd-one-out': {
-    1: { itemsInRow: 4, rounds: 2, label: 'Level 1 (4 Items • 2 Rounds)' },
-    2: { itemsInRow: 4, rounds: 3, label: 'Level 2 (4 Items • 3 Rounds)' },
-    3: { itemsInRow: 5, rounds: 3, label: 'Level 3 (5 Items • 3 Rounds)' },
-    4: { itemsInRow: 6, rounds: 3, label: 'Level 4 (6 Items • 3 Rounds)' },
-    5: { itemsInRow: 6, rounds: 4, label: 'Level 5 (6 Items • 4 Rounds)' },
+    1: { itemsInRow: 3, rounds: 2, label: 'Level 1 (Very Easy)' },
+    2: { itemsInRow: 4, rounds: 3, label: 'Level 2 (Easy)' },
+    3: { itemsInRow: 4, rounds: 4, label: 'Level 3 (Easy-Medium)' },
+    4: { itemsInRow: 5, rounds: 4, label: 'Level 4 (Medium)' },
+    5: { itemsInRow: 5, rounds: 5, label: 'Level 5 (Medium+)' },
+    6: { itemsInRow: 6, rounds: 5, label: 'Level 6 (Moderately Hard)' },
+    7: { itemsInRow: 7, rounds: 6, label: 'Level 7 (Hard)' },
+    8: { itemsInRow: 8, rounds: 7, label: 'Level 8 (Very Hard)' },
+    9: { itemsInRow: 10, rounds: 8, label: 'Level 9 (Expert)' },
+    10: { itemsInRow: 12, rounds: 10, label: 'Level 10 (Maximum)' },
   },
 };
 
 /**
  * Transparent adaptive difficulty calculator
- * Evaluates a rolling window of recent attempts (last 3-5 sessions) in a category.
- * Requires at least 2 consecutive high scores (>= 85%) to advance, never after 1 single attempt.
- * Lowers level gently if struggling (< 60% in 2 consecutive attempts).
+ * Evaluates a rolling window of recent attempts (last 3 sessions) for a specific game.
+ * Requires consistent high scores to advance, lowers gently if struggling.
  * 
  * @param {Array<object>} history - Cognitive history records
- * @param {number} currentLevel - Current difficulty level (1-5)
- * @param {string} category - e.g. 'memory', 'recall', 'attention', 'sequencing'
- * @returns {{ newLevel: number, levelNotice: string | null }}
+ * @param {number} currentLevel - Current difficulty level (1-10)
+ * @param {string} gameId - e.g. 'memory-twin', 'memory-basket'
+ * @returns {{ newLevel: number, levelNotice: string | null, changeDirection: number }}
  */
-export function evaluateAdaptiveDifficulty(history = [], currentLevel = 1, category = 'memory') {
-  const catKey = (category || 'memory').toLowerCase();
-  const catHistory = history.filter(h => (h.category || '').toLowerCase() === catKey);
+export function evaluateAdaptiveDifficulty(history = [], currentLevel = 1, gameId = null) {
+  // If we don't have a specific game, fallback to category or no-op
+  if (!gameId) {
+    return { newLevel: currentLevel, levelNotice: null, changeDirection: 0 };
+  }
+  
+  const gameHistory = history.filter(h => h.gameId === gameId);
 
-  // If fewer than 2 completed attempts in this category, maintain level
-  if (catHistory.length < 2) {
-    return { newLevel: currentLevel, levelNotice: null };
+  // If fewer than 2 completed attempts in this game, maintain level
+  if (gameHistory.length < 2) {
+    return { newLevel: currentLevel, levelNotice: null, changeDirection: 0 };
   }
 
-  const recent = catHistory.slice(0, 3); // Most recent attempts (newest first)
-  const [first, second] = recent;
+  const recent = gameHistory.slice(0, 3); // Most recent attempts (newest first)
+  const [first, second, third] = recent;
 
-  // Advance level: 2 consecutive attempts >= 85%
-  if (first.accuracy >= 85 && second.accuracy >= 85) {
-    if (currentLevel < 5) {
+  // Advance level: 3 consecutive attempts >= 80% or 2 consecutive >= 90%
+  const isExcellentRecent = (first.accuracy >= 90 && second.accuracy >= 90);
+  const isGoodConsistent = third && (first.accuracy >= 80 && second.accuracy >= 80 && third.accuracy >= 80);
+
+  if (isExcellentRecent || isGoodConsistent) {
+    if (currentLevel < 10) {
       const newLevel = currentLevel + 1;
       return {
         newLevel,
-        levelNotice: `🎉 Wonderful consistency! Difficulty gently advanced to Level ${newLevel}.`
+        changeDirection: 1,
+        levelNotice: `Level increased: ${currentLevel} → ${newLevel}`
       };
     }
   }
@@ -175,12 +217,13 @@ export function evaluateAdaptiveDifficulty(history = [], currentLevel = 1, categ
       const newLevel = currentLevel - 1;
       return {
         newLevel,
-        levelNotice: `Difficulty gently adjusted to Level ${newLevel} for maximum comfort.`
+        changeDirection: -1,
+        levelNotice: `Level decreased: ${currentLevel} → ${newLevel}`
       };
     }
   }
 
-  return { newLevel: currentLevel, levelNotice: null };
+  return { newLevel: currentLevel, levelNotice: null, changeDirection: 0 };
 }
 
 // ── Reshuffle Content Generators ──────────────────────────────────────────
@@ -383,10 +426,46 @@ export function generateDailyRoutineSession(routineSteps = [], level = 1) {
   };
 }
 
-// Dynamic Game Rotation System
+// AI-Based Game Personalization & Dynamic Rotation System
 export function getRecommendedGames(sessionCycle = 1, familyList = [], history = []) {
   const hasFamilyData = familyList && familyList.length > 0;
+  let availableGames = ALL_GAMES.filter(g => !g.requiresFamily || hasFamilyData);
 
+  // If there is enough history, use AI personalization logic to select the next games
+  if (history && history.length >= 2) {
+    const recent = history.slice(-10); // Look at last 10 games
+    
+    // Identify games patient struggled with (accuracy < 60%)
+    const struggledGames = recent.filter(r => r.accuracy < 60).map(r => r.gameId);
+    
+    // Identify games patient excels at (accuracy >= 80%)
+    const strongGames = recent.filter(r => r.accuracy >= 80).map(r => r.gameId);
+    
+    const recentIds = recent.map(r => r.gameId);
+
+    // AI Logic for selection:
+    // 1. A game they excel at (Builds confidence, likely to be bumped up in difficulty by adaptive engine)
+    const candidate1 = availableGames.filter(g => strongGames.includes(g.id));
+    let game1 = candidate1.length > 0 
+      ? candidate1[Math.floor(Math.random() * candidate1.length)] 
+      : availableGames[0];
+
+    // 2. A completely fresh game (Ensures variety and exercises different cognitive functions)
+    const candidate2 = availableGames.filter(g => !recentIds.includes(g.id) && !struggledGames.includes(g.id) && g.id !== game1.id);
+    let game2 = candidate2.length > 0 
+      ? candidate2[Math.floor(Math.random() * candidate2.length)] 
+      : availableGames.find(g => g.id !== game1.id) || availableGames[1];
+
+    // 3. A random suitable exercise (Avoiding recently struggled games to prevent frustration)
+    const candidate3 = availableGames.filter(g => g.id !== game1.id && g.id !== game2.id && !struggledGames.includes(g.id));
+    let game3 = candidate3.length > 0
+      ? candidate3[Math.floor(Math.random() * candidate3.length)]
+      : availableGames.find(g => g.id !== game1.id && g.id !== game2.id) || availableGames[2];
+
+    return [game1, game2, game3].filter(Boolean);
+  }
+
+  // Fallback to static rotating plans for fresh users with no history
   const rotationPlans = [
     hasFamilyData 
       ? ["family-memory", "memory-basket", "odd-one-out"]

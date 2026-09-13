@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Button from '../common/Button';
 import { useApp } from '../../context/AppContext';
-import { Sparkles, Trophy, Clock, Target, ArrowRight, RotateCcw, Home, Award, Shuffle } from 'lucide-react';
+import { Sparkles, Trophy, Clock, Target, ArrowRight, RotateCcw, Home, Award, Shuffle, Brain } from 'lucide-react';
 import { sounds } from '../../utils/soundPlayer';
 
 export default function GameResult({
@@ -10,15 +10,27 @@ export default function GameResult({
   timeTaken = "1 min 45 sec",
   difficulty = null,
   levelNotice = null,
+  changeDirection = 0,
   onPlayAgain,
   onReshufflePlayAgain,
   onNextGame,
-  onReturnHome
+  onStartNewAIRecommendedGame,
+  onReturnHome,
+  onExploreGames,
+  onManualLevelChange
 }) {
   const { patientData, t, language } = useApp();
+<<<<<<< HEAD
   const preferredName = patientData?.profile?.preferredName || patientData?.profile?.fullName || 'Friend';
   const currentLevel = patientData.cognitiveStats?.currentLevel || 1;
   const displayDifficulty = difficulty || `${t('games.level', { level: currentLevel })}`;
+=======
+  const preferredName = patientData.profile.preferredName || patientData.profile.fullName || 'Friend';
+  // Note: The global currentLevel isn't necessarily the game's level now, but difficulty contains the exact text.
+  const displayDifficulty = difficulty || 'Level 1';
+  // Extract number from "Level X" string for the "X / 10" display
+  const levelNumber = parseInt(displayDifficulty.replace(/\D/g, '')) || 1;
+>>>>>>> b68211a (Update caregiver cognitive analysis)
 
   const getLocaleTag = (lang) => {
     switch (lang) {
@@ -35,7 +47,7 @@ export default function GameResult({
     sounds.speak(`${t('games.wellDone')} ${preferredName}!`, {
       lang: getLocaleTag(language)
     });
-  }, [gameName, accuracy, preferredName, currentLevel, language]);
+  }, [gameName, accuracy, preferredName, levelNumber, language]);
 
   return (
     <div className="flex flex-col justify-between min-h-[540px] h-full p-6 text-center bg-gradient-to-b from-[#FFF8E1] via-white to-[#FAFBFD] rounded-3xl">
@@ -47,7 +59,7 @@ export default function GameResult({
 
         <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#EAF2FF] text-[#2F6FED] font-extrabold text-xs uppercase tracking-wider mb-2">
           <Award className="w-4 h-4" />
-          <span>{gameName} • {displayDifficulty}</span>
+          <span>{gameName}</span>
         </div>
 
         <h2 className="text-3xl font-extrabold text-[#172B4D] tracking-tight mb-2">
@@ -59,7 +71,14 @@ export default function GameResult({
         </p>
 
         {levelNotice && (
-          <div className="mt-3 p-3 bg-amber-100 text-amber-900 border border-amber-300 rounded-2xl text-xs font-bold animate-in fade-in">
+          <div className={`mt-3 p-3 rounded-2xl text-xs font-bold animate-in fade-in ${
+            changeDirection > 0 
+              ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' 
+              : changeDirection < 0 
+                ? 'bg-blue-100 text-blue-900 border border-blue-300'
+                : 'bg-amber-100 text-amber-900 border border-amber-300'
+          }`}>
+            {changeDirection > 0 ? '📈 ' : changeDirection < 0 ? '📉 ' : '🧠 '}
             {levelNotice}
           </div>
         )}
@@ -73,7 +92,7 @@ export default function GameResult({
             {accuracy}%
           </span>
           <span className="text-xs text-slate-500 font-bold">
-            {t('games.score', { score: accuracy })}
+            Accuracy
           </span>
         </div>
 
@@ -83,17 +102,17 @@ export default function GameResult({
             {timeTaken}
           </span>
           <span className="text-xs text-slate-500 font-bold">
-            {t('common.time')}
+            Time
           </span>
         </div>
 
         <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
           <Sparkles className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
-          <span className="text-lg font-extrabold text-[#172B4D] block truncate mt-0.5">
-            {displayDifficulty}
+          <span className="text-xl font-extrabold text-[#172B4D] block truncate mt-0.5">
+            {levelNumber} <span className="text-sm text-slate-400">/ 10</span>
           </span>
           <span className="text-xs text-slate-500 font-bold">
-            {t('games.level', { level: currentLevel })}
+            Current Level
           </span>
         </div>
       </div>
@@ -103,55 +122,74 @@ export default function GameResult({
         ✓ {t('common.success')}
       </div>
 
-      {/* Action Buttons */}
-      <div className="space-y-3 pb-2">
-        {onReshufflePlayAgain ? (
+      {onNextGame && (
+        <div className="mb-4">
           <Button
-            onClick={onReshufflePlayAgain}
+            onClick={onNextGame}
             variant="primary"
             size="xl"
             fullWidth
-            icon={Shuffle}
-            className="shadow-lg shadow-[#2F6FED]/25 text-xl font-bold bg-[#2F6FED] hover:bg-[#255ecf]"
-          >
-            {t('games.playAgain')}
-          </Button>
-        ) : null}
-
-        {onNextGame && (
-          <Button
-            onClick={onNextGame}
-            variant="secondary"
-            size="lg"
-            fullWidth
             icon={ArrowRight}
-            className="font-bold"
+            className="shadow-md shadow-[#2F6FED]/25 text-lg font-extrabold bg-[#2F6FED] hover:bg-[#255ecf]"
           >
-            {t('games.nextGame')}
-          </Button>
-        )}
-
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            onClick={onPlayAgain}
-            variant="outline"
-            size="md"
-            icon={RotateCcw}
-            className="bg-white border-slate-300 font-bold text-slate-700"
-          >
-            {t('games.playAgain')}
-          </Button>
-
-          <Button
-            onClick={onReturnHome}
-            variant="outline"
-            size="md"
-            icon={Home}
-            className="bg-white border-slate-300 font-bold text-slate-700"
-          >
-            {t('games.returnHome')}
+            Next Game
           </Button>
         </div>
+      )}
+
+      {/* Train Your Brain More Section (Primary Action) */}
+      {onStartNewAIRecommendedGame && (
+        <div className="bg-[#EAF2FF] p-4 rounded-3xl border border-[#CFE1FF] text-left mb-4 shadow-sm animate-in slide-in-from-bottom-2">
+          <h3 className="text-lg font-extrabold text-[#172B4D] mb-1">
+            Train Your Brain More
+          </h3>
+          <p className="text-sm text-[#2F6FED] font-medium mb-4">
+            Keep exercising your memory and cognitive skills.
+          </p>
+          
+          <Button
+            onClick={onStartNewAIRecommendedGame}
+            variant="primary"
+            size="xl"
+            fullWidth
+            icon={Sparkles}
+            className="shadow-md shadow-[#2F6FED]/25 text-lg font-extrabold bg-[#2F6FED] hover:bg-[#255ecf]"
+          >
+            Play Brain Exercise Again
+          </Button>
+        </div>
+      )}
+
+      {/* Secondary Actions */}
+      <div className="grid grid-cols-2 gap-3 pb-2">
+        <Button
+          onClick={onPlayAgain}
+          variant="outline"
+          size="md"
+          icon={RotateCcw}
+          className="bg-white border-slate-300 font-bold text-slate-700"
+        >
+          Replay This Game
+        </Button>
+
+        <Button
+          onClick={onExploreGames || onReturnHome}
+          variant="outline"
+          size="md"
+          icon={Brain}
+          className="bg-white border-slate-300 font-bold text-[#2F6FED]"
+        >
+          Game Library
+        </Button>
+      </div>
+      
+      <div className="text-center mt-2 pb-2">
+        <button 
+          onClick={onReturnHome}
+          className="text-slate-400 font-bold text-xs hover:text-slate-600 underline underline-offset-2"
+        >
+          {t('games.returnHome')}
+        </button>
       </div>
     </div>
   );

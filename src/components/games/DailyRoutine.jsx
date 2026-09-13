@@ -6,11 +6,11 @@ import { sounds } from '../../utils/soundPlayer';
 import { Clock, CheckCircle2 } from 'lucide-react';
 import { generateDailyRoutineSession } from '../../utils/adaptiveEngine';
 
-export default function DailyRoutine({ onComplete, onExit, reshuffleKey = 0 }) {
+export default function DailyRoutine({ onComplete, onExit, reshuffleKey = 0, initialLevel = 1 }) {
   const { patientData } = useApp();
   const preferredName = patientData.profile?.preferredName || patientData.profile?.fullName || 'Friend';
   const catLevels = patientData.cognitiveStats?.categoryLevels || {};
-  const currentLevel = catLevels.sequencing || patientData.cognitiveStats?.currentLevel || 1;
+  const currentLevel = initialLevel;
 
   // Generate dynamic questions from caregiver routine or familiar elder schedule
   const session = useMemo(() => {

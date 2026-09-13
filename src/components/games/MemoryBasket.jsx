@@ -6,10 +6,10 @@ import { CheckCircle2, ShoppingBasket, Sparkles } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { generateMemoryBasketSession } from '../../utils/adaptiveEngine';
 
-export default function MemoryBasket({ onComplete, onExit, reshuffleKey = 0 }) {
+export default function MemoryBasket({ onComplete, onExit, reshuffleKey = 0, initialLevel = 1 }) {
   const { patientData } = useApp();
   const catLevels = patientData.cognitiveStats?.categoryLevels || {};
-  const currentLevel = catLevels.recall || patientData.cognitiveStats?.currentLevel || 1;
+  const currentLevel = initialLevel;
 
   // Generate fresh, non-repeating session items
   const session = useMemo(() => {

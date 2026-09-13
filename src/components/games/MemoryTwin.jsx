@@ -11,9 +11,9 @@ const ALL_CARD_ITEMS = [
   { id: 'tea', emoji: '🫖', name: 'Teapot' },
 ];
 
-export default function MemoryTwin({ onComplete, onExit }) {
+export default function MemoryTwin({ onComplete, onExit, reshuffleKey = 0, initialLevel = 1 }) {
   const { patientData } = useApp();
-  const currentLevel = patientData.cognitiveStats?.currentLevel || 1;
+  const currentLevel = initialLevel;
   const levelConfig = GAME_LEVEL_CONFIGS['memory-twin'][currentLevel] || GAME_LEVEL_CONFIGS['memory-twin'][1];
 
   const activeItems = ALL_CARD_ITEMS.slice(0, levelConfig.pairsCount);

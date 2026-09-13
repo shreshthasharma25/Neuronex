@@ -1036,11 +1036,16 @@ export function AppProvider({ children }) {
     responseTime = 6
   }) => {
     const existingHistory = patientData.cognitiveStats?.history || [];
-    const currentCatLevels = patientData.cognitiveStats?.categoryLevels || {
-      memory: 1, recall: 1, attention: 1, sequencing: 1
-    };
+    const currentGameLevels = patientData.cognitiveStats?.gameLevels || {};
+    
+    // Fallback to category level or global level if game-specific level isn't set yet
     const catKey = (category || "memory").toLowerCase();
-    const currentLevel = currentCatLevels[catKey] || patientData.cognitiveStats?.currentLevel || 1;
+    const currentCatLevels = patientData.cognitiveStats?.categoryLevels || { memory: 1, recall: 1, attention: 1, sequencing: 1 };
+    
+    const currentLevel = currentGameLevels[gameId] 
+      || currentCatLevels[catKey] 
+      || patientData.cognitiveStats?.currentLevel 
+      || 1;
 
     // Full detailed performance record per attempt
     const sessionRecord = {
@@ -1061,9 +1066,9 @@ export function AppProvider({ children }) {
       date: "Today, " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     };
 
-    // Calculate adaptive difficulty progression using rolling window of recent history
+    // Calculate adaptive difficulty progression using rolling window of recent history for THIS GAME
     const simulatedHistory = [sessionRecord, ...existingHistory];
-    const { newLevel, levelNotice } = evaluateAdaptiveDifficulty(simulatedHistory, currentLevel, catKey);
+    const { newLevel, levelNotice, changeDirection } = evaluateAdaptiveDifficulty(simulatedHistory, currentLevel, gameId);
 
     setPatientData(prev => {
       const prevStats = prev.cognitiveStats || {};
@@ -1078,10 +1083,14 @@ export function AppProvider({ children }) {
       const currentCatVal = prevStats.categories?.[catKey] || 0;
       const newCatVal = Math.min(100, Math.round((currentCatVal + accuracy) / 2));
 
-      const updatedCategoryLevels = {
-        ...(prevStats.categoryLevels || { memory: 1, recall: 1, attention: 1, sequencing: 1 }),
-        [catKey]: newLevel
+      // Update the specific game level
+      const updatedGameLevels = {
+        ...(prevStats.gameLevels || {}),
+        [gameId]: newLevel
       };
+      
+      // Update global highest level achieved
+      const bestLevelAchieved = Math.max(prevStats.bestLevelAchieved || 1, newLevel);
 
       const newAlert = {
         id: "alt-" + Date.now(),
@@ -1108,7 +1117,8 @@ export function AppProvider({ children }) {
         cognitiveStats: {
           ...prevStats,
           currentLevel: newLevel,
-          categoryLevels: updatedCategoryLevels,
+          bestLevelAchieved,
+          gameLevels: updatedGameLevels,
           gamesCompleted: newGamesCompleted,
           averageAccuracy: newAvgAcc,
           averageResponseSecs: newAvgResp,
@@ -1120,7 +1130,12 @@ export function AppProvider({ children }) {
     });
 
     sounds.playSuccess();
-    return { newLevel, levelNotice };
+    return {
+      newLevel,
+      levelNotice,
+      changeDirection,
+      difficulty: `Level ${currentLevel}`
+    };
   }, [patientData.cognitiveStats, patientId]);
 
   // ── Difficulty ────────────────────────────────────────────────────────────

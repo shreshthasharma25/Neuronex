@@ -108,7 +108,10 @@ export default function PatientLayout({ onStartExercise, onOpenGame }) {
           />
         )}
         {activeTab === 'games' && (
-          <GameLibrary onOpenGame={onOpenGame} />
+          <GameLibrary 
+            onOpenGame={onOpenGame} 
+            onStartExercise={onStartExercise}
+          />
         )}
         {activeTab === 'memories' && (
           <MyMemories />

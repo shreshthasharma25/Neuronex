@@ -1,12 +1,13 @@
 import React from 'react';
-import { Check, CheckCircle2, Circle, Sparkles, Heart } from 'lucide-react';
+import { Check, CheckCircle2, Circle, Sparkles, Heart, AlertCircle, ArrowUpCircle } from 'lucide-react';
 import Card from '../common/Card';
 import { sounds } from '../../utils/soundPlayer';
 import { useApp } from '../../context/AppContext';
 import { translateDynamicContent } from '../../i18n';
+import { calculatePriority, sortItemsByPriority } from '../../utils/priorityLogic';
 
 export default function TodoList({ todos, onToggleTodo, preferredName = 'Maa' }) {
-  const { t, language } = useApp();
+  const { t, language, patientData } = useApp();
 
   if (!todos || todos.length === 0) {
     return (
@@ -26,10 +27,33 @@ export default function TodoList({ todos, onToggleTodo, preferredName = 'Maa' })
 
   const completedCount = todos.filter(t => t.completed).length;
   const allCompleted = completedCount === todos.length && todos.length > 0;
+  const sortedTodos = sortItemsByPriority(todos, patientData);
 
   const handleToggle = (id) => {
     sounds.playGentleTap();
     onToggleTodo(id);
+  };
+
+  const renderPriorityBadge = (todo) => {
+    if (todo.completed) return null;
+    const priority = calculatePriority(todo, patientData);
+    if (priority === 'High') {
+      return (
+        <span className="flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">
+          <AlertCircle className="w-3 h-3" />
+          High Priority
+        </span>
+      );
+    }
+    if (priority === 'Medium') {
+      return (
+        <span className="flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+          <ArrowUpCircle className="w-3 h-3" />
+          Medium Priority
+        </span>
+      );
+    }
+    return null;
   };
 
   return (
@@ -57,7 +81,9 @@ export default function TodoList({ todos, onToggleTodo, preferredName = 'Maa' })
 
       {/* Tasks List */}
       <div className="space-y-3">
-        {todos.map(todo => {
+        {sortedTodos.map(todo => {
+          const priority = calculatePriority(todo, patientData);
+          const isHigh = priority === 'High' && !todo.completed;
           return (
             <div
               key={todo.id}
@@ -65,7 +91,9 @@ export default function TodoList({ todos, onToggleTodo, preferredName = 'Maa' })
               className={`flex items-center gap-3.5 p-3.5 rounded-2xl border transition-all cursor-pointer touch-target ${
                 todo.completed
                   ? 'bg-[#E8F5E9]/50 border-[#C8E6C9] text-slate-500'
-                  : 'bg-white border-slate-200 hover:border-[#2F6FED]/50 hover:bg-[#FAFBFD]'
+                  : isHigh
+                    ? 'bg-rose-50/50 border-rose-200 hover:border-rose-300'
+                    : 'bg-white border-slate-200 hover:border-[#2F6FED]/50 hover:bg-[#FAFBFD]'
               }`}
             >
               {/* Checkbox */}
@@ -74,7 +102,9 @@ export default function TodoList({ todos, onToggleTodo, preferredName = 'Maa' })
                 className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
                   todo.completed
                     ? 'bg-[#2E7D32] text-white shadow-sm'
-                    : 'border-2 border-slate-300 text-transparent hover:border-[#2F6FED]'
+                    : isHigh
+                      ? 'border-2 border-rose-400 text-transparent hover:bg-rose-100'
+                      : 'border-2 border-slate-300 text-transparent hover:border-[#2F6FED]'
                 }`}
                 aria-label={todo.completed ? "Mark incomplete" : "Mark complete"}
               >
@@ -85,7 +115,8 @@ export default function TodoList({ todos, onToggleTodo, preferredName = 'Maa' })
                 <span className={`text-base font-bold block ${todo.completed ? 'line-through text-slate-400' : 'text-[#172B4D]'}`}>
                   {translateDynamicContent(todo.title, language, todo.title)}
                 </span>
-                <div className="flex items-center gap-2 mt-0.5">
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  {renderPriorityBadge(todo)}
                   {todo.time && (
                     <span className="text-xs text-slate-500 font-medium">
                       ⏰ {todo.time}
