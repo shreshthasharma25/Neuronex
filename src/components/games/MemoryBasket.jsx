@@ -80,6 +80,7 @@ export default function MemoryBasket({ onComplete, onExit, reshuffleKey = 0 }) {
         gameId: 'memory-basket',
         gameName: 'Memory Basket',
         category: 'recall',
+        cognitiveDomain: 'recall',
         accuracy,
         correctAnswers: correctCount,
         incorrectAnswers: targetItems.length - correctCount,

@@ -103,7 +103,8 @@ export default function FamilyMemory({ onComplete, onExit, reshuffleKey = 0 }) {
         onComplete({
           gameId: 'family-memory',
           gameName: 'Family Memory',
-          category: 'memory',
+          category: 'recall',
+          cognitiveDomain: 'recall',
           accuracy,
           correctAnswers: finalCorrect,
           incorrectAnswers: total - finalCorrect,

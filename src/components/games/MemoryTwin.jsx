@@ -74,6 +74,7 @@ export default function MemoryTwin({ onComplete, onExit }) {
               gameId: 'memory-twin',
               gameName: 'Memory Twin',
               category: 'memory',
+              cognitiveDomain: 'memory',
               accuracy: Math.max(65, accuracy),
               correctAnswers: correctCount,
               incorrectAnswers: incorrectCount,

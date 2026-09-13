@@ -80,7 +80,8 @@ export default function PatternMemory({ onComplete, onExit }) {
         onComplete({
           gameId: 'pattern-memory',
           gameName: 'Number & Pattern',
-          category: 'sequencing',
+          category: 'focus',
+          cognitiveDomain: 'focus',
           accuracy,
           correctAnswers: finalCorrect,
           incorrectAnswers: rounds.length - finalCorrect,
