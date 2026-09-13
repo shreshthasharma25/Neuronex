@@ -117,24 +117,35 @@ export async function loadPatientData(patientId) {
 }
 
 function buildCognitiveStats(sessions, profile) {
-  const history = sessions.map(s => ({
-    id: s.id,
-    gameName: s.game_name,
-    date: new Date(s.created_at).toLocaleDateString("en-IN", { weekday: "short", hour: "2-digit", minute: "2-digit" }),
-    accuracy: s.accuracy,
-    time: s.time_taken,
-    difficulty: s.difficulty || "Level 1",
-  }));
+  const history = sessions.map(s => {
+    const rawCat = (s.category || "memory").toLowerCase();
+    const domain = rawCat === "sequencing" ? "focus" : rawCat;
+    return {
+      id: s.id,
+      gameId: s.game_id || s.game_name,
+      gameName: s.game_name,
+      cognitiveDomain: domain,
+      domain,
+      score: s.accuracy,
+      accuracy: s.accuracy,
+      date: new Date(s.created_at).toLocaleDateString("en-IN", { weekday: "short", hour: "2-digit", minute: "2-digit" }),
+      timestamp: new Date(s.created_at).getTime(),
+      timeTaken: s.time_taken,
+      time: s.time_taken,
+      difficulty: s.difficulty || "Level 1",
+    };
+  });
 
   const total = history.length;
   const avgAccuracy = total > 0
     ? Math.round(history.reduce((sum, h) => sum + h.accuracy, 0) / total)
     : 0;
 
-  const categoryScores = { memory: 0, attention: 0, recall: 0, sequencing: 0 };
-  const categoryCounts = { memory: 0, attention: 0, recall: 0, sequencing: 0 };
+  const categoryScores = { memory: 0, recall: 0, attention: 0, focus: 0 };
+  const categoryCounts = { memory: 0, recall: 0, attention: 0, focus: 0 };
   sessions.forEach(s => {
-    const cat = (s.category || "memory").toLowerCase();
+    let cat = (s.category || "memory").toLowerCase();
+    if (cat === "sequencing") cat = "focus";
     if (categoryScores[cat] !== undefined) {
       categoryScores[cat] += s.accuracy;
       categoryCounts[cat]++;

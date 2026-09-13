@@ -22,6 +22,7 @@ import {
   subscribeToCaregiverPatients,
 } from "../services/supabaseService";
 import { calculatePatientStatus, getPatientCognitiveScore } from "../utils/patientStatusEngine";
+import { getDomainForTask } from "../utils/cognitiveAnalyticsEngine";
 
 import {
   translate,
@@ -1075,35 +1076,42 @@ export function AppProvider({ children }) {
     gameId,
     gameName,
     accuracy = 100,
+    score,
     timeTaken = "1 min 30 sec",
     category = "memory",
+    cognitiveDomain,
     correctAnswers = 1,
     incorrectAnswers = 0,
     responseTime = 6
   }) => {
     const existingHistory = patientData.cognitiveStats?.history || [];
     const currentCatLevels = patientData.cognitiveStats?.categoryLevels || {
-      memory: 1, recall: 1, attention: 1, sequencing: 1
+      memory: 1, recall: 1, attention: 1, focus: 1
     };
-    const catKey = (category || "memory").toLowerCase();
+    const domainKey = cognitiveDomain || getDomainForTask(category || gameId || gameName);
+    const catKey = domainKey;
     const currentLevel = currentCatLevels[catKey] || patientData.cognitiveStats?.currentLevel || 1;
+    const finalScore = typeof score === 'number' ? score : accuracy;
 
     // Full detailed performance record per attempt
     const sessionRecord = {
       id: "h-" + Date.now(),
       gameId,
       gameName,
-      category: catKey,
+      cognitiveDomain: domainKey,
+      domain: domainKey,
+      category: domainKey,
       difficultyLevel: currentLevel,
       difficulty: `Level ${currentLevel}`,
-      score: accuracy,
+      score: finalScore,
       accuracy,
       correctAnswers,
       incorrectAnswers,
       responseTime: typeof responseTime === 'number' ? responseTime : 6,
       timeTaken,
+      attempts: 1,
       completionStatus: 'completed',
-      timestamp: new Date().toISOString(),
+      timestamp: Date.now(),
       date: "Today, " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     };
 
@@ -1116,24 +1124,24 @@ export function AppProvider({ children }) {
       const prevCount = prevStats.gamesCompleted || 0;
       const prevAvg   = prevStats.averageAccuracy || 0;
       const newGamesCompleted = prevCount + 1;
-      const newAvgAcc = prevCount === 0 ? accuracy : Math.round((prevAvg * prevCount + accuracy) / newGamesCompleted);
+      const newAvgAcc = prevCount === 0 ? finalScore : Math.round((prevAvg * prevCount + finalScore) / newGamesCompleted);
 
       const prevAvgResp = prevStats.averageResponseSecs || 6;
       const newAvgResp = Number(((prevAvgResp * prevCount + sessionRecord.responseTime) / newGamesCompleted).toFixed(1));
 
-      const currentCatVal = prevStats.categories?.[catKey] || 0;
-      const newCatVal = Math.min(100, Math.round((currentCatVal + accuracy) / 2));
+      const currentCatVal = prevStats.categories?.[domainKey] || 0;
+      const newCatVal = Math.min(100, Math.round((currentCatVal + finalScore) / 2));
 
       const updatedCategoryLevels = {
-        ...(prevStats.categoryLevels || { memory: 1, recall: 1, attention: 1, sequencing: 1 }),
-        [catKey]: newLevel
+        ...(prevStats.categoryLevels || { memory: 1, recall: 1, attention: 1, focus: 1 }),
+        [domainKey]: newLevel
       };
 
       const newAlert = {
         id: "alt-" + Date.now(),
         type: "success",
         title: "Brain Exercise Completed",
-        message: `${prev.profile.preferredName || "Patient"} completed ${gameName} at Level ${newLevel} with ${accuracy}% accuracy.`,
+        message: `${prev.profile.preferredName || "Patient"} completed ${gameName} at Level ${newLevel} with ${finalScore}% score.`,
         time: "Just now",
         resolved: true,
       };
@@ -1144,7 +1152,7 @@ export function AppProvider({ children }) {
         prev.importantInfo?.find(i => i.label.toLowerCase().includes("doctor")),
         newLevel);
 
-      return {
+      const updatedPatient = {
         ...prev,
         brainExercise: { ...prev.brainExercise, dailyCompleted: true },
         todos: prev.todos.map(t =>
@@ -1158,11 +1166,49 @@ export function AppProvider({ children }) {
           gamesCompleted: newGamesCompleted,
           averageAccuracy: newAvgAcc,
           averageResponseSecs: newAvgResp,
-          categories: { ...(prevStats.categories || {}), [catKey]: newCatVal },
+          categories: { ...(prevStats.categories || {}), [domainKey]: newCatVal },
           history: [sessionRecord, ...(prevStats.history || [])],
         },
         alerts: [newAlert, ...prev.alerts],
       };
+
+      // Keep cache in sync
+      if (patientId) {
+        patientCacheRef.current[patientId] = updatedPatient;
+        try {
+          localStorage.setItem(`neuronex_patient_${patientId}`, JSON.stringify(updatedPatient));
+        } catch {}
+      }
+
+      return updatedPatient;
+    });
+
+    // Also update assignedPatients so caregiver view updates immediately
+    setAssignedPatients(prev => {
+      const updatedList = prev.map(p => {
+        if ((p.id || p.patientId) === patientId) {
+          const updatedSummary = {
+            ...p,
+            cognitiveScore: finalScore,
+            latestGameName: gameName,
+            latestGameAccuracy: finalScore,
+            recentActivity: "Today",
+            todayGamesCount: (p.todayGamesCount || 0) + 1,
+            cognitiveStats: {
+              ...(p.cognitiveStats || {}),
+              averageAccuracy: finalScore,
+              history: [sessionRecord, ...(p.cognitiveStats?.history || [])]
+            }
+          };
+          updatedSummary.status = calculatePatientStatus(updatedSummary);
+          return updatedSummary;
+        }
+        return p;
+      });
+      try {
+        localStorage.setItem(CAREGIVER_PATIENTS_KEY, JSON.stringify(updatedList));
+      } catch {}
+      return updatedList;
     });
 
     sounds.playSuccess();

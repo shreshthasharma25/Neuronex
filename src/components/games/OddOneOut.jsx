@@ -81,6 +81,7 @@ export default function OddOneOut({ onComplete, onExit }) {
           gameId: 'odd-one-out',
           gameName: 'Odd One Out',
           category: 'attention',
+          cognitiveDomain: 'attention',
           accuracy,
           correctAnswers: finalCorrect,
           incorrectAnswers: rounds.length - finalCorrect,

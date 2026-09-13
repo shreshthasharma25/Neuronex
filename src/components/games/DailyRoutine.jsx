@@ -68,7 +68,8 @@ export default function DailyRoutine({ onComplete, onExit, reshuffleKey = 0 }) {
         onComplete({
           gameId: 'daily-routine',
           gameName: 'Daily Routine',
-          category: 'sequencing',
+          category: 'recall',
+          cognitiveDomain: 'recall',
           accuracy,
           correctAnswers: finalCorrect,
           incorrectAnswers: total - finalCorrect,

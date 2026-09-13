@@ -55,9 +55,9 @@ export const emptyPatientData = {
     daysCompletedThisWeek: 0,
     categories: {
       memory: 0,
-      attention: 0,
       recall: 0,
-      sequencing: 0,
+      attention: 0,
+      focus: 0,
     },
     weeklyTrends: [],
     history: []

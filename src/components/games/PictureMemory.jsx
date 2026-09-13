@@ -85,7 +85,8 @@ export default function PictureMemory({ onComplete, onExit }) {
         onComplete({
           gameId: 'picture-memory',
           gameName: 'Remember the Picture',
-          category: 'attention',
+          category: 'memory',
+          cognitiveDomain: 'memory',
           accuracy,
           correctAnswers: finalCorrect,
           incorrectAnswers: questions.length - finalCorrect,
