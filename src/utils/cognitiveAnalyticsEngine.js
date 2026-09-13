@@ -301,6 +301,20 @@ export function calculateDomainStats(history = []) {
       const totalScore = sessions.reduce((acc, s) => acc + s.score, 0);
       const avgScore = Math.round(totalScore / sessions.length);
 
+      // Determine simple status: Strong (>=80), Stable (65-79), Needs Practice (<65)
+      let status = 'Stable';
+      let statusBadge = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+      if (avgScore >= 80) {
+        status = 'Strong';
+        statusBadge = 'bg-emerald-100 text-emerald-900 border-emerald-300 font-bold';
+      } else if (avgScore >= 65) {
+        status = 'Stable';
+        statusBadge = 'bg-teal-50 text-teal-800 border-teal-200';
+      } else {
+        status = 'Needs Practice';
+        statusBadge = 'bg-amber-50 text-amber-800 border-amber-200';
+      }
+
       // Extract unique task names measured
       const activities = Array.from(new Set(sessions.map(s => s.gameName)));
 
@@ -316,6 +330,8 @@ export function calculateDomainStats(history = []) {
         barClass: config.barClass,
         description: config.description,
         score: avgScore,
+        status,
+        statusBadge,
         sessionsCount: sessions.length,
         activitiesMeasured: activities,
         latestDate: latest ? latest.date : null,
@@ -333,11 +349,13 @@ export function calculateDomainStats(history = []) {
         barClass: config.barClass,
         description: config.description,
         score: null,
+        status: 'No recent data',
+        statusBadge: 'bg-slate-100 text-slate-500 border-slate-200',
         sessionsCount: 0,
         activitiesMeasured: [],
         latestDate: null,
         hasData: false,
-        prompt: config.defaultPrompt
+        prompt: `Complete a ${config.name} activity to measure this area.`
       };
     }
   });
@@ -380,14 +398,22 @@ export function calculateOverallPerformanceIndex(domainStats, history = []) {
     }
   }
 
+  const now = new Date();
+  const lastUpdated = latestSession
+    ? latestSession.date
+    : `Today, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
   return {
     score: overallScore,
+    sessionsCompleted: normalized.length,
     sessionsAnalyzed: normalized.length,
     activeDomainsCount: activeDomains.length,
     totalDomainsCount: 4,
-    latestActivity: latestSession ? `${latestSession.gameName} (${latestSession.score}%)` : 'No sessions recorded yet',
+    latestActivity: latestSession ? latestSession.gameName : 'None',
+    latestActivityName: latestSession ? latestSession.gameName : 'None',
+    latestActivityScore: latestSession ? latestSession.score : 0,
     latestActivityDate: latestSession ? latestSession.date : 'N/A',
-    lastUpdated: latestSession ? latestSession.date : 'Awaiting first session',
+    lastUpdated,
     trajectory
   };
 }
@@ -396,33 +422,74 @@ export function calculateOverallPerformanceIndex(domainStats, history = []) {
 
 /**
  * Builds chronological data points for the Performance Trends graph
+ * Supports filtering by domain and time range ('7d', '30d', 'month')
+ * Formats short non-repeating date labels ("Sep 7", "Sep 8", "Today")
+ * 
  * @param {Array} history 
  * @param {'all'|'memory'|'recall'|'attention'|'focus'} selectedDomain 
+ * @param {'7d'|'30d'|'month'} timeRange 
  * @returns {Array} chronological trend points
  */
-export function getPerformanceTrends(history = [], selectedDomain = 'all') {
+export function getPerformanceTrends(history = [], selectedDomain = 'all', timeRange = '7d') {
   const normalized = (history || [])
     .map((s, idx) => normalizeSession(s, idx))
     .filter(Boolean);
 
-  const filtered = selectedDomain === 'all'
+  const domainFiltered = selectedDomain === 'all'
     ? normalized
     : normalized.filter(s => s.domain === selectedDomain);
 
-  // Sort chronological (oldest to newest for plotting left-to-right)
-  const sorted = [...filtered].sort((a, b) => a.timestamp - b.timestamp);
+  // Time range filtering
+  const now = new Date();
+  const nowMs = now.getTime();
+  let cutoffMs = 0;
 
-  // Group or map to points
+  if (timeRange === '7d') {
+    cutoffMs = nowMs - 7 * 86400000;
+  } else if (timeRange === '30d') {
+    cutoffMs = nowMs - 30 * 86400000;
+  } else if (timeRange === 'month') {
+    cutoffMs = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  }
+
+  let timeFiltered = domainFiltered.filter(s => s.timestamp >= cutoffMs);
+  // If time filter leaves 0 points but domainFiltered has data, show all domainFiltered points gracefully
+  if (timeFiltered.length === 0 && domainFiltered.length > 0) {
+    timeFiltered = domainFiltered;
+  }
+
+  // Sort chronological (oldest to newest for plotting left-to-right)
+  const sorted = [...timeFiltered].sort((a, b) => a.timestamp - b.timestamp);
+
+  const todayStr = now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const yesterdayStr = yesterday.toDateString();
+
+  const total = sorted.length;
+
   const points = sorted.map((s, i) => {
     const dateObj = new Date(s.timestamp);
-    const label = !isNaN(dateObj.getTime())
-      ? dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      : `Session ${i + 1}`;
+    let label = '';
+
+    if (dateObj.toDateString() === todayStr) {
+      label = 'Today';
+    } else if (dateObj.toDateString() === yesterdayStr) {
+      label = 'Yesterday';
+    } else if (!isNaN(dateObj.getTime())) {
+      label = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // e.g. "Sep 7"
+    } else {
+      label = `S${i + 1}`;
+    }
+
+    // Auto-thin visible labels when many points exist to avoid clutter
+    const showLabel = total <= 8 || i === 0 || i === total - 1 || i % Math.ceil(total / 6) === 0;
 
     return {
       id: s.id,
       index: i,
       label,
+      showLabel,
       fullDate: s.date,
       score: s.score,
       accuracy: s.accuracy,
@@ -519,35 +586,32 @@ export function generateAICognitiveSummary(domainStats, history = []) {
 
   let summaryParts = [];
 
+  // Trajectory & stability sentence
+  const recentScores = normalized.slice(0, 4).map(s => s.score);
+  const maxDiff = recentScores.length >= 2 ? Math.max(...recentScores) - Math.min(...recentScores) : 0;
+  if (maxDiff <= 10) {
+    summaryParts.push("Performance has remained steady and consistent this week.");
+  } else {
+    summaryParts.push("Performance shows natural daily variations reflecting regular alertness rhythms.");
+  }
+
   // Strongest domain observation
   if (highest) {
     summaryParts.push(
-      `${highest.name} performance remains a key strength with an average score of ${highest.score}% across ${highest.sessionsCount} session${highest.sessionsCount > 1 ? 's' : ''}.`
+      `${highest.name} is currently the strongest area (averaging ${highest.score}% across ${highest.sessionsCount} session${highest.sessionsCount > 1 ? 's' : ''}).`
     );
   }
 
-  // Lowest / Practice area observation
+  // Practice area observation
   if (lowest && lowest.id !== highest.id && lowest.score < highest.score) {
     if (lowest.score >= 75) {
       summaryParts.push(
-        `${lowest.name} response is also well-maintained (${lowest.score}%), demonstrating balanced cognitive engagement.`
+        `${lowest.name} response is also well-maintained at ${lowest.score}%, indicating balanced cognitive wellness.`
       );
     } else {
       summaryParts.push(
-        `${lowest.name} tasks (${lowest.score}%) offer a gentle opportunity for continued practice with calm, unhurried routines.`
+        `${lowest.name} (${lowest.score}%) may benefit from continued gentle practice through everyday exercises.`
       );
-    }
-  }
-
-  // Consistency & trajectory observation
-  if (normalized.length >= 4) {
-    const recentScores = normalized.slice(0, 3).map(s => s.score);
-    const maxDiff = Math.max(...recentScores) - Math.min(...recentScores);
-
-    if (maxDiff <= 10) {
-      summaryParts.push("Recent exercise sessions show remarkable consistency and steady waypoint accuracy.");
-    } else {
-      summaryParts.push("Scores exhibit natural day-to-day variations reflecting normal alertness rhythms.");
     }
   }
 
