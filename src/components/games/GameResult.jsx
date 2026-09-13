@@ -20,17 +20,11 @@ export default function GameResult({
   onManualLevelChange
 }) {
   const { patientData, t, language } = useApp();
-<<<<<<< HEAD
   const preferredName = patientData?.profile?.preferredName || patientData?.profile?.fullName || 'Friend';
   const currentLevel = patientData.cognitiveStats?.currentLevel || 1;
   const displayDifficulty = difficulty || `${t('games.level', { level: currentLevel })}`;
-=======
-  const preferredName = patientData.profile.preferredName || patientData.profile.fullName || 'Friend';
-  // Note: The global currentLevel isn't necessarily the game's level now, but difficulty contains the exact text.
-  const displayDifficulty = difficulty || 'Level 1';
   // Extract number from "Level X" string for the "X / 10" display
-  const levelNumber = parseInt(displayDifficulty.replace(/\D/g, '')) || 1;
->>>>>>> b68211a (Update caregiver cognitive analysis)
+  const levelNumber = parseInt(displayDifficulty.replace(/\D/g, '')) || currentLevel;
 
   const getLocaleTag = (lang) => {
     switch (lang) {

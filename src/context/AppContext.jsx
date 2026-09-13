@@ -389,7 +389,11 @@ export function AppProvider({ children }) {
     // Security Verification: A caregiver must only be able to see assigned patients
     let isAuthorized = false;
     if (isSupabaseEnabled) {
-      isAuthorized = await verifyCaregiverPatientAccess(caregiverId, cleanId);
+      if (assignedPatients.some(p => (p.id || p.patientId) === cleanId)) {
+        isAuthorized = true;
+      } else {
+        isAuthorized = await verifyCaregiverPatientAccess(caregiverId, cleanId);
+      }
     } else {
       isAuthorized = assignedPatients.some(p => (p.id || p.patientId) === cleanId);
       if (!isAuthorized) {

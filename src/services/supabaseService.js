@@ -560,9 +560,9 @@ export async function verifyCaregiverPatientAccess(caregiverId, patientId) {
       .select("id")
       .eq("caregiver_id", caregiverId)
       .eq("patient_id", patientId)
-      .maybeSingle();
+      .limit(1);
 
-    if (error || !data) return false;
+    if (error || !data || data.length === 0) return false;
     return true;
   } catch {
     return false;

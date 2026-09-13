@@ -538,11 +538,11 @@ export default function Dashboard({ onNavigateTab }) {
                 onClick={() => onNavigateTab('safety')}
                 className="text-xs font-bold text-[#2F6FED] hover:underline"
               >
-                Edit Safe Zone →
+                Edit Safe Zone ➔
               </button>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#EAF2FF] border border-[#CFE1FF] space-y-2">
+            <div className="p-4 rounded-2xl bg-[#EAF2FF] border border-[#CFE1FF] space-y-2 mb-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-600">Registered Home:</span>
                 <span className="text-xs font-bold text-[#172B4D] text-right">
@@ -558,11 +558,22 @@ export default function Dashboard({ onNavigateTab }) {
               <div className="flex items-center justify-between border-t border-[#CFE1FF] pt-2">
                 <span className="text-xs font-bold text-slate-600">Live Status:</span>
                 <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#2E7D32]">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  Within Safe Boundary
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Live Sync Active
                 </span>
               </div>
             </div>
+
+            {homeLocation?.coordinates?.currentLat && (
+              <LiveLocationMap
+                currentLat={homeLocation.coordinates.currentLat}
+                currentLng={homeLocation.coordinates.currentLng}
+                lastUpdate={homeLocation.coordinates.lastUpdate}
+                homeLat={homeLocation.coordinates.lat}
+                homeLng={homeLocation.coordinates.lng}
+                safeZoneRadius={homeLocation.safeZoneRadius || 500}
+              />
+            )}
           </Card>
         </div>
 
@@ -837,38 +848,6 @@ export default function Dashboard({ onNavigateTab }) {
 </div>
 )}
 
-<div className="p-4 rounded-2xl bg-[#EAF2FF] border border-[#CFE1FF] space-y-2 mb-4">
-  <div className="flex items-center justify-between">
-    <span className="text-xs font-bold text-slate-600">Registered Home:</span>
-    <span className="text-xs font-bold text-[#172B4D] text-right">
-      {homeLocation.address || 'Not specified'}
-    </span>
-  </div>
-  <div className="flex items-center justify-between">
-    <span className="text-xs font-bold text-slate-600">Safe-Zone Radius:</span>
-    <span className="text-xs font-extrabold text-[#2F6FED]">
-      {homeLocation.safeZoneRadius} meters
-    </span>
-  </div>
-  <div className="flex items-center justify-between border-t border-[#CFE1FF] pt-2">
-    <span className="text-xs font-bold text-slate-600">Live Status:</span>
-    <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#2E7D32]">
-      <span className="w-2 h-2 rounded-full bg-emerald-500" />
-      Within Safe Boundary
-    </span>
-  </div>
-</div>
-
-{homeLocation.coordinates?.currentLat && (
-  <LiveLocationMap
-    currentLat={homeLocation.coordinates.currentLat}
-    currentLng={homeLocation.coordinates.currentLng}
-    lastUpdate={homeLocation.coordinates.lastUpdate}
-    homeLat={homeLocation.coordinates.lat}
-    homeLng={homeLocation.coordinates.lng}
-    safeZoneRadius={homeLocation.safeZoneRadius}
-  />
-)}
 
       {/* EMPTY STATE 2: FILTER / SEARCH YIELDS NO RESULTS */}
       {!assignedPatientsLoading && assignedPatients.length > 0 && filteredPatients.length === 0 && (
