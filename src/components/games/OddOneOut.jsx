@@ -16,37 +16,37 @@ export default function OddOneOut({ onComplete, onExit }) {
   const [correctCount, setCorrectCount] = useState(0);
   const [startTime] = useState(Date.now());
 
-  // Generate rounds scaled by level
+  // Generate rounds scaled by level with authentic, familiar regional items
   const rounds = [
     {
-      title: "Find the odd fruit",
+      title: "Find the different fruit",
       items: currentLevel === 1 
-        ? ['🍎', '🍎', '🍌', '🍎']
+        ? ['🍋', '🍋', '🍎', '🍋']
         : currentLevel === 2
-        ? ['🍎', '🍎', '🍎', '🍌', '🍎']
-        : ['🍎', '🍎', '🍎', '🍎', '🍌', '🍎'],
+        ? ['🍋', '🍋', '🍋', '🍎', '🍋']
+        : ['🍋', '🍋', '🍋', '🍋', '🍎', '🍋'],
       oddIndex: currentLevel === 1 ? 2 : currentLevel === 2 ? 3 : 4,
-      oddName: 'Banana 🍌',
+      oddName: 'Red Apple 🍎',
     },
     {
-      title: "Find the odd shape",
+      title: "Find the different household item",
       items: currentLevel === 1 
-        ? ['⭐', '🔵', '⭐', '⭐']
+        ? ['☕', '🔔', '☕', '☕']
         : currentLevel === 2
-        ? ['⭐', '⭐', '🔵', '⭐', '⭐']
-        : ['⭐', '⭐', '⭐', '🔵', '⭐', '⭐'],
+        ? ['☕', '☕', '🔔', '☕', '☕']
+        : ['☕', '☕', '☕', '🔔', '☕', '☕'],
       oddIndex: currentLevel === 1 ? 1 : currentLevel === 2 ? 2 : 3,
-      oddName: 'Blue Circle 🔵',
+      oddName: 'Brass Bell 🔔',
     },
     {
-      title: "Find the different item",
+      title: "Find the different nature item",
       items: currentLevel === 1 
-        ? ['🌸', '🌸', '☕', '🌸']
+        ? ['🌸', '🌸', '🎍', '🌸']
         : currentLevel === 2
-        ? ['🌸', '🌸', '🌸', '☕', '🌸']
-        : ['🌸', '🌸', '🌸', '🌸', '☕', '🌸'],
+        ? ['🌸', '🌸', '🌸', '🎍', '🌸']
+        : ['🌸', '🌸', '🌸', '🌸', '🎍', '🌸'],
       oddIndex: currentLevel === 1 ? 2 : currentLevel === 2 ? 3 : 4,
-      oddName: 'Tea Cup ☕',
+      oddName: 'Bamboo Shoot 🎍',
     }
   ];
 
@@ -100,11 +100,11 @@ export default function OddOneOut({ onComplete, onExit }) {
       instructionText="Which one is different? Tap the object that does not match the others."
     >
       <div className="space-y-6">
-        <div className="bg-[#EAF2FF] p-4 rounded-2xl border border-[#CFE1FF] text-center">
-          <h3 className="text-xl font-extrabold text-[#172B4D]">
+        <div className="bg-[#EBF5EE] p-4 rounded-2xl border border-[#D8E2D9] text-center">
+          <h3 className="text-xl font-extrabold text-[#162832]">
             Which one is different?
           </h3>
-          <p className="text-xs text-[#2F6FED] font-semibold mt-1">
+          <p className="text-xs text-[#1E5E3A] font-semibold mt-1">
             Tap the one object that looks different ({levelConfig.itemsInRow} items).
           </p>
         </div>
@@ -112,12 +112,12 @@ export default function OddOneOut({ onComplete, onExit }) {
         {/* Row of Items with Big Touch Targets */}
         <div className="flex flex-wrap items-center justify-center gap-3 py-6">
           {current.items.map((emoji, idx) => {
-            let style = 'bg-white border-2 border-slate-200 hover:border-[#2F6FED] shadow-sm';
+            let style = 'bg-white border-2 border-[#D8E2D9] hover:border-[#1E5E3A] shadow-sm';
             if (selectedIdx !== null) {
               if (idx === current.oddIndex) {
-                style = 'bg-[#E8F5E9] border-2 border-[#2E7D32] text-[#2E7D32] scale-105';
+                style = 'bg-[#EBF5EE] border-2 border-[#1E5E3A] text-[#1E5E3A] scale-105';
               } else if (idx === selectedIdx) {
-                style = 'bg-[#FFF8E1] border-2 border-amber-400 opacity-60';
+                style = 'bg-[#FFF6E5] border-2 border-[#D98A1E] opacity-60';
               }
             }
 
@@ -138,8 +138,8 @@ export default function OddOneOut({ onComplete, onExit }) {
         {feedback && (
           <div className={`p-4 rounded-2xl text-center text-sm font-bold animate-in fade-in duration-200 ${
             feedback.type === 'success'
-              ? 'bg-[#E8F5E9] text-[#2E7D32] border border-[#C8E6C9]'
-              : 'bg-[#FFF8E1] text-[#854D0E] border border-[#FDE68A]'
+              ? 'bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9]'
+              : 'bg-[#FFF6E5] text-[#D98A1E] border border-[#F3E2C4]'
           }`}>
             {feedback.text}
           </div>

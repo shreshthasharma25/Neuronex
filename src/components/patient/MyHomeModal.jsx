@@ -220,9 +220,9 @@ export default function MyHomeModal({ isOpen, onClose }) {
               </div>
             </div>
           ) : gpsStatus === 'REQUESTING' ? (
-            <div className="p-3.5 rounded-2xl bg-[#EAF2FF] border border-[#CFE1FF] text-left flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full bg-[#2F6FED] animate-ping flex-shrink-0" />
-              <p className="text-xs font-bold text-[#2F6FED]">
+            <div className="p-3.5 rounded-2xl bg-[#EBF5EE] border border-[#D8E2D9] text-left flex items-center gap-3">
+              <span className="w-3 h-3 rounded-full bg-[#1E5E3A] animate-ping flex-shrink-0" />
+              <p className="text-xs font-bold text-[#1E5E3A]">
                 {t('guideHome.gpsSearching')}
               </p>
             </div>
@@ -231,7 +231,7 @@ export default function MyHomeModal({ isOpen, onClose }) {
             <div className={`p-4 rounded-2xl border text-left flex items-center justify-between ${
               isAtHome 
                 ? 'bg-emerald-50 border-emerald-300 text-emerald-900' 
-                : 'bg-[#EAF2FF] border-[#CFE1FF] text-[#172B4D]'
+                : 'bg-[#EBF5EE] border-[#D8E2D9] text-[#162832]'
             }`}>
               <div className="flex items-center gap-3">
                 <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
@@ -251,15 +251,15 @@ export default function MyHomeModal({ isOpen, onClose }) {
           )}
 
           {/* Saved Home Destination Card */}
-          <div className="bg-white p-5 rounded-3xl border border-slate-200 text-left flex items-start gap-4 shadow-sm">
-            <div className="w-14 h-14 rounded-2xl bg-[#2F6FED] text-white flex items-center justify-center text-3xl shadow-sm flex-shrink-0">
+          <div className="bg-white p-5 rounded-3xl border border-[#D8E2D9] text-left flex items-start gap-4 shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-[#1E5E3A] text-white flex items-center justify-center text-3xl shadow-sm flex-shrink-0">
               🏠
             </div>
             <div>
-              <span className="text-[11px] font-extrabold text-[#2F6FED] uppercase tracking-wider">
+              <span className="text-[11px] font-extrabold text-[#1E5E3A] uppercase tracking-wider">
                 {home.name || (home.city ? `Home in ${home.city}` : "My Home")}
               </span>
-              <h4 className="text-xl font-extrabold text-[#172B4D] mt-0.5">
+              <h4 className="text-xl font-extrabold text-[#162832] mt-0.5">
                 {home.name || (home.city ? `Home in ${home.city}` : "My Home")}
               </h4>
               <p className="text-sm text-slate-600 font-semibold mt-1">
@@ -269,13 +269,13 @@ export default function MyHomeModal({ isOpen, onClose }) {
           </div>
 
           {/* Big Action Card */}
-          <div className="bg-gradient-to-br from-[#FFF8E1] to-[#FFFBEB] p-6 rounded-3xl border-2 border-[#FFC857] shadow-sm space-y-4">
-            <div className="w-16 h-16 rounded-full bg-[#FFC857] text-[#172B4D] flex items-center justify-center mx-auto text-3xl shadow-sm">
+          <div className="bg-gradient-to-br from-[#FFF6E5] via-[#FEF3D6] to-[#EBF5EE] p-6 rounded-3xl border-2 border-[#D98A1E] shadow-sm space-y-4">
+            <div className="w-16 h-16 rounded-full bg-[#D98A1E] text-white flex items-center justify-center mx-auto text-3xl shadow-sm">
               🚶
             </div>
 
             <div>
-              <h3 className="text-2xl font-extrabold text-[#172B4D] tracking-tight">
+              <h3 className="text-2xl font-extrabold text-[#162832] tracking-tight">
                 {isAtHome ? t('guideHome.atHome') : t('guideHome.guideMeButton')}
               </h3>
               <p className="text-sm text-slate-600 font-medium mt-1 max-w-xs mx-auto">
@@ -292,7 +292,7 @@ export default function MyHomeModal({ isOpen, onClose }) {
               variant="primary"
               size="xl"
               fullWidth
-              className="bg-[#2F6FED] hover:bg-[#255ecf] text-white text-xl font-black py-4 shadow-xl shadow-[#2F6FED]/30 active:scale-95 transition-all disabled:opacity-50"
+              className="bg-[#1E5E3A] hover:bg-[#164E30] text-white text-xl font-black py-4 shadow-xl shadow-[#1E5E3A]/30 active:scale-95 transition-all disabled:opacity-50"
             >
               {t('guideHome.guideMeButton')}
             </Button>
@@ -315,27 +315,27 @@ export default function MyHomeModal({ isOpen, onClose }) {
         /* STEP 2: REAL DYNAMIC WALKING NAVIGATION */
         <div className="space-y-5">
           {/* Live Header Status */}
-          <div className="bg-[#EAF2FF] px-4 py-2.5 rounded-2xl border border-[#CFE1FF] flex items-center justify-between">
+          <div className="bg-[#EBF5EE] px-4 py-2.5 rounded-2xl border border-[#C3E2CD] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-extrabold text-[#2F6FED] uppercase tracking-wider">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#1E5E3A] animate-pulse" />
+              <span className="text-xs font-extrabold text-[#1E5E3A] uppercase tracking-wider">
                 GPS
               </span>
             </div>
-            <span className="text-xs font-bold text-[#2F6FED] bg-white px-2.5 py-0.5 rounded-full border border-[#2F6FED]/20">
+            <span className="text-xs font-bold text-[#1E5E3A] bg-white px-2.5 py-0.5 rounded-full border border-[#C3E2CD]">
               {formatDistance(distanceToHome)}
             </span>
           </div>
 
           {/* Direction Indicator Visual */}
-          <div className="bg-gradient-to-b from-white to-[#FAFBFD] p-6 rounded-3xl border-2 border-slate-200 flex flex-col items-center text-center shadow-sm relative">
+          <div className="bg-gradient-to-b from-white to-[#FAF7F2] p-6 rounded-3xl border-2 border-[#D8E2D9] flex flex-col items-center text-center shadow-sm relative">
             {/* Dynamic Rotating Direction Arrow */}
             <div className="relative mb-4">
               <div 
                 className={`w-32 h-32 rounded-full flex items-center justify-center transition-transform duration-500 shadow-xl border-4 ${
                   isAtHome
-                    ? 'bg-[#E8F5E9] text-[#2E7D32] border-[#A5D6A7]'
-                    : 'bg-[#2F6FED] text-white border-[#EAF2FF] shadow-[#2F6FED]/30'
+                    ? 'bg-[#EBF5EE] text-[#1E5E3A] border-[#C3E2CD]'
+                    : 'bg-[#1E5E3A] text-white border-[#EBF5EE] shadow-[#1E5E3A]/30'
                 }`}
                 style={{
                   transform: isAtHome ? 'none' : `rotate(${compass.arrowAngle}deg)`
@@ -352,7 +352,7 @@ export default function MyHomeModal({ isOpen, onClose }) {
               <button
                 type="button"
                 onClick={handleSpeakInstruction}
-                className="absolute -bottom-1 -right-1 p-3 rounded-full bg-white text-[#2F6FED] shadow-md border border-slate-200 hover:bg-slate-50 touch-target"
+                className="absolute -bottom-1 -right-1 p-3 rounded-full bg-white text-[#1E5E3A] shadow-md border border-[#D8E2D9] hover:bg-[#EBF5EE] touch-target"
                 title="Hear direction aloud"
               >
                 <Volume2 className="w-5 h-5" />
@@ -360,7 +360,7 @@ export default function MyHomeModal({ isOpen, onClose }) {
             </div>
 
             {/* Instruction Text */}
-            <h3 className="text-2xl font-extrabold text-[#172B4D] tracking-tight mb-1">
+            <h3 className="text-2xl font-extrabold text-[#162832] tracking-tight mb-1">
               {isAtHome ? t('guideHome.atHome') : `Head ${compass.label}`}
             </h3>
 

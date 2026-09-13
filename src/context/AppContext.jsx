@@ -21,7 +21,7 @@ import {
   verifyCaregiverPatientAccess,
   subscribeToCaregiverPatients,
 } from "../services/supabaseService";
-import { calculatePatientStatus } from "../utils/patientStatusEngine";
+import { calculatePatientStatus, getPatientCognitiveScore } from "../utils/patientStatusEngine";
 
 import {
   translate,
@@ -129,6 +129,7 @@ export function AppProvider({ children }) {
 
   const [assignedPatients, setAssignedPatients] = useState(() => {
     try {
+      let list = [];
       const saved = localStorage.getItem(CAREGIVER_PATIENTS_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -138,12 +139,26 @@ export function AppProvider({ children }) {
           const map = {};
           demoPatients.forEach(p => { map[p.id] = p; });
           parsed.forEach(p => { map[p.id] = p; });
-          return Object.values(map);
+          list = Object.values(map);
+        } else {
+          list = getDemoCaregiverPatients();
         }
+      } else {
+        list = getDemoCaregiverPatients();
       }
-      return getDemoCaregiverPatients();
+
+      // Ensure every patient's status is directly calculated from their cognitive score
+      return list.map(p => ({
+        ...p,
+        cognitiveScore: getPatientCognitiveScore(p),
+        status: calculatePatientStatus(p),
+      }));
     } catch {
-      return getDemoCaregiverPatients();
+      return getDemoCaregiverPatients().map(p => ({
+        ...p,
+        cognitiveScore: getPatientCognitiveScore(p),
+        status: calculatePatientStatus(p),
+      }));
     }
   });
 
@@ -266,7 +281,7 @@ export function AppProvider({ children }) {
 
   // ── Sync localStorage (Per-patient isolated storage) ─────────────────────
   useEffect(() => {
-    if (!patientData || !patientData.profile) return;
+    if (!patientData || !patientData.profile || !patientData.profile.registered) return;
     const curPid = patientData.profile.patientId;
     if (curPid) {
       patientCacheRef.current[curPid] = patientData;
@@ -328,6 +343,7 @@ export function AppProvider({ children }) {
 
     // LocalStorage / Demo Mode Fallback
     try {
+      let loaded = [];
       if (isDemoMode) {
         const demoPatients = getDemoCaregiverPatients();
         const saved = localStorage.getItem(CAREGIVER_PATIENTS_KEY);
@@ -336,16 +352,25 @@ export function AppProvider({ children }) {
           const map = {};
           demoPatients.forEach(p => { map[p.id] = p; });
           parsed.forEach(p => { map[p.id] = p; });
-          const merged = Object.values(map);
-          setAssignedPatients(merged);
+          loaded = Object.values(map);
         } else {
-          setAssignedPatients(demoPatients);
-          localStorage.setItem(CAREGIVER_PATIENTS_KEY, JSON.stringify(demoPatients));
+          loaded = demoPatients;
         }
       } else {
         const saved = localStorage.getItem(CAREGIVER_PATIENTS_KEY);
-        setAssignedPatients(saved ? JSON.parse(saved) : []);
+        loaded = saved ? JSON.parse(saved) : [];
       }
+
+      const synchronized = loaded.map(p => ({
+        ...p,
+        cognitiveScore: getPatientCognitiveScore(p),
+        status: calculatePatientStatus(p),
+      }));
+
+      setAssignedPatients(synchronized);
+      try {
+        localStorage.setItem(CAREGIVER_PATIENTS_KEY, JSON.stringify(synchronized));
+      } catch {}
     } catch (e) {
       console.warn("Local caregiver patients load failed", e);
     } finally {
@@ -643,6 +668,11 @@ export function AppProvider({ children }) {
 
     // Local / Demo mode fallback
     const newPid = "pat-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+    const rawScore = patientFields.cognitiveScore !== undefined && patientFields.cognitiveScore !== null && patientFields.cognitiveScore !== ''
+      ? Number(patientFields.cognitiveScore)
+      : 75;
+    const scoreNum = !isNaN(rawScore) ? Math.max(0, Math.min(100, Math.round(rawScore))) : 75;
+
     const newSummary = {
       id: newPid,
       patientId: newPid,
@@ -652,6 +682,7 @@ export function AppProvider({ children }) {
       gender: patientFields.gender || "Female",
       language: patientFields.language || "English",
       avatar: patientFields.avatar || "",
+      cognitiveScore: scoreNum,
       profile: {
         fullName: patientFields.fullName,
         preferredName: patientFields.preferredName || patientFields.fullName,
@@ -663,18 +694,33 @@ export function AppProvider({ children }) {
         registered: true,
         patientId: newPid,
       },
-      homeLocation: { address: "", city: "", safeZoneRadius: 500 },
-      cognitiveStats: { gamesCompleted: 0, averageAccuracy: 0, history: [] },
-      latestGameName: null,
-      latestGameAccuracy: null,
-      recentActivity: "No exercise yet",
-      todayGamesCount: 0,
+      homeLocation: { address: "Residential Home", city: "Guwahati", safeZoneRadius: 500 },
+      cognitiveStats: {
+        currentLevel: scoreNum > 80 ? 2 : 1,
+        gamesCompleted: 1,
+        averageAccuracy: scoreNum,
+        averageResponseSecs: 14,
+        history: [
+          {
+            id: `h-${Date.now()}`,
+            gameName: "Cognitive Assessment",
+            date: "Today",
+            accuracy: scoreNum,
+            time: "1m 45s",
+            difficulty: scoreNum > 80 ? "Level 2" : "Level 1"
+          }
+        ]
+      },
+      latestGameName: "Cognitive Assessment",
+      latestGameAccuracy: scoreNum,
+      recentActivity: "Today",
+      todayGamesCount: 1,
       unresolvedAlertsCount: 0,
       medicinesCount: 0,
       medicinesTakenCount: 0,
       alerts: [],
       medicines: [],
-      brainExercise: { dailyCompleted: false },
+      brainExercise: { dailyCompleted: true },
     };
     newSummary.status = calculatePatientStatus(newSummary);
 
@@ -690,7 +736,7 @@ export function AppProvider({ children }) {
       places: [],
       family: [],
       emergencyContacts: [],
-      brainExercise: { dailyCompleted: false, scheduledTime: "10:00 AM", todaysGames: ["memory-twin", "picture-memory"], dayCycle: 1 }
+      brainExercise: { dailyCompleted: true, scheduledTime: "10:00 AM", todaysGames: ["memory-twin", "picture-memory"], dayCycle: 1 }
     };
     patientCacheRef.current[newPid] = fullPatientData;
     try {
@@ -1137,44 +1183,57 @@ export function AppProvider({ children }) {
 
   // ── Role-based Registration & Multi-User Linking ────────────────────────
   const registerPatientAsSelf = useCallback((patientFields) => {
-    const pid = patientId || ("pat-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6));
+    const pid = "pat-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+    try {
+      localStorage.setItem(PATIENT_ID_KEY, pid);
+    } catch {}
+
+    const fields = patientFields?.profile ? patientFields.profile : (patientFields || {});
     const user = {
       role: "patient",
-      name: patientFields.preferredName || patientFields.fullName || "Patient",
+      name: fields.preferredName || fields.fullName || "Patient",
       relationOrTitle: "Self",
-      phone: patientFields.phone || ""
+      phone: fields.phone || ""
     };
     setPatientIdState(pid);
     setCurrentUser(user);
     setUserRole("patient");
     setIsDemoMode(false);
-    setPatientData(prev => {
-      const updated = {
-        ...prev,
-        patientId: pid,
-        profile: {
-          ...prev.profile,
-          ...patientFields,
-          registered: true,
-          patientId: pid
-        }
-      };
-      upsertPatient(pid, updated.profile, updated.homeLocation,
-        updated.importantInfo?.find(i => i.label.toLowerCase().includes("doctor")),
-        updated.cognitiveStats?.currentLevel);
-      return updated;
-    });
+
+    // Build fresh patient from emptyPatientData defaults
+    const newBase = JSON.parse(JSON.stringify(emptyPatientData));
+    const newPatient = {
+      ...newBase,
+      patientId: pid,
+      profile: {
+        ...newBase.profile,
+        ...fields,
+        registered: true,
+        patientId: pid
+      },
+      family: patientFields?.family?.length ? patientFields.family : newBase.family,
+      linkedCaregivers: patientFields?.linkedCaregivers?.length ? patientFields.linkedCaregivers : newBase.linkedCaregivers,
+    };
+
+    setPatientData(newPatient);
+    upsertPatient(pid, newPatient.profile, newPatient.homeLocation,
+      newPatient.importantInfo?.find(i => i.label.toLowerCase().includes("doctor")),
+      newPatient.cognitiveStats?.currentLevel);
     setIsOnboarded(true);
     sounds.playSuccess();
-  }, [patientId]);
+  }, []);
 
   const registerPatientAsFamily = useCallback(({ patientFields, familyMemberInfo, targetPatientId }) => {
-    const pid = targetPatientId || patientId || ("pat-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6));
+    const pid = targetPatientId || ("pat-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6));
+    try {
+      localStorage.setItem(PATIENT_ID_KEY, pid);
+    } catch {}
+
     const user = {
       role: "family",
-      name: familyMemberInfo.name || "Family Member",
-      relationOrTitle: familyMemberInfo.relation || "Family",
-      phone: familyMemberInfo.phone || ""
+      name: familyMemberInfo?.name || "Family Member",
+      relationOrTitle: familyMemberInfo?.relation || "Family",
+      phone: familyMemberInfo?.phone || ""
     };
     const newLinkedFamily = {
       id: "fam-link-" + Date.now(),
@@ -1187,47 +1246,54 @@ export function AppProvider({ children }) {
     setCurrentUser(user);
     setUserRole("family");
     setIsDemoMode(false);
-    setPatientData(prev => {
-      const updatedProfile = patientFields
-        ? { ...prev.profile, ...patientFields, registered: true, patientId: pid }
-        : { ...prev.profile, registered: true, patientId: pid };
 
-      const alreadyInList = prev.family.some(f => f.name.toLowerCase() === user.name.toLowerCase());
-      const updatedFamilyList = alreadyInList ? prev.family : [
-        ...prev.family,
-        {
-          id: "fam-" + Date.now(),
-          name: user.name,
-          relation: user.relationOrTitle,
-          phone: user.phone,
-          photo: ""
-        }
-      ];
+    const fields = patientFields?.profile ? patientFields.profile : (patientFields || {});
+    const newBase = JSON.parse(JSON.stringify(emptyPatientData));
 
-      const updated = {
-        ...prev,
-        patientId: pid,
-        profile: updatedProfile,
-        family: updatedFamilyList,
-        linkedFamilyMembers: [...(prev.linkedFamilyMembers || []), newLinkedFamily]
-      };
-      upsertPatient(pid, updated.profile, updated.homeLocation,
-        updated.importantInfo?.find(i => i.label.toLowerCase().includes("doctor")),
-        updated.cognitiveStats?.currentLevel);
-      return updated;
-    });
+    const initialFamilyList = user.name ? [
+      {
+        id: "fam-" + Date.now(),
+        name: user.name,
+        relation: user.relationOrTitle,
+        phone: user.phone,
+        photo: "",
+        isEmergencyContact: true
+      }
+    ] : [];
+
+    const newPatient = {
+      ...newBase,
+      patientId: pid,
+      profile: {
+        ...newBase.profile,
+        ...fields,
+        registered: true,
+        patientId: pid
+      },
+      family: initialFamilyList,
+      linkedFamilyMembers: [newLinkedFamily]
+    };
+
+    setPatientData(newPatient);
+    upsertPatient(pid, newPatient.profile, newPatient.homeLocation,
+      newPatient.importantInfo?.find(i => i.label.toLowerCase().includes("doctor")),
+      newPatient.cognitiveStats?.currentLevel);
     setIsOnboarded(true);
     sounds.playSuccess();
-  }, [patientId]);
+  }, []);
 
   const registerPatientAsCaregiver = useCallback(({ patientFields, caregiverInfo, targetPatientId }) => {
-    const pid = targetPatientId || patientId || ("pat-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6));
+    const pid = targetPatientId || ("pat-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6));
+    try {
+      localStorage.setItem(PATIENT_ID_KEY, pid);
+    } catch {}
+
     const user = {
       id: caregiverId,
       role: "caregiver",
-      name: caregiverInfo.name || "Caregiver",
-      relationOrTitle: caregiverInfo.title || "Primary Caregiver",
-      phone: caregiverInfo.phone || ""
+      name: caregiverInfo?.name || "Caregiver",
+      relationOrTitle: caregiverInfo?.title || "Primary Caregiver",
+      phone: caregiverInfo?.phone || ""
     };
     const newLinkedCaregiver = {
       id: "cg-link-" + Date.now(),
@@ -1241,26 +1307,30 @@ export function AppProvider({ children }) {
     setUserRole("caregiver");
     setIsDemoMode(false);
     linkPatientToCaregiverDB(caregiverId, pid);
-    setPatientData(prev => {
-      const updatedProfile = patientFields
-        ? { ...prev.profile, ...patientFields, registered: true, patientId: pid }
-        : { ...prev.profile, registered: true, patientId: pid };
 
-      const updated = {
-        ...prev,
-        patientId: pid,
-        profile: updatedProfile,
-        linkedCaregivers: [...(prev.linkedCaregivers || []), newLinkedCaregiver]
-      };
-      upsertPatient(pid, updated.profile, updated.homeLocation,
-        updated.importantInfo?.find(i => i.label.toLowerCase().includes("doctor")),
-        updated.cognitiveStats?.currentLevel);
-      return updated;
-    });
+    const fields = patientFields?.profile ? patientFields.profile : (patientFields || {});
+    const newBase = JSON.parse(JSON.stringify(emptyPatientData));
+
+    const newPatient = {
+      ...newBase,
+      patientId: pid,
+      profile: {
+        ...newBase.profile,
+        ...fields,
+        registered: true,
+        patientId: pid
+      },
+      linkedCaregivers: [newLinkedCaregiver]
+    };
+
+    setPatientData(newPatient);
+    upsertPatient(pid, newPatient.profile, newPatient.homeLocation,
+      newPatient.importantInfo?.find(i => i.label.toLowerCase().includes("doctor")),
+      newPatient.cognitiveStats?.currentLevel);
     refreshCaregiverPatients();
     setIsOnboarded(true);
     sounds.playSuccess();
-  }, [patientId, caregiverId, refreshCaregiverPatients]);
+  }, [caregiverId, refreshCaregiverPatients]);
 
   const connectExistingPatient = useCallback(async ({ targetPatientId, role, userInfo }) => {
     if (!targetPatientId) return false;
@@ -1313,6 +1383,11 @@ export function AppProvider({ children }) {
     setIsOnboarded(false);
     setActiveGame(null);
     setGameResult(null);
+    setPatientData(emptyPatientData);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem("neuronex_data_v2");
+    } catch {}
     sounds.playGentleTap();
   }, []);
 

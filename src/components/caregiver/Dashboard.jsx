@@ -5,7 +5,7 @@ import { useApp } from '../../context/AppContext';
 import PatientSummaryBar from './PatientSummaryBar';
 import PatientCard from './PatientCard';
 import AddPatientModal from './AddPatientModal';
-import { calculateDashboardSummary } from '../../utils/patientStatusEngine';
+import { calculateDashboardSummary, calculatePatientStatus, getPatientCognitiveScore } from '../../utils/patientStatusEngine';
 import {
   Pill,
   Brain,
@@ -27,6 +27,15 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { sounds } from '../../utils/soundPlayer';
+import {
+  LivingRootBridgeHeader,
+  TraditionalGamchaBorder,
+  TribalGeometricDivider,
+  BambooWeaveDivider,
+  OrchidFloraIcon,
+  TeaLeafSprig,
+  RegionalTextileBorder
+} from '../common/CulturalMotifs';
 
 export default function Dashboard({ onNavigateTab }) {
   const {
@@ -58,7 +67,7 @@ export default function Dashboard({ onNavigateTab }) {
     return calculateDashboardSummary(assignedPatients);
   }, [assignedPatients]);
 
-  // Filter patients by search text and status
+  // Filter patients by search text and status (single source of truth: cognitive score)
   const filteredPatients = useMemo(() => {
     return assignedPatients.filter(patient => {
       // Name search
@@ -68,37 +77,38 @@ export default function Dashboard({ onNavigateTab }) {
         (patient.preferredName && patient.preferredName.toLowerCase().includes(q)) ||
         (patient.id && patient.id.toLowerCase().includes(q));
 
-      // Status filter
-      const patientStatusLevel = patient.status?.level || 'stable';
+      // Status filter strictly calculated from cognitive score
+      const statusObj = calculatePatientStatus(patient);
       let statusMatch = true;
       if (statusFilter === 'stable') {
-        statusMatch = patientStatusLevel === 'stable';
+        statusMatch = statusObj.label === 'Stable';
       } else if (statusFilter === 'needs_attention') {
-        statusMatch = patientStatusLevel === 'needs_attention';
-      } else if (statusFilter === 'high_attention') {
-        statusMatch = patientStatusLevel === 'high_attention';
+        statusMatch = statusObj.label === 'Needs Attention';
+      } else if (statusFilter === 'high_attention' || statusFilter === 'higher_attention') {
+        statusMatch = statusObj.label === 'Higher Attention';
       }
 
       return nameMatch && statusMatch;
     });
   }, [assignedPatients, searchQuery, statusFilter]);
 
-  // Counts for status filters
+  // Counts for status filters directly computed from cognitive scores
   const filterCounts = useMemo(() => {
     let stable = 0;
     let needs = 0;
-    let high = 0;
+    let higher = 0;
     assignedPatients.forEach(p => {
-      const lvl = p.status?.level || 'stable';
-      if (lvl === 'stable') stable++;
-      else if (lvl === 'needs_attention') needs++;
-      else if (lvl === 'high_attention') high++;
+      const statusObj = calculatePatientStatus(p);
+      if (statusObj.label === 'Stable') stable++;
+      else if (statusObj.label === 'Needs Attention') needs++;
+      else if (statusObj.label === 'Higher Attention') higher++;
     });
     return {
       all: assignedPatients.length,
       stable,
       needs_attention: needs,
-      high_attention: high,
+      high_attention: higher,
+      higher_attention: higher,
     };
   }, [assignedPatients]);
 
@@ -120,7 +130,7 @@ export default function Dashboard({ onNavigateTab }) {
                 sounds.playGentleTap();
                 backToAllPatients();
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold text-xs transition-colors border border-blue-200 shadow-xs touch-target"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#EBF5EE] hover:bg-[#D8E2D9] text-[#1E5E3A] font-extrabold text-xs transition-colors border border-[#D8E2D9] shadow-xs touch-target"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>← Back to All Patients</span>
@@ -135,7 +145,7 @@ export default function Dashboard({ onNavigateTab }) {
               ⚠️
             </div>
             <div>
-              <h3 className="text-lg font-extrabold text-[#172B4D]">
+              <h3 className="text-lg font-extrabold text-[#162832]">
                 Unable to Load Patient Portal
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto mt-1 font-medium leading-relaxed">
@@ -156,7 +166,7 @@ export default function Dashboard({ onNavigateTab }) {
               <button
                 type="button"
                 onClick={() => selectPatient(selectedPatientId)}
-                className="px-4 py-2.5 rounded-xl bg-[#2F6FED] hover:bg-[#2557be] text-white text-xs font-bold transition-colors touch-target"
+                className="px-4 py-2.5 rounded-xl bg-[#1E5E3A] hover:bg-[#164E30] text-white text-xs font-bold transition-colors touch-target"
               >
                 Retry Loading
               </button>
@@ -173,31 +183,31 @@ export default function Dashboard({ onNavigateTab }) {
       return (
         <div className="space-y-4 sm:space-y-6 pb-20 animate-in fade-in duration-200">
           {/* Breadcrumb Skeleton */}
-          <div className="p-3 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between gap-2">
+          <div className="p-3 sm:p-4 rounded-2xl bg-white border border-[#D8E2D9] shadow-xs flex items-center justify-between gap-2">
             <button
               type="button"
               onClick={() => {
                 sounds.playGentleTap();
                 backToAllPatients();
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold text-xs transition-colors border border-blue-200 shadow-xs touch-target"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#EBF5EE] hover:bg-[#D8E2D9] text-[#1E5E3A] font-extrabold text-xs transition-colors border border-[#D8E2D9] shadow-xs touch-target"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>← Back to All Patients</span>
             </button>
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 border-2 border-[#2F6FED] border-t-transparent rounded-full animate-spin" />
-              <span className="px-2 py-0.5 rounded-md bg-[#EAF2FF] text-[#2F6FED] font-mono font-bold text-xs truncate">
+              <span className="w-3 h-3 border-2 border-[#1E5E3A] border-t-transparent rounded-full animate-spin" />
+              <span className="px-2 py-0.5 rounded-md bg-[#EBF5EE] text-[#1E5E3A] font-mono font-bold text-xs truncate">
                 {selectedPatientId}
               </span>
             </div>
           </div>
 
           {/* Loading Indicator Banner */}
-          <div className="p-4 rounded-2xl bg-[#EAF2FF] border border-[#CFE1FF] flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full border-2 border-[#2F6FED] border-t-transparent animate-spin flex-shrink-0" />
+          <div className="p-4 rounded-2xl bg-[#EBF5EE] border border-[#D8E2D9] flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full border-2 border-[#1E5E3A] border-t-transparent animate-spin flex-shrink-0" />
             <div>
-              <p className="text-xs font-extrabold text-[#2F6FED]">
+              <p className="text-xs font-extrabold text-[#1E5E3A]">
                 Loading Patient Portal for {displayName}...
               </p>
               <p className="text-[11px] text-slate-500 font-medium">
@@ -243,77 +253,100 @@ export default function Dashboard({ onNavigateTab }) {
 
     return (
       <div className="space-y-4 sm:space-y-6 pb-20 animate-in fade-in duration-200">
-        {/* Navigation Breadcrumb / Return to All Patients Bar */}
-        <div className="p-3 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              sounds.playGentleTap();
-              backToAllPatients();
-            }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold text-xs transition-colors border border-blue-200 shadow-xs touch-target"
-            title="Return to Caregiver Dashboard showing all patients"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>← Back to All Patients</span>
-          </button>
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[11px] font-mono text-slate-400 hidden sm:inline">
-              Selected ID:
-            </span>
-            <span className="px-2 py-0.5 rounded-md bg-[#EAF2FF] text-[#2F6FED] font-mono font-bold text-xs truncate">
-              {selectedPatientId}
-            </span>
-          </div>
-        </div>
-
-        {/* Patient Profile Card */}
-        <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            {profile?.avatar ? (
-              <img
-                src={profile.avatar}
-                alt={profile.fullName}
-                className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl object-cover border-2 border-[#EAF2FF] flex-shrink-0"
-              />
-            ) : (
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-[#EAF2FF] border-2 border-[#2F6FED]/20 flex items-center justify-center text-[#2F6FED] flex-shrink-0">
-                <User className="w-7 h-7 sm:w-8 sm:h-8" />
+        {/* Living Root Bridges of Meghalaya Landmark Header for Patient Details */}
+        <LivingRootBridgeHeader className="rounded-3xl shadow-sm">
+          <div className="flex flex-col gap-3">
+            {/* Top Row: Landmark Badge & Back Button */}
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-[#D98A1E]/50 text-[#FED7AA] text-xs font-black shadow-xs">
+                <OrchidFloraIcon className="w-4 h-4" />
+                <span>Living Root Bridges of Meghalaya • Cherrapunji Gorge</span>
               </div>
-            )}
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <h2 className="text-base sm:text-xl font-extrabold text-[#172B4D] truncate">
-                  {profile?.fullName || 'Patient'}
-                </h2>
-                <span className="px-2 py-0.5 rounded-full bg-[#FFF8E1] text-[#B45309] text-[10px] sm:text-xs font-bold">
-                  Called "{profile?.preferredName || 'Maa'}"
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playGentleTap();
+                    backToAllPatients();
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/95 hover:bg-white text-[#1E5E3A] font-extrabold text-xs transition-colors border border-white/60 shadow-xs touch-target"
+                  title="Return to Caregiver Dashboard showing all patients"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>← Back to All Patients</span>
+                </button>
+                <span className="px-2 py-0.5 rounded-md bg-black/40 border border-white/20 text-[#A7F3D0] font-mono font-bold text-xs truncate">
+                  {selectedPatientId}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-semibold truncate mt-0.5">
-                {profile?.age ? `${profile.age} yrs` : 'Age pending'} • {profile?.gender || 'Female'} • {profile?.language || 'English'}
-              </p>
-              <p className="text-xs text-[#2F6FED] font-bold truncate mt-0.5">
-                📍 Home: {homeLocation?.address || 'Address pending'}
-              </p>
+            </div>
+
+            {/* Patient Profile Card inside Misty White Frame with Terracotta Red Accent */}
+            <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-md border-2 border-[#C3E2CD] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[#162832] relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#BA1A1A] via-[#D98A1E] to-[#1E5E3A]" />
+
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                {profile?.avatar ? (
+                  <img
+                    src={profile.avatar}
+                    alt={profile.fullName}
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl object-cover border-2 border-[#1E5E3A]/20 shadow-xs flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-[#EBF5EE] border-2 border-[#1E5E3A]/20 flex items-center justify-center text-[#1E5E3A] flex-shrink-0">
+                    <User className="w-7 h-7 sm:w-8 sm:h-8" />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <h2 className="text-base sm:text-xl font-extrabold text-[#162832] font-serif truncate">
+                      {profile?.fullName || 'Patient'}
+                    </h2>
+                    <span className="px-2 py-0.5 rounded-full bg-[#FFF6E5] text-[#B37012] border border-[#F7D59A] text-[10px] sm:text-xs font-extrabold">
+                      Called "{profile?.preferredName || 'Maa'}"
+                    </span>
+                    {(() => {
+                      const selStatus = calculatePatientStatus(patientData);
+                      const selScore = getPatientCognitiveScore(patientData);
+                      return (
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-extrabold border ${selStatus.badgeClass}`}
+                          title={selStatus.reason}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${selStatus.dotClass}`} />
+                          <span>{selStatus.label} ({selScore}%)</span>
+                        </span>
+                      );
+                    })()}
+                  </div>
+                  <p className="text-xs text-slate-500 font-semibold truncate mt-0.5">
+                    {profile?.age ? `${profile.age} yrs` : 'Age pending'} • {profile?.gender || 'Female'} • {profile?.language || 'English'}
+                  </p>
+                  <p className="text-xs text-[#1E5E3A] font-bold truncate mt-0.5 flex items-center gap-1">
+                    <span>📍</span>
+                    <span>Home: {homeLocation?.address || 'Address pending'}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={() => onNavigateTab('safety')}
+                  className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#EBF5EE] hover:bg-[#D8E2D9] text-[#1E5E3A] border border-[#C3E2CD] text-xs font-extrabold transition-all w-full sm:w-auto touch-target shadow-2xs"
+                >
+                  <span>Safety & Location</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
-
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <button
-              onClick={() => onNavigateTab('safety')}
-              className="flex items-center justify-center gap-1 px-3.5 py-2 rounded-xl bg-[#EAF2FF] hover:bg-[#d5e6ff] text-[#2F6FED] text-xs font-bold transition-all w-full sm:w-auto touch-target"
-            >
-              <span>Safety & Location</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
+        </LivingRootBridgeHeader>
 
         {/* TODAY'S STATUS OVERVIEW GRID FOR SELECTED PATIENT */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-extrabold text-[#172B4D] uppercase tracking-wider text-xs">
+            <h3 className="text-base font-extrabold text-[#162832] uppercase tracking-wider text-xs">
               Today's Care Status: {profile?.preferredName || profile?.fullName || 'Patient'}
             </h3>
             <span className="text-xs text-slate-400 font-semibold">
@@ -325,7 +358,7 @@ export default function Dashboard({ onNavigateTab }) {
             {/* Medicines Card */}
             <div 
               onClick={() => onNavigateTab('medicines')}
-              className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 shadow-sm cursor-pointer hover:border-[#2F6FED] transition-all"
+              className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-white border border-[#D8E2D9] shadow-sm cursor-pointer hover:border-[#1E5E3A] transition-all"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-lg sm:text-xl">
@@ -333,7 +366,7 @@ export default function Dashboard({ onNavigateTab }) {
                 </div>
                 <span className="text-[10px] sm:text-xs font-bold text-slate-400">Daily</span>
               </div>
-              <span className="text-xl sm:text-2xl font-extrabold text-[#172B4D] block">
+              <span className="text-xl sm:text-2xl font-extrabold text-[#162832] block">
                 {medsTaken}/{totalMeds}
               </span>
               <span className="text-[11px] sm:text-xs font-bold text-slate-500">
@@ -350,19 +383,19 @@ export default function Dashboard({ onNavigateTab }) {
             {/* Brain Exercise Card */}
             <div 
               onClick={() => onNavigateTab('monitoring')}
-              className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 shadow-sm cursor-pointer hover:border-[#2F6FED] transition-all"
+              className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-white border border-[#D8E2D9] shadow-sm cursor-pointer hover:border-[#1E5E3A] transition-all"
             >
               <div className="flex items-center justify-between mb-2">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 text-[#2F6FED] flex items-center justify-center text-lg sm:text-xl">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#EBF5EE] text-[#1E5E3A] flex items-center justify-center text-lg sm:text-xl">
                   🧠
                 </div>
                 <span className={`text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full ${
-                  brainExercise?.dailyCompleted ? 'bg-[#E8F5E9] text-[#2E7D32]' : 'bg-slate-100 text-slate-600'
+                  brainExercise?.dailyCompleted ? 'bg-[#EBF5EE] text-[#1E5E3A]' : 'bg-slate-100 text-slate-600'
                 }`}>
                   {brainExercise?.dailyCompleted ? 'Done' : 'Pending'}
                 </span>
               </div>
-              <span className="text-xl sm:text-2xl font-extrabold text-[#172B4D] block">
+              <span className="text-xl sm:text-2xl font-extrabold text-[#162832] block">
                 {brainExercise?.dailyCompleted ? "Done" : "Pending"}
               </span>
               <span className="text-[11px] sm:text-xs font-bold text-slate-500">
@@ -370,7 +403,7 @@ export default function Dashboard({ onNavigateTab }) {
               </span>
               <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
                 <div
-                  className="bg-[#2F6FED] h-full rounded-full"
+                  className="bg-[#1E5E3A] h-full rounded-full"
                   style={{ width: brainExercise?.dailyCompleted ? '100%' : '30%' }}
                 />
               </div>
@@ -390,7 +423,7 @@ export default function Dashboard({ onNavigateTab }) {
                       onClick={() => setDifficultyLevel(lvl)}
                       className={`px-1 sm:px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-black transition-all ${
                         currentLevel === lvl
-                          ? 'bg-[#2F6FED] text-white shadow-xs'
+                          ? 'bg-[#1E5E3A] text-white shadow-xs'
                           : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                       }`}
                       title={`Set Level ${lvl}`}
@@ -405,7 +438,7 @@ export default function Dashboard({ onNavigateTab }) {
             {/* To-Do Completed Card */}
             <div 
               onClick={() => onNavigateTab('todos')}
-              className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 shadow-sm cursor-pointer hover:border-[#2F6FED] transition-all"
+              className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-white border border-[#D8E2D9] shadow-sm cursor-pointer hover:border-[#1E5E3A] transition-all"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-lg sm:text-xl">
@@ -413,7 +446,7 @@ export default function Dashboard({ onNavigateTab }) {
                 </div>
                 <span className="text-[10px] sm:text-xs font-bold text-slate-400">Routine</span>
               </div>
-              <span className="text-xl sm:text-2xl font-extrabold text-[#172B4D] block">
+              <span className="text-xl sm:text-2xl font-extrabold text-[#162832] block">
                 {todosCompleted}/{totalTodos}
               </span>
               <span className="text-[11px] sm:text-xs font-bold text-slate-500">
@@ -442,7 +475,7 @@ export default function Dashboard({ onNavigateTab }) {
                   <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
                 )}
               </div>
-              <span className="text-xl sm:text-2xl font-extrabold text-[#172B4D] block">
+              <span className="text-xl sm:text-2xl font-extrabold text-[#162832] block">
                 {pendingAlerts.length}
               </span>
               <span className="text-[11px] sm:text-xs font-bold text-slate-500">
@@ -455,18 +488,21 @@ export default function Dashboard({ onNavigateTab }) {
           </div>
         </div>
 
-        {/* Quick Launch Care Schedule */}
-        <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#2F6FED] to-[#1E4EB8] text-white shadow-lg shadow-[#2F6FED]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-white/20 text-[10px] sm:text-xs font-bold mb-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#FFC857]" />
-              <span>Caregiver Daily Care</span>
+        {/* Traditional Bamboo Weave Divider */}
+        <BambooWeaveDivider height={6} className="my-1" />
+
+        {/* Quick Launch Care Schedule: Himalayan Sanctuary Theme with Gamcha Border */}
+        <div className="p-5 sm:p-7 rounded-3xl sm:rounded-4xl bg-gradient-to-br from-[#1E5E3A] via-[#164E30] to-[#0E351F] text-white shadow-xl shadow-[#1E5E3A]/20 border-2 border-[#D98A1E]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden">
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-[#E5C158] text-[10px] sm:text-xs font-extrabold uppercase tracking-wider mb-2 border border-white/20 backdrop-blur-xs">
+              <TeaLeafSprig className="w-3.5 h-3.5" color="#E5C158" />
+              <span>Caregiver Sanctuary Hub</span>
             </div>
-            <h3 className="text-lg sm:text-2xl font-extrabold tracking-tight">
-              Manage {profile?.preferredName || 'Patient'}'s Care & Schedule
+            <h3 className="text-xl sm:text-2xl font-extrabold font-serif tracking-tight">
+              Manage {profile?.preferredName || 'Patient'}'s Daily Care & Rhythm
             </h3>
-            <p className="text-xs sm:text-sm text-blue-100 max-w-md font-medium mt-0.5">
-              Configure medicines, daily checklist, scheduled routine, and safe-zone perimeter.
+            <p className="text-xs sm:text-sm text-emerald-100 max-w-md font-medium mt-1">
+              Configure medicines, morning rituals, daily checklist, and geo-safe perimeter.
             </p>
           </div>
 
@@ -474,23 +510,26 @@ export default function Dashboard({ onNavigateTab }) {
             onClick={() => onNavigateTab('medicines')}
             variant="yellow"
             size="lg"
-            className="font-extrabold text-sm sm:text-base flex-shrink-0 w-full sm:w-auto text-center justify-center"
+            className="font-extrabold text-sm sm:text-base flex-shrink-0 w-full sm:w-auto text-center justify-center relative z-10 shadow-md rounded-2xl"
           >
             MANAGE MEDICINES →
           </Button>
         </div>
+
+        {/* North-Eastern Tribal Geometric Divider */}
+        <TribalGeometricDivider height={8} className="my-1" />
 
         {/* RECENT ACTIVITY & LOCATION SNAPSHOT */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Recent Games Played */}
           <Card variant="white" className="p-5">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="text-base font-extrabold text-[#172B4D]">
+              <h4 className="text-base font-extrabold text-[#162832]">
                 Recent Cognitive Activity
               </h4>
               <button
                 onClick={() => onNavigateTab('monitoring')}
-                className="text-xs font-bold text-[#2F6FED] hover:underline"
+                className="text-xs font-bold text-[#1E5E3A] hover:underline"
               >
                 Full Analytics →
               </button>
@@ -510,7 +549,7 @@ export default function Dashboard({ onNavigateTab }) {
                     <div className="flex items-center gap-2.5">
                       <span className="text-lg">🧠</span>
                       <div>
-                        <span className="font-bold text-[#172B4D] block">
+                        <span className="font-bold text-[#162832] block">
                           {item.gameName}
                         </span>
                         <span className="text-xs text-slate-500">
@@ -518,8 +557,8 @@ export default function Dashboard({ onNavigateTab }) {
                         </span>
                       </div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full bg-[#E8F5E9] text-[#2E7D32] text-xs font-extrabold">
-                      {item.accuracy}% Accuracy
+                    <span className="text-xs font-extrabold px-2.5 py-1 rounded-full bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9]">
+                      {item.accuracy}%
                     </span>
                   </div>
                 ))}
@@ -530,31 +569,31 @@ export default function Dashboard({ onNavigateTab }) {
           {/* Safety & Location Status */}
           <Card variant="white" className="p-5">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="text-base font-extrabold text-[#172B4D]">
+              <h4 className="text-base font-extrabold text-[#162832]">
                 Home & Safe Zone Monitor
               </h4>
               <button
                 onClick={() => onNavigateTab('safety')}
-                className="text-xs font-bold text-[#2F6FED] hover:underline"
+                className="text-xs font-bold text-[#1E5E3A] hover:underline"
               >
                 Edit Safe Zone →
               </button>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#EAF2FF] border border-[#CFE1FF] space-y-2">
+            <div className="p-4 rounded-2xl bg-[#EBF5EE] border border-[#D8E2D9] space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-600">Registered Home:</span>
-                <span className="text-xs font-bold text-[#172B4D] text-right">
+                <span className="text-xs font-bold text-[#162832] text-right">
                   {homeLocation?.address || 'Not specified'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-600">Safe-Zone Radius:</span>
-                <span className="text-xs font-extrabold text-[#2F6FED]">
+                <span className="text-xs font-extrabold text-[#1E5E3A]">
                   {homeLocation?.safeZoneRadius || 500} meters
                 </span>
               </div>
-              <div className="flex items-center justify-between border-t border-[#CFE1FF] pt-2">
+              <div className="flex items-center justify-between border-t border-[#D8E2D9] pt-2">
                 <span className="text-xs font-bold text-slate-600">Live Status:</span>
                 <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#2E7D32]">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -582,6 +621,11 @@ export default function Dashboard({ onNavigateTab }) {
             View as Patient 🧓
           </Button>
         </div>
+
+        {/* Authentic Assamese Traditional Gamcha Border with Fringes */}
+        <div className="pt-2">
+          <TraditionalGamchaBorder height={12} showFringes={true} />
+        </div>
       </div>
     );
   }
@@ -591,6 +635,35 @@ export default function Dashboard({ onNavigateTab }) {
   // ═══════════════════════════════════════════════════════════════════════════
   return (
     <div className="space-y-4 sm:space-y-6 pb-20">
+      {/* Living Root Bridges of Meghalaya Hero Landmark Header for Multi-Patient Portal */}
+      <LivingRootBridgeHeader className="rounded-3xl shadow-md">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-[#D98A1E]/50 text-[#FED7AA] text-xs font-black shadow-xs">
+              <OrchidFloraIcon className="w-4 h-4" />
+              <span>Living Root Bridges of Meghalaya • Living Network of Care</span>
+            </div>
+            <h2 className="text-xl sm:text-3xl font-black text-white font-serif tracking-tight">
+              Caregiver Sanctuary & Patient Oversight
+            </h2>
+            <p className="text-xs sm:text-sm text-emerald-100 max-w-xl font-medium leading-relaxed">
+              Intertwined with the enduring strength of Meghalaya's living root bridges—nurturing cognitive resilience, safe boundaries, and timely rhythms.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="p-3 sm:p-4 rounded-2xl bg-black/35 backdrop-blur-md border border-white/20 text-right">
+              <span className="text-[10px] sm:text-xs font-bold text-emerald-200 uppercase tracking-wider block">
+                Care Circle
+              </span>
+              <span className="text-base sm:text-xl font-extrabold text-[#FED7AA] font-serif flex items-center justify-end gap-1.5">
+                <span>{assignedPatients.length} Active Patients</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </LivingRootBridgeHeader>
+
       {/* Unauthorized Access Alert (if URL tampering or permission check fails) */}
       {accessDeniedNotice && (
         <div className="p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-800 flex items-start justify-between gap-3 animate-in fade-in">
@@ -636,7 +709,7 @@ export default function Dashboard({ onNavigateTab }) {
               placeholder="Search patients by name or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 sm:py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-xs sm:text-sm text-[#172B4D] outline-none transition-colors"
+              className="w-full pl-10 pr-4 py-2 sm:py-2.5 rounded-xl border border-[#D8E2D9] focus:border-[#1E5E3A] text-xs sm:text-sm text-[#162832] outline-none transition-colors"
             />
             {searchQuery && (
               <button
@@ -655,10 +728,10 @@ export default function Dashboard({ onNavigateTab }) {
               type="button"
               onClick={refreshCaregiverPatients}
               disabled={assignedPatientsLoading}
-              className="p-2 sm:p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors touch-target"
+              className="p-2 sm:p-2.5 rounded-xl border border-[#D8E2D9] hover:bg-[#EBF5EE] text-slate-600 transition-colors touch-target"
               title="Refresh patients data"
             >
-              <RefreshCw className={`w-4 h-4 ${assignedPatientsLoading ? 'animate-spin text-[#2F6FED]' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${assignedPatientsLoading ? 'animate-spin text-[#1E5E3A]' : ''}`} />
             </button>
 
             <button
@@ -667,7 +740,7 @@ export default function Dashboard({ onNavigateTab }) {
                 sounds.playGentleTap();
                 setIsAddModalOpen(true);
               }}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 rounded-xl bg-[#2F6FED] hover:bg-[#2557be] active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm shadow-sm transition-all touch-target flex-shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 rounded-xl bg-[#1E5E3A] hover:bg-[#164E30] active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm shadow-sm transition-all touch-target flex-shrink-0"
             >
               <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>+ Add Patient</span>
@@ -689,7 +762,7 @@ export default function Dashboard({ onNavigateTab }) {
             }}
             className={`px-3 py-1 rounded-xl text-xs font-bold transition-all whitespace-nowrap touch-target ${
               statusFilter === 'all'
-                ? 'bg-[#172B4D] text-white shadow-xs'
+                ? 'bg-[#162832] text-white shadow-xs'
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
             }`}
           >
@@ -704,7 +777,7 @@ export default function Dashboard({ onNavigateTab }) {
             }}
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all whitespace-nowrap touch-target ${
               statusFilter === 'stable'
-                ? 'bg-emerald-700 text-white shadow-xs'
+                ? 'bg-emerald-600 text-white shadow-xs'
                 : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'
             }`}
           >
@@ -738,20 +811,26 @@ export default function Dashboard({ onNavigateTab }) {
                 : 'bg-rose-50 hover:bg-rose-100 text-rose-800'
             }`}
           >
-            <span>🔴 High Attention ({filterCounts.high_attention})</span>
+            <span>🔴 Higher Attention ({filterCounts.high_attention})</span>
           </button>
         </div>
       </div>
 
+      {/* Traditional Bamboo Weave Divider */}
+      <BambooWeaveDivider height={6} className="my-1" />
+
       {/* "MY PATIENTS" SECTION HEADER */}
       <div className="flex items-center justify-between pt-1">
-        <div>
-          <h2 className="text-base sm:text-lg font-black text-[#172B4D] tracking-tight">
-            My Patients
-          </h2>
-          <p className="text-xs text-slate-500 font-medium">
-            Showing {filteredPatients.length} of {assignedPatients.length} assigned patients
-          </p>
+        <div className="flex items-center gap-2">
+          <TeaLeafSprig className="w-4 h-4" color="#1E5E3A" />
+          <div>
+            <h2 className="text-base sm:text-lg font-black text-[#162832] tracking-tight">
+              My Patients
+            </h2>
+            <p className="text-xs text-slate-500 font-medium">
+              Showing {filteredPatients.length} of {assignedPatients.length} assigned patients
+            </p>
+          </div>
         </div>
 
         {/* Active search or filter reset */}
@@ -762,7 +841,7 @@ export default function Dashboard({ onNavigateTab }) {
               setSearchQuery('');
               setStatusFilter('all');
             }}
-            className="text-xs font-bold text-[#2F6FED] hover:underline"
+            className="text-xs font-bold text-[#1E5E3A] hover:underline"
           >
             Reset Filters
           </button>
@@ -773,7 +852,7 @@ export default function Dashboard({ onNavigateTab }) {
       {assignedPatientsLoading && assignedPatients.length === 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="p-5 rounded-3xl bg-white border border-slate-200 animate-pulse space-y-3">
+            <div key={i} className="p-5 rounded-3xl bg-white border border-[#D8E2D9] animate-pulse space-y-3">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl bg-slate-200" />
                 <div className="flex-1 space-y-1.5">
@@ -810,12 +889,12 @@ export default function Dashboard({ onNavigateTab }) {
 
       {/* EMPTY STATE 1: NO PATIENTS ASSIGNED TO CAREGIVER */}
       {!assignedPatientsLoading && assignedPatients.length === 0 && (
-        <div className="p-8 sm:p-12 rounded-3xl bg-white border-2 border-dashed border-slate-200 text-center space-y-4">
-          <div className="w-16 h-16 rounded-3xl bg-[#EAF2FF] text-[#2F6FED] flex items-center justify-center text-3xl mx-auto shadow-sm">
+        <div className="p-8 sm:p-12 rounded-3xl bg-white border-2 border-dashed border-[#D8E2D9] text-center space-y-4">
+          <div className="w-16 h-16 rounded-3xl bg-[#EBF5EE] text-[#1E5E3A] flex items-center justify-center text-3xl mx-auto shadow-sm">
             👥
           </div>
           <div>
-            <h3 className="text-lg font-extrabold text-[#172B4D]">
+            <h3 className="text-lg font-extrabold text-[#162832]">
               No patients linked yet.
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto mt-1 font-medium leading-relaxed">
@@ -828,7 +907,7 @@ export default function Dashboard({ onNavigateTab }) {
               sounds.playGentleTap();
               setIsAddModalOpen(true);
             }}
-            className="inline-flex items-center justify-center gap-1.5 px-5 py-3 rounded-2xl bg-[#2F6FED] hover:bg-[#2557be] text-white font-extrabold text-sm shadow-md transition-all touch-target"
+            className="inline-flex items-center justify-center gap-1.5 px-5 py-3 rounded-2xl bg-[#1E5E3A] hover:bg-[#164E30] text-white font-extrabold text-sm shadow-md transition-all touch-target"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>+ Add Your First Patient</span>
@@ -842,7 +921,7 @@ export default function Dashboard({ onNavigateTab }) {
           <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-xl mx-auto">
             🔍
           </div>
-          <h3 className="text-sm font-extrabold text-[#172B4D]">
+          <h3 className="text-sm font-extrabold text-[#162832]">
             No patients match your criteria
           </h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto font-medium">
@@ -882,10 +961,18 @@ export default function Dashboard({ onNavigateTab }) {
         </div>
       )}
 
+      {/* Authentic Assamese Traditional Gamcha Border with Fringes */}
+      <div className="pt-2">
+        <TraditionalGamchaBorder height={12} showFringes={true} />
+      </div>
+
       {/* ADD PATIENT MODAL */}
       <AddPatientModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        onPatientAdded={(_newId) => {
+          refreshCaregiverPatients();
+        }}
       />
     </div>
   );

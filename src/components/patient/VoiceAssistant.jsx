@@ -261,18 +261,18 @@ export default function VoiceAssistant({ isOpen, onClose }) {
     >
       <div className="flex flex-col h-[70vh] sm:h-[520px] max-h-[580px]">
         {/* Top Status & Audio Controls */}
-        <div className="flex items-center justify-between px-3 py-2 mb-2 bg-[#EAF2FF] rounded-2xl border border-[#CFE1FF]">
+        <div className="flex items-center justify-between px-3 py-2 mb-2 bg-[#EBF5EE] rounded-2xl border border-[#C3E2CD]">
           <div className="flex items-center gap-2">
             <span className={`w-2.5 h-2.5 rounded-full ${
               assistantState === 'LISTENING' 
                 ? 'bg-rose-500 animate-ping' 
                 : assistantState === 'SPEAKING'
-                  ? 'bg-emerald-500 animate-pulse'
+                  ? 'bg-[#1E5E3A] animate-pulse'
                   : assistantState === 'THINKING'
                     ? 'bg-amber-500 animate-spin'
-                    : 'bg-[#2F6FED]'
+                    : 'bg-[#1E5E3A]'
             }`} />
-            <span className="text-xs font-extrabold text-[#172B4D] uppercase tracking-wider">
+            <span className="text-xs font-extrabold text-[#162832] uppercase tracking-wider">
               {assistantState === 'LISTENING' && `🎤 ${t('assistant.listening')}`}
               {assistantState === 'THINKING' && `🧠 ${t('assistant.thinking')}`}
               {assistantState === 'SPEAKING' && `🔊 ${t('assistant.speaking')}`}
@@ -313,7 +313,7 @@ export default function VoiceAssistant({ isOpen, onClose }) {
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-colors ${
                 isMuted 
                   ? 'bg-rose-100 text-rose-700 hover:bg-rose-200' 
-                  : 'bg-white text-[#2F6FED] hover:bg-slate-50 shadow-xs'
+                  : 'bg-white text-[#1E5E3A] hover:bg-[#EBF5EE] shadow-xs border border-[#C3E2CD]/60'
               }`}
               title={isMuted ? "Unmute audio" : "Mute audio"}
             >
@@ -335,7 +335,7 @@ export default function VoiceAssistant({ isOpen, onClose }) {
 
         {/* Banner if speaking with big STOP option */}
         {assistantState === 'SPEAKING' && (
-          <div className="mb-2 p-2 px-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs text-emerald-800">
+          <div className="mb-2 p-2 px-3 rounded-xl bg-[#EBF5EE] border border-[#C3E2CD] flex items-center justify-between text-xs text-[#1E5E3A]">
             <span className="font-semibold">{t('assistant.speaking')}</span>
             <button
               onClick={handleStopSpeaking}
@@ -355,7 +355,7 @@ export default function VoiceAssistant({ isOpen, onClose }) {
         )}
 
         {/* Conversation Stream */}
-        <div className="flex-1 overflow-y-auto space-y-3 p-1.5 mb-3 rounded-2xl bg-slate-50 border border-slate-100">
+        <div className="flex-1 overflow-y-auto space-y-3 p-1.5 mb-3 rounded-2xl bg-[#FAF7F2] border border-[#EAE3D2]">
           {conversation.map((msg) => (
             <div
               key={msg.id}
@@ -364,8 +364,8 @@ export default function VoiceAssistant({ isOpen, onClose }) {
               <div
                 className={`max-w-[85%] p-4 rounded-3xl text-base leading-relaxed ${
                   msg.sender === 'user'
-                    ? 'bg-[#2F6FED] text-white rounded-br-none shadow-sm font-semibold'
-                    : 'bg-white border border-slate-200 text-[#172B4D] rounded-bl-none shadow-sm font-medium'
+                    ? 'bg-[#1E5E3A] text-white rounded-br-none shadow-sm font-semibold'
+                    : 'bg-white border border-[#D8E2D9] text-[#162832] rounded-bl-none shadow-sm font-medium'
                 }`}
               >
                 {msg.text}
@@ -375,7 +375,7 @@ export default function VoiceAssistant({ isOpen, onClose }) {
               {msg.sender === 'assistant' && (
                 <button
                   onClick={() => handleReplay(msg.text)}
-                  className="mt-1 ml-2 inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-[#2F6FED] py-0.5 px-2 rounded-lg hover:bg-slate-200/60 transition-colors"
+                  className="mt-1 ml-2 inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-[#1E5E3A] py-0.5 px-2 rounded-lg hover:bg-[#EBF5EE] transition-colors"
                   title="Listen again"
                 >
                   <RotateCcw className="w-3 h-3" />
@@ -387,10 +387,10 @@ export default function VoiceAssistant({ isOpen, onClose }) {
 
           {assistantState === 'THINKING' && (
             <div className="flex justify-start">
-              <div className="bg-white border border-slate-200 text-slate-500 p-3 rounded-2xl text-xs font-bold flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#2F6FED] animate-bounce" />
-                <span className="w-2 h-2 rounded-full bg-[#2F6FED] animate-bounce delay-100" />
-                <span className="w-2 h-2 rounded-full bg-[#2F6FED] animate-bounce delay-200" />
+              <div className="bg-white border border-[#D8E2D9] text-slate-500 p-3 rounded-2xl text-xs font-bold flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#1E5E3A] animate-bounce" />
+                <span className="w-2 h-2 rounded-full bg-[#1E5E3A] animate-bounce delay-100" />
+                <span className="w-2 h-2 rounded-full bg-[#1E5E3A] animate-bounce delay-200" />
                 <span>{t('assistant.thinking')}</span>
               </div>
             </div>
@@ -401,7 +401,7 @@ export default function VoiceAssistant({ isOpen, onClose }) {
 
         {/* Quick Question Prompts */}
         <div className="mb-3">
-          <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
+          <p className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider mb-1.5">
             {t('assistant.suggestedQuestions')}
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -410,7 +410,7 @@ export default function VoiceAssistant({ isOpen, onClose }) {
                 key={idx}
                 type="button"
                 onClick={() => handleProcessQuery(prompt.replace(/^[“"]|[”"]$/g, ''))}
-                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-[#EAF2FF] text-[#2F6FED] text-xs font-bold border border-slate-200 hover:border-[#CFE1FF] transition-all"
+                className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-[#EBF5EE] text-[#1E5E3A] text-xs font-bold border border-[#D8E2D9] hover:border-[#C3E2CD] transition-all"
               >
                 💬 {prompt}
               </button>
@@ -419,14 +419,14 @@ export default function VoiceAssistant({ isOpen, onClose }) {
         </div>
 
         {/* Main Interaction Controls: Big Mic Button & Typed Input */}
-        <div className="pt-2 border-t border-slate-200 flex items-center gap-2">
+        <div className="pt-2 border-t border-[#D8E2D9] flex items-center gap-2">
           <button
             type="button"
             onClick={assistantState === 'LISTENING' ? handleStopListening : handleStartListening}
             className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center text-white transition-all shadow-md flex-shrink-0 touch-target ${
               assistantState === 'LISTENING'
                 ? 'bg-rose-500 scale-105 animate-pulse shadow-rose-500/40 ring-4 ring-rose-200'
-                : 'bg-[#2F6FED] hover:bg-[#255ecf] shadow-[#2F6FED]/25'
+                : 'bg-[#1E5E3A] hover:bg-[#164E30] shadow-[#1E5E3A]/25'
             }`}
             title={assistantState === 'LISTENING' ? t('assistant.stopSpeaking') : t('assistant.tapToSpeak')}
           >
@@ -443,12 +443,12 @@ export default function VoiceAssistant({ isOpen, onClose }) {
               value={queryInput}
               onChange={(e) => setQueryInput(e.target.value)}
               placeholder={t('assistant.inputPlaceholder')}
-              className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm text-[#172B4D] bg-white font-medium shadow-xs"
+              className="w-full px-3.5 py-3 rounded-xl border border-[#D8E2D9] focus:border-[#1E5E3A] focus:outline-none text-sm text-[#162832] bg-white font-medium shadow-2xs"
             />
             <button
               type="submit"
               disabled={!queryInput.trim()}
-              className="p-3 rounded-xl bg-[#2F6FED] text-white hover:bg-[#255ecf] disabled:opacity-40 transition-opacity flex-shrink-0 shadow-xs"
+              className="p-3 rounded-xl bg-[#1E5E3A] text-white hover:bg-[#164E30] disabled:opacity-40 transition-opacity flex-shrink-0 shadow-2xs"
               title={t('assistant.send')}
             >
               <Send className="w-4 h-4" />

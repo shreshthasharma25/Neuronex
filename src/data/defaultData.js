@@ -124,7 +124,7 @@ export const defaultPatientData = {
   ],
   emergencyContacts: [
     { id: "ec-1", title: "CALL FAMILY", name: "Priya (Daughter)", phone: "+91 98300 11223", color: "bg-red-50 text-red-700 border-red-200" },
-    { id: "ec-2", title: "CALL DOCTOR", name: "Dr. Debashish Bose", phone: "+91 98301 23456", color: "bg-blue-50 text-blue-700 border-blue-200" },
+    { id: "ec-2", title: "CALL DOCTOR", name: "Dr. Debashish Bose", phone: "+91 98301 23456", color: "bg-[#EBF5EE] text-[#1E5E3A] border-[#D8E2D9]" },
     { id: "ec-3", title: "CALL POLICE", name: "Police Emergency (Standard Service)", phone: "100", isService: true, color: "bg-amber-50 text-amber-800 border-amber-200" },
     { id: "ec-4", title: "EMERGENCY AMBULANCE", name: "Medical Ambulance (Standard Service)", phone: "108", isService: true, color: "bg-rose-100 text-rose-800 border-rose-300" },
   ],
@@ -423,6 +423,8 @@ export function getDemoCaregiverPatients() {
     const unresolvedAlerts = (p.alerts || []).filter(a => !a.resolved);
     const meds = p.medicines || [];
 
+    const score = p.cognitiveStats?.averageAccuracy ?? 0;
+
     const summary = {
       id: p.profile.patientId,
       patientId: p.profile.patientId,
@@ -435,6 +437,7 @@ export function getDemoCaregiverPatients() {
       profile: p.profile,
       homeLocation: p.homeLocation,
       cognitiveStats: p.cognitiveStats,
+      cognitiveScore: score,
       latestGameName: latest ? latest.gameName : null,
       latestGameAccuracy: latest ? latest.accuracy : null,
       recentActivity: latest ? latest.date : "No recent activity",

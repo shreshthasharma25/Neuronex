@@ -8,6 +8,8 @@ import MyHomeModal from './MyHomeModal';
 import EmergencyModal from './EmergencyModal';
 import VoiceAssistant from './VoiceAssistant';
 import { sounds } from '../../utils/soundPlayer';
+import { GamosaRibbon, TeaLeafSprig, RegionalTextileBorder } from '../common/CulturalMotifs';
+import NeuronexLogo from '../common/NeuronexLogo';
 
 export default function PatientLayout({ onStartExercise, onOpenGame }) {
   const {
@@ -34,16 +36,16 @@ export default function PatientLayout({ onStartExercise, onOpenGame }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#FAFBFD] relative overflow-hidden">
+    <div className="flex flex-col h-full bg-[#F5FAF6] relative overflow-hidden">
       {/* Top Navigation Banner: Back to All Patients */}
-      <div className="bg-[#1E293B] text-white px-3 sm:px-4 py-2 flex items-center justify-between z-30 text-xs shadow-md border-b border-slate-700">
+      <div className="bg-[#162832] text-white px-3 sm:px-4 py-2 flex items-center justify-between z-30 text-xs shadow-md border-b border-[#244253]">
         <button
           type="button"
           onClick={() => {
             sounds.playGentleTap();
             backToAllPatients();
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2F6FED] hover:bg-blue-600 text-white font-extrabold transition-all shadow-sm active:scale-95 touch-target"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1E5E3A] hover:bg-[#164E30] text-white font-extrabold transition-all shadow-sm active:scale-95 touch-target"
           title="Return to Caregiver Portal showing all patients"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -60,44 +62,36 @@ export default function PatientLayout({ onStartExercise, onOpenGame }) {
               sounds.playGentleTap();
               setUserRole('caregiver');
             }}
-            className="px-2.5 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold transition-all text-xs"
+            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition-all text-xs border border-slate-700"
             title="Switch to Caregiver Dashboard"
           >
             Caregiver 🩺
           </button>
         </div>
       </div>
-      {/* Top Patient Header */}
-      <header className="px-5 py-3.5 bg-white border-b border-slate-100 flex items-center justify-between sticky top-0 z-20 shadow-sm">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl bg-[#2F6FED] text-white flex items-center justify-center text-xl shadow-sm">
-            🧠
-          </div>
-          <div>
-            <h2 className="text-base font-extrabold text-[#172B4D] tracking-tight">
-              NeuroNex
-            </h2>
-            <span className="text-[11px] font-bold text-[#2F6FED]">
-              Memory Companion
-            </span>
-          </div>
-        </div>
 
-        {/* Patient Loving Pill */}
+      {/* Top Patient Header */}
+      <header className="px-4 sm:px-5 py-2.5 bg-white border-b border-[#D8E2D9] flex items-center justify-between sticky top-0 z-20 shadow-2xs">
+        <NeuronexLogo variant="compact" size="md" />
+
+        {/* Patient Loving Pill in Muga Golden Silk Styling */}
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1 rounded-full bg-[#EAF2FF] border border-[#CFE1FF] text-xs font-extrabold text-[#2F6FED] flex items-center gap-1">
+          <span className="px-3 py-1 rounded-full bg-[#FFF6E5] border border-[#F7D59A] text-xs font-extrabold text-[#92540B] flex items-center gap-1 shadow-2xs">
             <span>❤️</span>
             <span>{preferredName}</span>
           </span>
           <button
             onClick={() => sounds.speak(`Welcome to NeuroNex, ${preferredName}. We are here to help you remember and stay safe.`)}
-            className="p-2 rounded-full text-slate-400 hover:text-[#2F6FED] hover:bg-[#EAF2FF] transition-colors touch-target"
+            className="p-2 rounded-full text-slate-400 hover:text-[#1E5E3A] hover:bg-[#EBF5EE] transition-colors touch-target"
             title="Read screen aloud"
           >
             <Volume2 className="w-5 h-5" />
           </button>
         </div>
       </header>
+
+      {/* Cultural Regional Textile Geometric Trim */}
+      <RegionalTextileBorder height={4} />
 
       {/* Main View Area */}
       <main className="flex-1 overflow-y-auto">
@@ -115,8 +109,8 @@ export default function PatientLayout({ onStartExercise, onOpenGame }) {
         )}
       </main>
 
-      {/* Bottom Sticky Patient Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2 z-30 shadow-lg">
+      {/* Bottom Sticky Patient Navigation with Nature-Inspired Active States */}
+      <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-lg border-t border-[#D8E2D9] px-3 py-2 z-30 shadow-xl rounded-t-3xl">
         <div className="grid grid-cols-3 gap-2">
           {navItems.map(item => {
             const isActive = activeTab === item.id;
@@ -124,14 +118,18 @@ export default function PatientLayout({ onStartExercise, onOpenGame }) {
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`flex flex-col items-center justify-center py-2 px-1 rounded-2xl transition-all duration-150 active:scale-95 touch-target ${
+                className={`flex flex-col items-center justify-center py-2 px-1 rounded-2xl transition-all duration-200 active:scale-95 touch-target relative overflow-hidden ${
                   isActive
-                    ? 'bg-[#EAF2FF] text-[#2F6FED] font-extrabold shadow-sm'
-                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 font-bold'
+                    ? 'bg-gradient-to-br from-[#1E5E3A] to-[#143B28] text-white font-black shadow-tea'
+                    : 'text-slate-600 hover:text-[#162832] hover:bg-[#FAF7F2] font-extrabold'
                 }`}
               >
+                {/* Active leaf accent dot */}
+                {isActive && (
+                  <span className="absolute top-1 right-2 text-[9px] text-amber-300">✦</span>
+                )}
                 <span className="text-xl mb-0.5">{item.emoji}</span>
-                <span className="text-[11px] tracking-tight">{item.label}</span>
+                <span className="text-[11px] tracking-wider uppercase font-sans font-extrabold">{item.label}</span>
               </button>
             );
           })}

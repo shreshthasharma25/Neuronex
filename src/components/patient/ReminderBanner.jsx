@@ -88,24 +88,24 @@ export default function ReminderBanner({ alert, medicine, onMarkDone, onRemindLa
   return (
     <div className={`border-2 rounded-3xl p-5 shadow-sm transition-all duration-200 ${
       isMissed 
-        ? 'bg-[#FFF8E1] border-amber-400' 
+        ? 'bg-[#FDF2F2] border-[#F5C2C2]' 
         : isUpcoming 
-          ? 'bg-[#EAF2FF] border-[#93C5FD]' 
-          : 'bg-[#FFF8E1] border-[#FFC857]'
+          ? 'bg-[#EBF5EE] border-[#C3E2CD]' 
+          : 'bg-[#FFF6E5] border-[#F7D59A]'
     }`}>
       {/* Top Status Bar */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 font-bold text-sm min-w-0 flex-1">
           <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
             isMissed 
-              ? 'bg-rose-500 animate-ping' 
+              ? 'bg-[#C92A2A] animate-ping' 
               : isUpcoming 
-                ? 'bg-blue-500' 
-                : 'bg-amber-500 animate-pulse'
+                ? 'bg-[#1E5E3A]' 
+                : 'bg-[#D98A1E] animate-pulse'
           }`} />
-          <Bell className={`w-4 h-4 flex-shrink-0 ${isMissed ? 'text-rose-600' : isUpcoming ? 'text-[#2F6FED]' : 'text-amber-600'}`} />
+          <Bell className={`w-4 h-4 flex-shrink-0 ${isMissed ? 'text-[#C92A2A]' : isUpcoming ? 'text-[#1E5E3A]' : 'text-[#D98A1E]'}`} />
           <span className={`uppercase tracking-wider text-xs font-extrabold truncate ${
-            isMissed ? 'text-rose-800' : isUpcoming ? 'text-[#2F6FED]' : 'text-[#854D0E]'
+            isMissed ? 'text-[#C92A2A]' : isUpcoming ? 'text-[#1E5E3A]' : 'text-[#92540B]'
           }`}>
             {isMissed ? `MISSED • ${item.time}` : isUpcoming ? `UPCOMING • ${item.time}` : `${t('home.medicineDue')} • ${item.time || ''}`}
           </span>
@@ -113,22 +113,21 @@ export default function ReminderBanner({ alert, medicine, onMarkDone, onRemindLa
 
         <button
           onClick={handleSpeak}
-          className="p-2 rounded-full bg-white/90 hover:bg-white text-amber-800 border border-amber-200 flex items-center gap-1 text-xs font-bold transition-all shadow-xs flex-shrink-0"
+          className="p-2 rounded-full bg-white/90 hover:bg-white text-slate-700 border border-[#D8E2D9] flex items-center gap-1 text-xs font-bold transition-all shadow-2xs flex-shrink-0"
           title="Read aloud"
         >
-          <Volume2 className="w-4 h-4 text-[#2F6FED]" />
+          <Volume2 className="w-4 h-4 text-[#1E5E3A]" />
           <span className="hidden xs:inline">Listen</span>
         </button>
       </div>
 
-
       {/* Main Content */}
       <div className="flex items-start gap-3.5 mb-4">
-        <div className="w-12 h-12 rounded-2xl bg-amber-200/70 text-amber-900 flex items-center justify-center flex-shrink-0 text-2xl shadow-xs">
+        <div className="w-12 h-12 rounded-2xl bg-white text-amber-900 flex items-center justify-center flex-shrink-0 text-2xl shadow-2xs border border-[#F7D59A]/60">
           {getIcon()}
         </div>
         <div className="flex-1">
-          <h4 className="text-xl font-extrabold text-[#172B4D]">
+          <h4 className="text-xl font-extrabold text-[#162832]">
             {item.title}
           </h4>
           <p className="text-base text-slate-700 font-bold mt-0.5">
@@ -149,7 +148,7 @@ export default function ReminderBanner({ alert, medicine, onMarkDone, onRemindLa
           variant="primary"
           size="md"
           icon={CheckCircle2}
-          className="bg-[#2E7D32] hover:bg-[#256629] text-white shadow-none font-extrabold"
+          className="font-extrabold shadow-sm"
         >
           ✓ {t('common.done')}
         </Button>
@@ -159,7 +158,7 @@ export default function ReminderBanner({ alert, medicine, onMarkDone, onRemindLa
           variant="outline"
           size="md"
           icon={Clock}
-          className="bg-white text-slate-700 border-slate-300 font-bold"
+          className="bg-white text-slate-700 border-[#D8E2D9] font-bold"
         >
           {t('common.cancel')}
         </Button>

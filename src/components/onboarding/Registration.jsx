@@ -51,14 +51,14 @@ export default function Registration({ onComplete }) {
   };
 
   return (
-    <div className="flex flex-col justify-between min-h-[580px] h-full p-5 sm:p-7 bg-[#FAFBFD] overflow-y-auto">
+    <div className="flex flex-col justify-between min-h-[580px] h-full p-5 sm:p-7 bg-[#F3F6F3] overflow-y-auto">
       <div>
         {/* Screen Title */}
         <div className="text-center mb-5">
-          <div className="w-14 h-14 rounded-2xl bg-[#EAF2FF] text-[#2F6FED] flex items-center justify-center mx-auto mb-2.5 shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9] flex items-center justify-center mx-auto mb-2.5 shadow-sm">
             <User className="w-7 h-7" />
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#172B4D] tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#162832] tracking-tight">
             Register Yourself
           </h2>
           <p className="text-sm text-slate-500 font-medium mt-1">
@@ -69,8 +69,8 @@ export default function Registration({ onComplete }) {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* PROFILE PHOTO SECTION (REAL UPLOAD & CAMERA ONLY) */}
-          <div className="p-4 rounded-3xl bg-white border-2 border-slate-200 text-center">
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+          <div className="p-4 rounded-3xl bg-white border-2 border-[#D8E2D9] text-center shadow-sm">
+            <label className="block text-xs font-extrabold text-[#162832] uppercase tracking-wider mb-2">
               Profile Photo
             </label>
 
@@ -80,7 +80,7 @@ export default function Registration({ onComplete }) {
                   <img
                     src={formData.avatar}
                     alt="Uploaded Profile"
-                    className="w-24 h-24 rounded-full object-cover border-4 border-[#2F6FED] shadow-md"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-[#1E5E3A] shadow-md"
                   />
                   <button
                     type="button"
@@ -92,7 +92,7 @@ export default function Registration({ onComplete }) {
                   </button>
                 </div>
               ) : (
-                <div className="w-24 h-24 rounded-full bg-[#EAF2FF] border-2 border-dashed border-[#2F6FED]/40 flex flex-col items-center justify-center text-[#2F6FED] mb-2">
+                <div className="w-24 h-24 rounded-full bg-[#EBF5EE] border-2 border-dashed border-[#1E5E3A]/40 flex flex-col items-center justify-center text-[#1E5E3A] mb-2">
                   <User className="w-10 h-10 stroke-[1.5]" />
                 </div>
               )}
@@ -116,7 +116,7 @@ export default function Registration({ onComplete }) {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#EAF2FF] hover:bg-[#d5e5ff] text-[#2F6FED] text-xs font-bold transition-all border border-[#CFE1FF]"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#EBF5EE] hover:bg-[#D8E2D9] text-[#1E5E3A] text-xs font-bold transition-all border border-[#D8E2D9]"
                 >
                   <Upload className="w-3.5 h-3.5" />
                   <span>Upload Photo</span>
@@ -145,7 +145,7 @@ export default function Registration({ onComplete }) {
 
           {/* Full Name */}
           <div>
-            <label className="block text-sm font-bold text-[#172B4D] mb-1">
+            <label className="block text-sm font-bold text-[#162832] mb-1">
               Full Name *
             </label>
             <input
@@ -153,14 +153,14 @@ export default function Registration({ onComplete }) {
               required
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-[#2F6FED] focus:outline-none text-base text-[#172B4D] bg-white font-medium touch-target"
+              className="w-full px-4 py-3 rounded-2xl border-2 border-[#D8E2D9] focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-base text-[#162832] bg-white font-medium touch-target"
               placeholder="e.g., Ananya Sen"
             />
           </div>
 
           {/* Critical Preferred Name */}
-          <div className="bg-[#EAF2FF] p-4 rounded-2xl border border-[#CFE1FF]">
-            <label className="block text-sm font-extrabold text-[#2F6FED] mb-0.5 flex items-center gap-1.5">
+          <div className="bg-[#EBF5EE] p-4 rounded-2xl border border-[#D8E2D9]">
+            <label className="block text-sm font-extrabold text-[#1E5E3A] mb-0.5 flex items-center gap-1.5">
               <Heart className="w-4 h-4 fill-current text-rose-500" />
               <span>What should we call you? (Important) *</span>
             </label>
@@ -172,7 +172,7 @@ export default function Registration({ onComplete }) {
               required
               value={formData.preferredName}
               onChange={(e) => setFormData({ ...formData, preferredName: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border-2 border-[#2F6FED]/30 focus:border-[#2F6FED] focus:outline-none text-lg font-bold text-[#172B4D] bg-white touch-target"
+              className="w-full px-4 py-2.5 rounded-xl border-2 border-[#1E5E3A]/30 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-lg font-bold text-[#162832] bg-white touch-target"
               placeholder="e.g., Maa, Dida, Papa, Dadu"
             />
           </div>
@@ -180,7 +180,7 @@ export default function Registration({ onComplete }) {
           {/* Age & Gender */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-bold text-[#172B4D] mb-1">
+              <label className="block text-sm font-bold text-[#162832] mb-1">
                 Age *
               </label>
               <input
@@ -190,19 +190,19 @@ export default function Registration({ onComplete }) {
                 max="120"
                 value={formData.age}
                 onChange={(e) => setFormData({ ...formData, age: e.target.value ? Number(e.target.value) : '' })}
-                className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-[#2F6FED] focus:outline-none text-base text-[#172B4D] bg-white font-medium touch-target"
+                className="w-full px-4 py-3 rounded-2xl border-2 border-[#D8E2D9] focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-base text-[#162832] bg-white font-medium touch-target"
                 placeholder="e.g., 68"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#172B4D] mb-1">
+              <label className="block text-sm font-bold text-[#162832] mb-1">
                 Gender
               </label>
               <select
                 value={formData.gender}
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-[#2F6FED] focus:outline-none text-base text-[#172B4D] bg-white font-medium touch-target"
+                className="w-full px-4 py-3 rounded-2xl border-2 border-[#D8E2D9] focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-base text-[#162832] bg-white font-medium touch-target"
               >
                 <option value="Female">Female</option>
                 <option value="Male">Male</option>
@@ -214,7 +214,7 @@ export default function Registration({ onComplete }) {
           {/* Email Address & Phone Number */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-bold text-[#172B4D] mb-1 flex items-center gap-1">
+              <label className="block text-sm font-bold text-[#162832] mb-1 flex items-center gap-1">
                 <Mail className="w-3.5 h-3.5 text-slate-400" />
                 <span>Email Address</span>
               </label>
@@ -222,13 +222,13 @@ export default function Registration({ onComplete }) {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm text-[#172B4D] bg-white font-medium"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm text-[#162832] bg-white font-medium"
                 placeholder="e.g., patient@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#172B4D] mb-1 flex items-center gap-1">
+              <label className="block text-sm font-bold text-[#162832] mb-1 flex items-center gap-1">
                 <Phone className="w-3.5 h-3.5 text-slate-400" />
                 <span>Phone Number</span>
               </label>
@@ -236,7 +236,7 @@ export default function Registration({ onComplete }) {
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm text-[#172B4D] bg-white font-medium"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm text-[#162832] bg-white font-medium"
                 placeholder="e.g., +91 98765 43210"
               />
             </div>
@@ -244,13 +244,13 @@ export default function Registration({ onComplete }) {
 
           {/* Preferred Language */}
           <div>
-            <label className="block text-sm font-bold text-[#172B4D] mb-1">
+            <label className="block text-sm font-bold text-[#162832] mb-1">
               Preferred Language
             </label>
             <select
               value={formData.language}
               onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-[#2F6FED] focus:outline-none text-base text-[#172B4D] bg-white font-medium touch-target"
+              className="w-full px-4 py-3 rounded-2xl border-2 border-[#D8E2D9] focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-base text-[#162832] bg-white font-medium touch-target"
             >
               <option value="English">English</option>
               <option value="Hindi">Hindi (हिंदी)</option>
@@ -265,7 +265,7 @@ export default function Registration({ onComplete }) {
               type="submit"
               size="xl"
               fullWidth
-              className="shadow-md shadow-[#2F6FED]/25 text-lg font-extrabold"
+              className="shadow-md shadow-[#1E5E3A]/25 text-lg font-extrabold"
             >
               CONTINUE TO ROLE SELECTION →
             </Button>

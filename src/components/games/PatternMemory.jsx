@@ -102,8 +102,8 @@ export default function PatternMemory({ onComplete, onExit }) {
       <div className="space-y-6">
         {phase === 'show' ? (
           <div className="text-center space-y-6">
-            <div className="bg-[#FFF8E1] p-4 rounded-2xl border border-[#FDE68A]">
-              <p className="text-base font-extrabold text-[#854D0E]">
+            <div className="bg-[#FFF6E5] p-4 rounded-2xl border border-[#F3E2C4]">
+              <p className="text-base font-extrabold text-[#D98A1E]">
                 👀 Remember this sequence ({levelConfig.sequenceLength} steps):
               </p>
             </div>
@@ -112,7 +112,7 @@ export default function PatternMemory({ onComplete, onExit }) {
             <div className="flex flex-wrap items-center justify-center gap-2.5 py-5">
               {currentRound.sequence.map((item, idx) => (
                 <React.Fragment key={idx}>
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white border-2 border-[#2F6FED] shadow-md flex items-center justify-center text-2xl sm:text-3xl font-extrabold text-[#172B4D]">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white border-2 border-[#1E5E3A] shadow-md flex items-center justify-center text-2xl sm:text-3xl font-extrabold text-[#162832]">
                     {item}
                   </div>
                   {idx < currentRound.sequence.length - 1 && (
@@ -133,23 +133,23 @@ export default function PatternMemory({ onComplete, onExit }) {
           </div>
         ) : (
           <div className="space-y-5">
-            <div className="bg-white p-5 rounded-3xl border border-slate-200 text-center shadow-sm">
+            <div className="bg-white p-5 rounded-3xl border border-[#D8E2D9] text-center shadow-sm">
               <span className="text-sm font-bold text-slate-400 block mb-1">
                 {currentRound.subtext}
               </span>
-              <h3 className="text-2xl font-extrabold text-[#172B4D]">
+              <h3 className="text-2xl font-extrabold text-[#162832]">
                 {currentRound.question}
               </h3>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               {currentRound.options.map((opt, i) => {
-                let btnStyle = 'bg-white border-2 border-slate-200 text-[#172B4D] hover:border-[#2F6FED]';
+                let btnStyle = 'bg-white border-2 border-[#D8E2D9] text-[#162832] hover:border-[#1E5E3A]';
                 if (selected !== null) {
                   if (opt === currentRound.correct) {
-                    btnStyle = 'bg-[#E8F5E9] border-2 border-[#2E7D32] text-[#2E7D32] font-extrabold';
+                    btnStyle = 'bg-[#EBF5EE] border-2 border-[#1E5E3A] text-[#1E5E3A] font-extrabold';
                   } else if (opt === selected) {
-                    btnStyle = 'bg-[#FFF8E1] border-2 border-amber-400 text-amber-900';
+                    btnStyle = 'bg-[#FFF6E5] border-2 border-[#D98A1E] text-amber-900';
                   }
                 }
 

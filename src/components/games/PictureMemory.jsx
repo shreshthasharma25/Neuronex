@@ -13,17 +13,17 @@ export default function PictureMemory({ onComplete, onExit }) {
 
   const allQuestions = [
     {
-      q: "What color was the car parked outside?",
-      options: ["Red", "Blue", "Yellow", "White"],
-      correct: "Red"
+      q: "What was placed on the veranda table?",
+      options: ["Tea Kettle 🫖", "Radio 📻", "Book 📖", "Lantern 🏮"],
+      correct: "Tea Kettle 🫖"
     },
     {
-      q: "Which friendly animal was sitting near the tree?",
-      options: ["Dog 🐕", "Cat 🐈", "Parrot 🦜", "Cow 🐄"],
-      correct: "Dog 🐕"
+      q: "Which gentle animal was resting near the garden tree?",
+      options: ["Cow 🐄", "Cat 🐈", "Parrot 🦜", "Horse 🐎"],
+      correct: "Cow 🐄"
     },
     {
-      q: "What was resting against the garden fence?",
+      q: "What was resting against the courtyard fence?",
       options: ["Bicycle 🚲", "Chair 🪑", "Umbrella ☂️", "Ladder 🪜"],
       correct: "Bicycle 🚲"
     }
@@ -112,8 +112,8 @@ export default function PictureMemory({ onComplete, onExit }) {
     >
       {phase === 'observe' ? (
         <div className="space-y-4">
-          <div className="bg-[#EAF2FF] p-3 rounded-2xl text-center border border-[#CFE1FF]">
-            <p className="text-sm font-extrabold text-[#2F6FED]">
+          <div className="bg-[#EBF5EE] p-3 rounded-2xl text-center border border-[#D8E2D9]">
+            <p className="text-sm font-extrabold text-[#1E5E3A]">
               👀 Look closely at everything in the peaceful garden scene:
             </p>
             <p className="text-xs text-slate-500 font-bold mt-0.5">
@@ -121,8 +121,8 @@ export default function PictureMemory({ onComplete, onExit }) {
             </p>
           </div>
 
-          {/* Calm Garden Scene Illustration */}
-          <div className="relative rounded-3xl bg-gradient-to-b from-[#E0F2FE] via-[#BAE6FD] to-[#86EFAC] p-6 border-4 border-white shadow-md overflow-hidden min-h-[220px] flex flex-col justify-between">
+          {/* Calm North-Eastern Courtyard Scene Illustration */}
+          <div className="relative rounded-3xl bg-gradient-to-b from-[#DCEBF2] via-[#EAF2ED] to-[#CBE5D4] p-6 border-4 border-white shadow-md overflow-hidden min-h-[220px] flex flex-col justify-between">
             <div className="flex justify-between items-start">
               <span className="text-4xl">☀️</span>
               <span className="text-3xl opacity-80">☁️</span>
@@ -131,20 +131,20 @@ export default function PictureMemory({ onComplete, onExit }) {
             <div className="flex items-end justify-around text-center pt-8">
               <div className="flex flex-col items-center">
                 <span className="text-5xl">🏡</span>
-                <span className="text-xs font-bold text-slate-800 bg-white/90 px-2 py-0.5 rounded-full mt-1">Yellow House</span>
+                <span className="text-xs font-bold text-slate-800 bg-white/90 px-2.5 py-0.5 rounded-full mt-1 border border-slate-200">Hill Cottage</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-5xl">🚗</span>
-                <span className="text-xs font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full mt-1">Red Car</span>
+                <span className="text-5xl">🫖</span>
+                <span className="text-xs font-bold text-amber-900 bg-[#FFF6E5] border border-[#F7D59A] px-2.5 py-0.5 rounded-full mt-1">Tea Kettle</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-5xl">🌳</span>
-                <span className="text-4xl -mt-4">🐕</span>
-                <span className="text-xs font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full mt-1">Friendly Dog</span>
+                <span className="text-4xl -mt-4">🐄</span>
+                <span className="text-xs font-bold text-slate-800 bg-white/90 px-2.5 py-0.5 rounded-full mt-1 border border-slate-200">Gentle Cow</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-4xl">🚲</span>
-                <span className="text-xs font-bold text-blue-900 bg-blue-100 px-2 py-0.5 rounded-full mt-1">Bicycle</span>
+                <span className="text-xs font-bold text-[#1E5E3A] bg-[#EBF5EE] border border-[#D8E2D9] px-2.5 py-0.5 rounded-full mt-1">Bicycle</span>
               </div>
             </div>
           </div>
@@ -160,21 +160,21 @@ export default function PictureMemory({ onComplete, onExit }) {
         </div>
       ) : (
         <div className="space-y-5">
-          <div className="bg-white p-5 rounded-3xl border border-slate-200 text-center shadow-sm">
+          <div className="bg-white p-5 rounded-3xl border border-[#D8E2D9] text-center shadow-sm">
             <span className="text-3xl mb-2 block">❓</span>
-            <h3 className="text-xl font-extrabold text-[#172B4D]">
+            <h3 className="text-xl font-extrabold text-[#162832]">
               {activeQ.q}
             </h3>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             {activeQ.options.map((opt, i) => {
-              let btnStyle = 'bg-white border-2 border-slate-200 text-[#172B4D] hover:border-[#2F6FED]';
+              let btnStyle = 'bg-white border-2 border-[#D8E2D9] text-[#162832] hover:border-[#1E5E3A]';
               if (selectedAnswer) {
                 if (opt === activeQ.correct) {
-                  btnStyle = 'bg-[#E8F5E9] border-2 border-[#2E7D32] text-[#2E7D32] font-extrabold';
+                  btnStyle = 'bg-[#EBF5EE] border-2 border-[#1E5E3A] text-[#1E5E3A] font-extrabold';
                 } else if (opt === selectedAnswer) {
-                  btnStyle = 'bg-[#FFF8E1] border-2 border-amber-400 text-amber-900';
+                  btnStyle = 'bg-[#FFF6E5] border-2 border-[#D98A1E] text-amber-900';
                 }
               }
 
@@ -195,8 +195,8 @@ export default function PictureMemory({ onComplete, onExit }) {
           {feedback && (
             <div className={`p-4 rounded-2xl text-center text-sm font-bold animate-in fade-in duration-200 ${
               feedback.type === 'success'
-                ? 'bg-[#E8F5E9] text-[#2E7D32] border border-[#C8E6C9]'
-                : 'bg-[#FFF8E1] text-[#854D0E] border border-[#FDE68A]'
+                ? 'bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9]'
+                : 'bg-[#FFF6E5] text-[#D98A1E] border border-[#F3E2C4]'
             }`}>
               {feedback.text}
             </div>

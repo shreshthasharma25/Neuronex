@@ -103,12 +103,12 @@ export default function CaregiverTodos() {
       )}
 
       {/* Header */}
-      <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#EAF2FF] border border-[#CFE1FF] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#EBF5EE] border border-[#D8E2D9] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <span className="text-[11px] sm:text-xs font-bold text-[#2F6FED] uppercase tracking-wider">
+          <span className="text-[11px] sm:text-xs font-bold text-[#1E5E3A] uppercase tracking-wider">
             Patient Routine & Tasks
           </span>
-          <h2 className="text-lg sm:text-2xl font-extrabold text-[#172B4D] mt-0.5">
+          <h2 className="text-lg sm:text-2xl font-extrabold text-[#162832] mt-0.5">
             To-Do List & Care Reminders
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 font-medium">
@@ -117,7 +117,7 @@ export default function CaregiverTodos() {
         </div>
         <button
           onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-[#2F6FED] hover:bg-[#2052b8] text-white text-xs font-extrabold shadow-sm transition-all touch-target w-full sm:w-auto flex-shrink-0"
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-[#1E5E3A] hover:bg-[#164E30] text-white text-xs font-extrabold shadow-sm transition-all touch-target w-full sm:w-auto flex-shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Add Task</span>
@@ -125,12 +125,12 @@ export default function CaregiverTodos() {
       </div>
 
       {/* Progress Summary Card */}
-      <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between gap-2">
+      <div className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white border border-[#D8E2D9] shadow-sm flex items-center justify-between gap-2">
         <div>
           <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">
             Today's Task Completion
           </span>
-          <span className="text-base sm:text-xl font-extrabold text-[#172B4D]">
+          <span className="text-base sm:xl font-extrabold text-[#162832]">
             {completedCount} of {todos.length} completed
           </span>
         </div>
@@ -144,11 +144,11 @@ export default function CaregiverTodos() {
       </div>
 
       {todos.length === 0 ? (
-        <Card variant="white" className="p-6 sm:p-8 text-center border-dashed border-2 border-slate-200">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-blue-50 text-[#2F6FED] flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-3">
+        <Card variant="white" className="p-6 sm:p-8 text-center border-dashed border-2 border-[#D8E2D9]">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9] flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-3">
             📋
           </div>
-          <h3 className="text-base sm:text-lg font-extrabold text-[#172B4D]">
+          <h3 className="text-base sm:text-lg font-extrabold text-[#162832]">
             No tasks added yet
           </h3>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 max-w-sm mx-auto">
@@ -179,7 +179,7 @@ export default function CaregiverTodos() {
                     className={`w-7 h-7 rounded-xl border-2 flex items-center justify-center transition-all flex-shrink-0 ${
                       isDone
                         ? 'bg-emerald-600 border-emerald-600 text-white'
-                        : 'border-slate-300 hover:border-[#2F6FED]'
+                        : 'border-slate-300 hover:border-[#1E5E3A]'
                     }`}
                     title={isDone ? "Mark incomplete" : "Mark completed"}
                   >
@@ -189,7 +189,7 @@ export default function CaregiverTodos() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h4 className={`text-base font-extrabold truncate ${
-                        isDone ? 'line-through text-slate-500' : 'text-[#172B4D]'
+                        isDone ? 'line-through text-slate-500' : 'text-[#162832]'
                       }`}>
                         {todo.title}
                       </h4>
@@ -225,7 +225,7 @@ export default function CaregiverTodos() {
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <button
                     onClick={() => handleOpenEdit(todo)}
-                    className="p-2 rounded-xl text-slate-500 hover:text-[#2F6FED] hover:bg-[#EAF2FF] transition-colors"
+                    className="p-2 rounded-xl text-slate-500 hover:text-[#1E5E3A] hover:bg-[#EBF5EE] transition-colors"
                     title="Edit task"
                   >
                     <Edit3 className="w-4 h-4" />
@@ -254,7 +254,7 @@ export default function CaregiverTodos() {
       >
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-[#172B4D] mb-1">
+            <label className="block text-xs font-bold text-[#162832] mb-1">
               Task / Reminder Name *
             </label>
             <input
@@ -263,13 +263,13 @@ export default function CaregiverTodos() {
               value={form.title}
               onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
               placeholder="e.g., Evening walk in the garden"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-[#172B4D] mb-1">
+              <label className="block text-xs font-bold text-[#162832] mb-1">
                 Time (Optional)
               </label>
               <input
@@ -277,18 +277,18 @@ export default function CaregiverTodos() {
                 value={form.time}
                 onChange={(e) => setForm(prev => ({ ...prev, time: e.target.value }))}
                 placeholder="e.g., 6:00 PM"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#172B4D] mb-1">
+              <label className="block text-xs font-bold text-[#162832] mb-1">
                 Recurrence
               </label>
               <select
                 value={form.recurrence}
                 onChange={(e) => setForm(prev => ({ ...prev, recurrence: e.target.value }))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none bg-white"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none bg-white"
               >
                 <option value="Daily">Daily</option>
                 <option value="Once">Once</option>

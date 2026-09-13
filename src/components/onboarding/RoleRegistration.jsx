@@ -18,6 +18,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { sounds } from '../../utils/soundPlayer';
+import { GamosaRibbon, RegionalTextileBorder, TeaLeafSprig } from '../common/CulturalMotifs';
 
 export default function RoleRegistration({ role = 'patient', onBack, onComplete }) {
   const {
@@ -99,36 +100,50 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
           phone: userInfo.phone
         }
       });
-      if (success) {
-        if (onComplete) onComplete();
-      }
-      return;
-    }
 
-    // CREATE MODE
-    if (role === 'patient') {
-      if (!patientFields.fullName.trim()) return;
-      registerPatientAsSelf(patientFields);
-    } else if (role === 'family') {
-      if (!patientFields.fullName.trim() || !userInfo.name.trim()) return;
-      registerPatientAsFamily({
-        patientFields,
-        familyMemberInfo: {
-          name: userInfo.name,
-          relation: userInfo.relation || 'Family Member',
-          phone: userInfo.phone
-        }
-      });
-    } else if (role === 'caregiver') {
-      if (!patientFields.fullName.trim() || !userInfo.name.trim()) return;
-      registerPatientAsCaregiver({
-        patientFields,
-        caregiverInfo: {
-          name: userInfo.name,
-          title: userInfo.title || 'Primary Caregiver',
-          phone: userInfo.phone
-        }
-      });
+      if (!success) {
+        setConnectError(t('registration.idNotFound'));
+        return;
+      }
+    } else {
+      // Create new patient mode
+      if (!patientFields.fullName.trim()) {
+        alert(t('registration.enterFullName'));
+        return;
+      }
+
+      const cleanPatientFields = {
+        fullName: patientFields.fullName,
+        preferredName: patientFields.preferredName || patientFields.fullName,
+        age: patientFields.age ? parseInt(patientFields.age) : null,
+        gender: patientFields.gender,
+        language: patientFields.language,
+        avatar: patientFields.avatar,
+        phone: patientFields.phone,
+        registered: true
+      };
+
+      if (role === 'patient') {
+        await registerPatientAsSelf(cleanPatientFields);
+      } else if (role === 'family') {
+        await registerPatientAsFamily({
+          patientFields: cleanPatientFields,
+          familyMemberInfo: {
+            name: userInfo.name,
+            relation: userInfo.relation || 'Family Member',
+            phone: userInfo.phone
+          }
+        });
+      } else if (role === 'caregiver') {
+        await registerPatientAsCaregiver({
+          patientFields: cleanPatientFields,
+          caregiverInfo: {
+            name: userInfo.name,
+            title: userInfo.title || 'Primary Caregiver',
+            phone: userInfo.phone
+          }
+        });
+      }
     }
 
     if (onComplete) onComplete();
@@ -137,28 +152,29 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
   const getRoleBadge = () => {
     if (role === 'patient') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF2FF] text-[#2F6FED] text-xs font-extrabold">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EBF5EE] text-[#1E5E3A] border border-[#C3E2CD] text-xs font-extrabold">
           <span>🧓</span> {t('brand.patientRole')}
         </span>
       );
     }
     if (role === 'family') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF2FF] text-[#2F6FED] text-xs font-extrabold">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EBF5EE] text-[#2D7D4B] border border-[#C3E2CD] text-xs font-extrabold">
           <span>👨‍👩‍👧</span> {t('brand.familyRole')}
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF8E1] text-[#B45309] text-xs font-extrabold">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF6E5] text-[#92540B] border border-[#F7D59A] text-xs font-extrabold">
         <span>🩺</span> {t('brand.caregiverRole')}
       </span>
     );
   };
 
   return (
-    <div className="flex flex-col justify-between min-h-[580px] h-full p-5 sm:p-7 bg-[#FAFBFD] overflow-y-auto">
-      <div>
+    <div className="flex flex-col justify-between min-h-[580px] h-full bg-gradient-to-b from-[#F5FAF6] via-white to-[#FAF7F2] overflow-y-auto">
+      <RegionalTextileBorder height={4} />
+      <div className="p-5 sm:p-7 flex-1">
         {/* Top Nav: Back button & Role Pill */}
         <div className="flex items-center justify-between mb-4">
           <button
@@ -167,7 +183,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
               sounds.playGentleTap();
               if (onBack) onBack();
             }}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#172B4D] px-2.5 py-1.5 rounded-xl hover:bg-slate-100 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-500 hover:text-[#162832] px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>{t('registration.backToRole')}</span>
@@ -177,7 +193,11 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
 
         {/* Screen Title */}
         <div className="text-center mb-5">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#172B4D] tracking-tight">
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#EBF5EE] text-[#1E5E3A] text-[10px] font-extrabold uppercase tracking-wider mb-1.5 border border-[#C3E2CD]">
+            <TeaLeafSprig className="w-3 h-3" />
+            <span>North-Eastern Memory Sanctuary</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-serif text-[#162832] tracking-tight">
             {role === 'patient' ? t('registration.registerSelf') : t('registration.registerPatient')}
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 max-w-sm mx-auto">
@@ -199,7 +219,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
             }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               mode === 'create'
-                ? 'bg-white text-[#172B4D] shadow-sm'
+                ? 'bg-white text-[#162832] shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -214,7 +234,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
             }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               mode === 'connect'
-                ? 'bg-white text-[#172B4D] shadow-sm'
+                ? 'bg-white text-[#162832] shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -226,13 +246,13 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
         {/* CONNECT BY PATIENT ID MODE */}
         {mode === 'connect' && (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="p-5 rounded-3xl bg-white border-2 border-slate-200 shadow-sm space-y-4">
+            <div className="p-5 rounded-3xl bg-white border-2 border-[#D8E2D9] shadow-sm space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#EAF2FF] text-[#2F6FED] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-[#EBF5EE] text-[#1E5E3A] flex items-center justify-center">
                   <LinkIcon className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-[#172B4D]">
+                  <h3 className="text-sm font-extrabold text-[#162832]">
                     {t('registration.connectTitle')}
                   </h3>
                   <p className="text-xs text-slate-500 font-medium">
@@ -242,7 +262,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                <label className="block text-xs font-bold text-[#162832] mb-1">
                   {t('registration.patientIdLabel')}
                 </label>
                 <input
@@ -251,7 +271,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                   placeholder={t('registration.patientIdPlaceholder')}
                   value={connectId}
                   onChange={(e) => setConnectId(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-[#2F6FED] text-sm font-mono font-semibold text-[#172B4D] outline-none"
+                  className="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-[#1E5E3A] text-sm font-mono font-semibold text-[#162832] outline-none"
                 />
                 {connectError && (
                   <p className="text-xs text-rose-500 font-semibold mt-1">
@@ -270,7 +290,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                     {t('registration.yourInfo')} ({role === 'family' ? t('brand.familyRole') : t('brand.caregiverRole')})
                   </h4>
                   <div>
-                    <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                    <label className="block text-xs font-bold text-[#162832] mb-1">
                       {t('registration.yourName')}
                     </label>
                     <input
@@ -279,13 +299,13 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                       placeholder={role === 'family' ? t('registration.yourNamePlaceholderFamily') : t('registration.yourNamePlaceholderCaregiver')}
                       value={userInfo.name}
                       onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none"
                     />
                   </div>
 
                   {role === 'family' ? (
                     <div>
-                      <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                      <label className="block text-xs font-bold text-[#162832] mb-1">
                         {t('registration.relationLabel')}
                       </label>
                       <input
@@ -293,12 +313,12 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                         placeholder={t('registration.relationPlaceholder')}
                         value={userInfo.relation}
                         onChange={(e) => setUserInfo(prev => ({ ...prev, relation: e.target.value }))}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none"
                       />
                     </div>
                   ) : (
                     <div>
-                      <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                      <label className="block text-xs font-bold text-[#162832] mb-1">
                         {t('registration.titleLabel')}
                       </label>
                       <input
@@ -306,13 +326,13 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                         placeholder={t('registration.titlePlaceholder')}
                         value={userInfo.title}
                         onChange={(e) => setUserInfo(prev => ({ ...prev, title: e.target.value }))}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none"
                       />
                     </div>
                   )}
 
                   <div>
-                    <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                    <label className="block text-xs font-bold text-[#162832] mb-1">
                       {t('registration.phoneLabel')}
                     </label>
                     <input
@@ -320,7 +340,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                       placeholder={t('registration.phonePlaceholder')}
                       value={userInfo.phone}
                       onChange={(e) => setUserInfo(prev => ({ ...prev, phone: e.target.value }))}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none"
                     />
                   </div>
                 </div>
@@ -329,7 +349,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
 
             <button
               type="submit"
-              className="w-full py-4 rounded-2xl bg-[#2F6FED] hover:bg-[#2557be] text-white font-extrabold text-base shadow-lg shadow-[#2F6FED]/20 transition-all touch-target"
+              className="w-full py-4 rounded-2xl bg-[#1E5E3A] hover:bg-[#164E30] text-white font-extrabold text-base shadow-lg shadow-[#1E5E3A]/25 transition-all touch-target"
             >
               {t('registration.connectButton')}
             </button>
@@ -341,13 +361,13 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* IF FAMILY OR CAREGIVER: YOUR DETAILS FIRST */}
             {role !== 'patient' && (
-              <div className="p-4 rounded-3xl bg-white border-2 border-slate-200 shadow-sm space-y-3">
+              <div className="p-4 rounded-3xl bg-white border-2 border-[#D8E2D9] shadow-sm space-y-3">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-8 h-8 rounded-xl bg-[#EAF2FF] text-[#2F6FED] flex items-center justify-center text-base">
+                  <div className="w-8 h-8 rounded-xl bg-[#EBF5EE] text-[#1E5E3A] flex items-center justify-center text-base">
                     {role === 'family' ? '👨‍👩‍👧' : '🩺'}
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold text-[#172B4D]">
+                    <h3 className="text-sm font-extrabold text-[#162832]">
                       {t('registration.yourInfo')} ({role === 'family' ? t('brand.familyRole') : t('brand.caregiverRole')})
                     </h3>
                     <p className="text-[11px] text-slate-500 font-medium">
@@ -357,7 +377,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                  <label className="block text-xs font-bold text-[#162832] mb-1">
                     {t('registration.yourName')}
                   </label>
                   <input
@@ -366,13 +386,13 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                     placeholder={role === 'family' ? t('registration.yourNamePlaceholderFamily') : t('registration.yourNamePlaceholderCaregiver')}
                     value={userInfo.name}
                     onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
-                    <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                    <label className="block text-xs font-bold text-[#162832] mb-1">
                       {role === 'family' ? t('registration.relationLabel') : t('registration.titleLabel')}
                     </label>
                     <input
@@ -384,12 +404,12 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                         ...prev,
                         [role === 'family' ? 'relation' : 'title']: e.target.value
                       }))}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                    <label className="block text-xs font-bold text-[#162832] mb-1">
                       {t('registration.phoneLabel')}
                     </label>
                     <input
@@ -397,7 +417,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                       placeholder={t('registration.phonePlaceholder')}
                       value={userInfo.phone}
                       onChange={(e) => setUserInfo(prev => ({ ...prev, phone: e.target.value }))}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none"
                     />
                   </div>
                 </div>
@@ -405,13 +425,13 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
             )}
 
             {/* PATIENT DETAILS CARD */}
-            <div className="p-4 rounded-3xl bg-white border-2 border-slate-200 shadow-sm space-y-3.5">
+            <div className="p-4 rounded-3xl bg-white border-2 border-[#D8E2D9] shadow-sm space-y-3.5">
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-8 h-8 rounded-xl bg-[#EAF2FF] text-[#2F6FED] flex items-center justify-center text-base">
+                <div className="w-8 h-8 rounded-xl bg-[#EBF5EE] text-[#1E5E3A] flex items-center justify-center text-base">
                   🧓
                 </div>
                 <div>
-                  <h3 className="text-sm font-extrabold text-[#172B4D]">
+                  <h3 className="text-sm font-extrabold text-[#162832]">
                     {role === 'patient' ? t('registration.patientProfileTitle') : t('registration.patientInfoTitle')}
                   </h3>
                   <p className="text-[11px] text-slate-500 font-medium">
@@ -434,7 +454,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                       <img
                         src={patientFields.avatar}
                         alt="Profile"
-                        className="w-20 h-20 rounded-full object-cover border-4 border-[#2F6FED] shadow-md"
+                        className="w-20 h-20 rounded-full object-cover border-4 border-[#1E5E3A] shadow-md"
                       />
                       <button
                         type="button"
@@ -446,7 +466,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                       </button>
                     </div>
                   ) : (
-                    <div className="w-20 h-20 rounded-full bg-[#EAF2FF] border-2 border-dashed border-[#2F6FED]/40 flex flex-col items-center justify-center text-[#2F6FED] mb-2">
+                    <div className="w-20 h-20 rounded-full bg-[#EBF5EE] border-2 border-dashed border-[#1E5E3A]/40 flex flex-col items-center justify-center text-[#1E5E3A] mb-2">
                       <User className="w-8 h-8 stroke-[1.5]" />
                     </div>
                   )}
@@ -462,7 +482,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#EAF2FF] hover:bg-[#d5e5ff] text-[#2F6FED] text-xs font-bold transition-all border border-[#CFE1FF]"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#EBF5EE] hover:bg-[#d8ece0] text-[#1E5E3A] text-xs font-bold transition-all border border-[#C3E2CD]"
                     >
                       <Upload className="w-3.5 h-3.5" />
                       <span>{t('registration.uploadPhoto')}</span>
@@ -490,7 +510,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
 
               {/* Full Name */}
               <div>
-                <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                <label className="block text-xs font-bold text-[#162832] mb-1">
                   {role === 'patient' ? t('registration.fullNameSelf') : t('registration.fullNameOther')}
                 </label>
                 <input
@@ -499,14 +519,14 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                   placeholder={t('registration.fullNamePlaceholder')}
                   value={patientFields.fullName}
                   onChange={(e) => setPatientFields(prev => ({ ...prev, fullName: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none"
                 />
               </div>
 
               {/* Preferred Name & Age */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                  <label className="block text-xs font-bold text-[#162832] mb-1">
                     {t('registration.preferredNameLabel')}
                   </label>
                   <input
@@ -514,12 +534,12 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                     placeholder={t('registration.preferredNamePlaceholder')}
                     value={patientFields.preferredName}
                     onChange={(e) => setPatientFields(prev => ({ ...prev, preferredName: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                  <label className="block text-xs font-bold text-[#162832] mb-1">
                     {t('registration.ageLabel')}
                   </label>
                   <input
@@ -527,7 +547,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                     placeholder={t('registration.agePlaceholder')}
                     value={patientFields.age}
                     onChange={(e) => setPatientFields(prev => ({ ...prev, age: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none"
                   />
                 </div>
               </div>
@@ -535,13 +555,13 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
               {/* Gender & Language */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                  <label className="block text-xs font-bold text-[#162832] mb-1">
                     {t('registration.genderLabel')}
                   </label>
                   <select
                     value={patientFields.gender}
                     onChange={(e) => setPatientFields(prev => ({ ...prev, gender: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none bg-white"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none bg-white"
                   >
                     <option value="Female">{t('registration.genderFemale')}</option>
                     <option value="Male">{t('registration.genderMale')}</option>
@@ -550,13 +570,13 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                  <label className="block text-xs font-bold text-[#162832] mb-1">
                     {t('registration.languageLabel')}
                   </label>
                   <select
                     value={patientFields.language}
                     onChange={(e) => setPatientFields(prev => ({ ...prev, language: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none bg-white"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none bg-white"
                   >
                     {SUPPORTED_LANGUAGES.map(l => (
                       <option key={l.code} value={l.name}>
@@ -569,7 +589,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
 
               {/* Patient Phone */}
               <div>
-                <label className="block text-xs font-bold text-[#172B4D] mb-1">
+                <label className="block text-xs font-bold text-[#162832] mb-1">
                   {role === 'patient' ? t('registration.patientPhoneSelf') : t('registration.patientPhoneOther')}
                 </label>
                 <input
@@ -577,7 +597,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
                   placeholder={t('registration.phonePlaceholder')}
                   value={patientFields.phone}
                   onChange={(e) => setPatientFields(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] text-sm text-[#172B4D] outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] text-sm text-[#162832] outline-none"
                 />
               </div>
             </div>
@@ -585,7 +605,7 @@ export default function RoleRegistration({ role = 'patient', onBack, onComplete 
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-4 rounded-2xl bg-[#2F6FED] hover:bg-[#2557be] text-white font-extrabold text-base shadow-lg shadow-[#2F6FED]/20 transition-all touch-target mt-2"
+              className="w-full py-4 rounded-2xl bg-[#1E5E3A] hover:bg-[#164E30] text-white font-extrabold text-base shadow-lg shadow-[#1E5E3A]/25 transition-all touch-target mt-2"
             >
               {role === 'patient'
                 ? t('registration.submitSelf')

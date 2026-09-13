@@ -112,12 +112,12 @@ export default function FamilyPeople() {
       )}
 
       {/* Header Banner */}
-      <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#EAF2FF] border border-[#CFE1FF] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#EBF5EE] border border-[#D8E2D9] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <span className="text-[11px] sm:text-xs font-bold text-[#2F6FED] uppercase tracking-wider">
+          <span className="text-[11px] sm:text-xs font-bold text-[#1E5E3A] uppercase tracking-wider">
             Personalization Portal
           </span>
-          <h2 className="text-lg sm:text-2xl font-extrabold text-[#172B4D] mt-0.5">
+          <h2 className="text-lg sm:text-2xl font-extrabold text-[#162832] mt-0.5">
             Family & Important People
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 font-medium">
@@ -126,7 +126,7 @@ export default function FamilyPeople() {
         </div>
         <button
           onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-[#2F6FED] hover:bg-[#2052b8] text-white text-xs font-extrabold shadow-sm transition-all touch-target w-full sm:w-auto flex-shrink-0"
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-[#1E5E3A] hover:bg-[#164E30] text-white text-xs font-extrabold shadow-sm transition-all touch-target w-full sm:w-auto flex-shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Add Family Member</span>
@@ -136,10 +136,10 @@ export default function FamilyPeople() {
       {/* Family Members Grid */}
       {familyList.length === 0 ? (
         <Card variant="white" className="p-6 sm:p-8 text-center border-dashed border-2 border-slate-200">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#EAF2FF] text-[#2F6FED] flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-3">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9] flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-3">
             👨‍👩‍👧
           </div>
-          <h3 className="text-base sm:text-lg font-extrabold text-[#172B4D]">
+          <h3 className="text-base sm:text-lg font-extrabold text-[#162832]">
             No family members added yet
           </h3>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 max-w-sm mx-auto">
@@ -163,20 +163,20 @@ export default function FamilyPeople() {
                   <img
                     src={member.avatar || member.photo}
                     alt={member.name}
-                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl object-cover border-2 border-[#2F6FED]/20 flex-shrink-0 shadow-xs"
+                    className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl object-cover border-2 border-[#1E5E3A]/20 flex-shrink-0 shadow-xs"
                   />
                 ) : (
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-[#EAF2FF] text-[#2F6FED] font-extrabold text-xl sm:text-2xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9] font-extrabold text-xl sm:text-2xl flex items-center justify-center flex-shrink-0">
                     {member.name.charAt(0)}
                   </div>
                 )}
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                    <h4 className="font-extrabold text-sm sm:text-base text-[#172B4D] truncate">
+                    <h4 className="font-extrabold text-sm sm:text-base text-[#162832] truncate">
                       {member.name}
                     </h4>
-                    <span className="px-2 py-0.5 rounded-full bg-[#EAF2FF] text-[#2F6FED] text-[10px] sm:text-[11px] font-bold flex-shrink-0">
+                    <span className="px-2 py-0.5 rounded-full bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9] text-[10px] sm:text-[11px] font-bold flex-shrink-0">
                       {member.relation}
                     </span>
                   </div>
@@ -200,7 +200,7 @@ export default function FamilyPeople() {
               <div className="flex items-center justify-end gap-2 mt-4 pt-3 border-t border-slate-100">
                 <button
                   onClick={() => handleOpenEdit(member)}
-                  className="p-2 rounded-xl text-slate-500 hover:text-[#2F6FED] hover:bg-[#EAF2FF] transition-colors text-xs font-bold flex items-center gap-1"
+                  className="p-2 rounded-xl text-slate-500 hover:text-[#1E5E3A] hover:bg-[#EBF5EE] transition-colors text-xs font-bold flex items-center gap-1"
                   title="Edit person"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
@@ -230,7 +230,7 @@ export default function FamilyPeople() {
       >
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-[#172B4D] mb-1">
+            <label className="block text-xs font-bold text-[#162832] mb-1">
               Full Name *
             </label>
             <input
@@ -239,19 +239,19 @@ export default function FamilyPeople() {
               value={form.name}
               onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
               placeholder="e.g., Priya"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-[#172B4D] mb-1">
+              <label className="block text-xs font-bold text-[#162832] mb-1">
                 Relationship *
               </label>
               <select
                 value={form.relation}
                 onChange={(e) => setForm(prev => ({ ...prev, relation: e.target.value }))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none bg-white"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none bg-white"
               >
                 <option value="Daughter">Daughter</option>
                 <option value="Son">Son</option>
@@ -270,7 +270,7 @@ export default function FamilyPeople() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#172B4D] mb-1">
+              <label className="block text-xs font-bold text-[#162832] mb-1">
                 Phone Number (Optional)
               </label>
               <input
@@ -278,13 +278,13 @@ export default function FamilyPeople() {
                 value={form.phone}
                 onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))}
                 placeholder="+91 98300 11223"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-[#172B4D] mb-1">
+            <label className="block text-xs font-bold text-[#162832] mb-1">
               Photo
             </label>
             <div className="flex items-center gap-3">
@@ -310,7 +310,7 @@ export default function FamilyPeople() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                  className="px-3.5 py-2 rounded-xl bg-[#EBF5EE] hover:bg-[#D8E2D9] text-[#1E5E3A] text-xs font-bold flex items-center gap-1.5 transition-colors border border-[#D8E2D9]"
                 >
                   <Upload className="w-3.5 h-3.5" />
                   <span>Choose Photo File</span>
@@ -320,7 +320,7 @@ export default function FamilyPeople() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-[#172B4D] mb-1">
+            <label className="block text-xs font-bold text-[#162832] mb-1">
               Personal Note / Memory Clue (Optional)
             </label>
             <textarea
@@ -328,7 +328,7 @@ export default function FamilyPeople() {
               value={form.notes}
               onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
               placeholder="e.g., Visits every evening around 6 PM. Loves balcony flowers."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
             />
           </div>
 
@@ -338,7 +338,7 @@ export default function FamilyPeople() {
               id="isEmergencyContact"
               checked={form.isEmergencyContact}
               onChange={(e) => setForm(prev => ({ ...prev, isEmergencyContact: e.target.checked }))}
-              className="w-4 h-4 rounded text-[#2F6FED] focus:ring-[#2F6FED]"
+              className="w-4 h-4 rounded text-[#1E5E3A] focus:ring-[#1E5E3A]"
             />
             <label htmlFor="isEmergencyContact" className="text-xs font-bold text-slate-700">
               Include as One-Touch Emergency Contact for Patient

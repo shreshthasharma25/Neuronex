@@ -36,25 +36,25 @@ export default function CaregiverSettings() {
   return (
     <div className="space-y-6 pb-24">
       {/* Header */}
-      <div className="p-5 rounded-3xl bg-[#EAF2FF] border border-[#CFE1FF] flex items-center justify-between">
+      <div className="p-5 rounded-3xl bg-[#EBF5EE] border border-[#D8E2D9] flex items-center justify-between">
         <div>
-          <span className="text-xs font-bold text-[#2F6FED] uppercase tracking-wider">
+          <span className="text-xs font-bold text-[#1E5E3A] uppercase tracking-wider">
             Configuration
           </span>
-          <h2 className="text-2xl font-extrabold text-[#172B4D] mt-0.5">
+          <h2 className="text-2xl font-extrabold text-[#162832] mt-0.5">
             Caregiver App Settings
           </h2>
           <p className="text-sm text-slate-600 font-medium">
             Fine-tune exercise timings, language support, and cognitive pacing
           </p>
         </div>
-        <div className="w-12 h-12 rounded-2xl bg-white text-[#2F6FED] flex items-center justify-center text-2xl shadow-sm">
+        <div className="w-12 h-12 rounded-2xl bg-white text-[#1E5E3A] border border-[#D8E2D9] flex items-center justify-center text-2xl shadow-sm">
           ⚙️
         </div>
       </div>
 
       {savedNotice && (
-        <div className="p-4 rounded-2xl bg-[#E8F5E9] border border-[#C8E6C9] text-[#2E7D32] text-sm font-bold flex items-center gap-2">
+        <div className="p-4 rounded-2xl bg-[#EBF5EE] border border-[#D8E2D9] text-[#1E5E3A] text-sm font-bold flex items-center gap-2">
           <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
           <span>Settings saved and synced across all patient views!</span>
         </div>
@@ -64,8 +64,8 @@ export default function CaregiverSettings() {
         {/* Brain Exercise Schedule */}
         <Card variant="white" className="p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Clock className="w-5 h-5 text-[#2F6FED]" />
-            <h3 className="text-base font-extrabold text-[#172B4D]">
+            <Clock className="w-5 h-5 text-[#1E5E3A]" />
+            <h3 className="text-base font-extrabold text-[#162832]">
               Daily Brain Exercise Time
             </h3>
           </div>
@@ -76,7 +76,7 @@ export default function CaregiverSettings() {
             type="text"
             value={exerciseTime}
             onChange={(e) => setExerciseTime(e.target.value)}
-            className="w-full sm:w-64 px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-bold text-[#172B4D]"
+            className="w-full sm:w-64 px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-bold text-[#162832]"
             placeholder="e.g. 10:00 AM"
           />
         </Card>
@@ -84,8 +84,8 @@ export default function CaregiverSettings() {
         {/* Multi-language Adaptation */}
         <Card variant="white" className="p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Globe className="w-5 h-5 text-[#2F6FED]" />
-            <h3 className="text-base font-extrabold text-[#172B4D]">
+            <Globe className="w-5 h-5 text-[#1E5E3A]" />
+            <h3 className="text-base font-extrabold text-[#162832]">
               Patient Language Preference
             </h3>
           </div>
@@ -95,7 +95,7 @@ export default function CaregiverSettings() {
           <select
             value={selectedLanguage}
             onChange={(e) => handleLanguageChange(e.target.value)}
-            className="w-full sm:w-64 px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium text-[#172B4D]"
+            className="w-full sm:w-64 px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium text-[#162832]"
           >
             <option value="en">English</option>
             <option value="hi">Hindi (हिंदी)</option>
@@ -108,8 +108,8 @@ export default function CaregiverSettings() {
         {/* Cognitive Pacing & Difficulty */}
         <Card variant="white" className="p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Sliders className="w-5 h-5 text-[#2F6FED]" />
-            <h3 className="text-base font-extrabold text-[#172B4D]">
+            <Sliders className="w-5 h-5 text-[#1E5E3A]" />
+            <h3 className="text-base font-extrabold text-[#162832]">
               Cognitive Engine Adaptation Mode
             </h3>
           </div>
@@ -119,7 +119,7 @@ export default function CaregiverSettings() {
           <select
             value={difficultyPreset}
             onChange={(e) => setDifficultyPreset(e.target.value)}
-            className="w-full sm:w-64 px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium text-[#172B4D]"
+            className="w-full sm:w-64 px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium text-[#162832]"
           >
             <option value="Adaptive (Automatic)">Adaptive (Automatic - Recommended)</option>
             <option value="Gentle / Low Paced">Gentle / Low Paced</option>
