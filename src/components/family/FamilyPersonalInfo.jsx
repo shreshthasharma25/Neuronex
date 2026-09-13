@@ -41,28 +41,28 @@ export default function FamilyPersonalInfo() {
       )}
 
       {/* Header */}
-      <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#EAF2FF] border border-[#CFE1FF] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#EBF5EE] border border-[#D8E2D9] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <span className="text-[11px] sm:text-xs font-bold text-[#2F6FED] uppercase tracking-wider">
+          <span className="text-[11px] sm:text-xs font-bold text-[#1E5E3A] uppercase tracking-wider">
             Memory Grounding & Comfort
           </span>
-          <h2 className="text-lg sm:text-2xl font-extrabold text-[#172B4D] mt-0.5">
+          <h2 className="text-lg sm:text-2xl font-extrabold text-[#162832] mt-0.5">
             Personal Information & Preferences
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 font-medium">
             Safe, heartwarming details about {preferredName}'s lifelong favorites and family facts. Powers gentle voice companion conversations.
           </p>
         </div>
-        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white text-[#2F6FED] flex items-center justify-center text-xl sm:text-2xl shadow-sm flex-shrink-0 self-start sm:self-auto">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white text-[#1E5E3A] border border-[#D8E2D9] flex items-center justify-center text-xl sm:text-2xl shadow-sm flex-shrink-0 self-start sm:self-auto">
           💡
         </div>
       </div>
 
-      <Card variant="white" className="p-4 sm:p-6">
+      <Card variant="white" className="p-4 sm:p-6 border border-[#D8E2D9]">
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Favorite Food */}
           <div>
-            <label className="text-xs font-extrabold text-[#172B4D] flex items-center gap-2 mb-1.5">
+            <label className="text-xs font-extrabold text-[#162832] flex items-center gap-2 mb-1.5">
               <Utensils className="w-4 h-4 text-amber-500" />
               <span>Favorite Comfort Food</span>
             </label>
@@ -70,8 +70,8 @@ export default function FamilyPersonalInfo() {
               type="text"
               value={form.favoriteFood}
               onChange={(e) => setForm(prev => ({ ...prev, favoriteFood: e.target.value }))}
-              placeholder="e.g., Warm khichuri with roasted papad"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+              placeholder="e.g., Warm khichuri with roasted papad or fresh pithas"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
             />
             <p className="text-[11px] text-slate-400 font-medium mt-1">
               Referenced gently during mealtime check-ins.
@@ -80,7 +80,7 @@ export default function FamilyPersonalInfo() {
 
           {/* Favorite Color */}
           <div>
-            <label className="text-xs font-extrabold text-[#172B4D] flex items-center gap-2 mb-1.5">
+            <label className="text-xs font-extrabold text-[#162832] flex items-center gap-2 mb-1.5">
               <Palette className="w-4 h-4 text-purple-500" />
               <span>Favorite Color</span>
             </label>
@@ -88,14 +88,14 @@ export default function FamilyPersonalInfo() {
               type="text"
               value={form.favoriteColor}
               onChange={(e) => setForm(prev => ({ ...prev, favoriteColor: e.target.value }))}
-              placeholder="e.g., Soft marigold yellow or sky blue"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+              placeholder="e.g., Soft marigold yellow, Muga golden, or sky blue"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
             />
           </div>
 
           {/* Hobbies & Passions */}
           <div>
-            <label className="text-xs font-extrabold text-[#172B4D] flex items-center gap-2 mb-1.5">
+            <label className="text-xs font-extrabold text-[#162832] flex items-center gap-2 mb-1.5">
               <BookOpen className="w-4 h-4 text-emerald-500" />
               <span>Important Hobbies & Lifelong Passions</span>
             </label>
@@ -103,14 +103,14 @@ export default function FamilyPersonalInfo() {
               rows={2}
               value={form.hobbies}
               onChange={(e) => setForm(prev => ({ ...prev, hobbies: e.target.value }))}
-              placeholder="e.g., Singing Rabindra Sangeet, watering balcony plants, knitting"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+              placeholder="e.g., Singing Rabindra Sangeet, handloom weaving, watering balcony plants"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
             />
           </div>
 
           {/* Family Facts */}
           <div>
-            <label className="text-xs font-extrabold text-[#172B4D] flex items-center gap-2 mb-1.5">
+            <label className="text-xs font-extrabold text-[#162832] flex items-center gap-2 mb-1.5">
               <Heart className="w-4 h-4 text-rose-500" />
               <span>Key Family Facts & Routine Anchors</span>
             </label>
@@ -119,13 +119,13 @@ export default function FamilyPersonalInfo() {
               value={form.familyFacts}
               onChange={(e) => setForm(prev => ({ ...prev, familyFacts: e.target.value }))}
               placeholder="e.g., Daughter Priya visits every evening around 6 PM; son Rahul calls Sundays."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
             />
           </div>
 
           {/* Personal Preferences */}
           <div>
-            <label className="text-xs font-extrabold text-[#172B4D] flex items-center gap-2 mb-1.5">
+            <label className="text-xs font-extrabold text-[#162832] flex items-center gap-2 mb-1.5">
               <Coffee className="w-4 h-4 text-amber-700" />
               <span>Daily Comfort Preferences</span>
             </label>
@@ -133,8 +133,8 @@ export default function FamilyPersonalInfo() {
               type="text"
               value={form.preferences}
               onChange={(e) => setForm(prev => ({ ...prev, preferences: e.target.value }))}
-              placeholder="e.g., Likes morning tea at 7 AM with mild ginger"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+              placeholder="e.g., Likes morning Assam tea at 7 AM with mild ginger"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
             />
           </div>
 

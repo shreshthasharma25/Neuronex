@@ -111,7 +111,7 @@ export default function CaregiverMedicines() {
           <span className="text-[11px] sm:text-xs font-bold text-amber-800 uppercase tracking-wider">
             Medication Schedule & Adherence
           </span>
-          <h2 className="text-lg sm:text-2xl font-extrabold text-[#172B4D] mt-0.5">
+          <h2 className="text-lg sm:text-2xl font-extrabold text-[#162832] mt-0.5">
             Prescriptions & Medicines
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 font-medium">
@@ -120,7 +120,7 @@ export default function CaregiverMedicines() {
         </div>
         <button
           onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-[#2F6FED] hover:bg-[#2052b8] text-white text-xs font-extrabold shadow-sm transition-all touch-target w-full sm:w-auto flex-shrink-0"
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-[#1E5E3A] hover:bg-[#164E30] text-white text-xs font-extrabold shadow-sm transition-all touch-target w-full sm:w-auto flex-shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Add Medicine</span>
@@ -128,11 +128,11 @@ export default function CaregiverMedicines() {
       </div>
 
       {medicines.length === 0 ? (
-        <Card variant="white" className="p-6 sm:p-8 text-center border-dashed border-2 border-slate-200">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-3">
+        <Card variant="white" className="p-6 sm:p-8 text-center border-dashed border-2 border-[#D8E2D9]">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#EBF5EE] text-[#1E5E3A] flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-3 border border-[#D8E2D9]">
             💊
           </div>
-          <h3 className="text-base sm:text-lg font-extrabold text-[#172B4D]">
+          <h3 className="text-base sm:text-lg font-extrabold text-[#162832]">
             No medicines added yet
           </h3>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1 max-w-sm mx-auto">
@@ -165,13 +165,13 @@ export default function CaregiverMedicines() {
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                      <h4 className="text-sm sm:text-base font-extrabold text-[#172B4D]">
+                      <h4 className="text-sm sm:text-base font-extrabold text-[#162832]">
                         {med.name}
                       </h4>
                       <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] sm:text-xs font-bold">
                         {med.dosage || '1 dose'}
                       </span>
-                      <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#EAF2FF] text-[#2F6FED] text-[10px] sm:text-xs font-bold flex items-center gap-1">
+                      <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9] text-[10px] sm:text-xs font-bold flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         <span>{med.time}</span>
                       </span>
@@ -210,7 +210,7 @@ export default function CaregiverMedicines() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handleOpenEdit(med)}
-                      className="p-2 rounded-xl text-slate-500 hover:text-[#2F6FED] hover:bg-[#EAF2FF] transition-colors touch-target flex items-center justify-center"
+                      className="p-2 rounded-xl text-slate-500 hover:text-[#1E5E3A] hover:bg-[#EBF5EE] transition-colors touch-target flex items-center justify-center"
                       title="Edit medicine"
                     >
                       <Edit3 className="w-4 h-4" />
@@ -241,7 +241,7 @@ export default function CaregiverMedicines() {
       >
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-[#172B4D] mb-1">
+            <label className="block text-xs font-bold text-[#162832] mb-1">
               Medicine Name *
             </label>
             <input
@@ -250,13 +250,13 @@ export default function CaregiverMedicines() {
               value={form.name}
               onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
               placeholder="e.g., Morning Medicine"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-[#172B4D] mb-1">
+              <label className="block text-xs font-bold text-[#162832] mb-1">
                 Dosage
               </label>
               <input
@@ -264,12 +264,12 @@ export default function CaregiverMedicines() {
                 value={form.dosage}
                 onChange={(e) => setForm(prev => ({ ...prev, dosage: e.target.value }))}
                 placeholder="e.g., 1 Tablet"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#172B4D] mb-1">
+              <label className="block text-xs font-bold text-[#162832] mb-1">
                 Scheduled Time *
               </label>
               <input
@@ -278,19 +278,19 @@ export default function CaregiverMedicines() {
                 value={form.time}
                 onChange={(e) => setForm(prev => ({ ...prev, time: e.target.value }))}
                 placeholder="e.g., 8:00 AM"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-[#172B4D] mb-1">
+            <label className="block text-xs font-bold text-[#162832] mb-1">
               Frequency
             </label>
             <select
               value={form.frequency}
               onChange={(e) => setForm(prev => ({ ...prev, frequency: e.target.value }))}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none bg-white"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none bg-white"
             >
               <option value="Daily">Daily</option>
               <option value="Twice daily">Twice daily</option>
@@ -301,7 +301,7 @@ export default function CaregiverMedicines() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-[#172B4D] mb-1">
+            <label className="block text-xs font-bold text-[#162832] mb-1">
               Instructions for Patient
             </label>
             <textarea
@@ -309,7 +309,7 @@ export default function CaregiverMedicines() {
               value={form.instructions}
               onChange={(e) => setForm(prev => ({ ...prev, instructions: e.target.value }))}
               placeholder="e.g., Take with warm water after breakfast."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#2F6FED] focus:outline-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none"
             />
           </div>
 

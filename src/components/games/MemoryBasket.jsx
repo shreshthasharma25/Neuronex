@@ -70,9 +70,9 @@ export default function MemoryBasket({ onComplete, onExit, reshuffleKey = 0 }) {
 
     if (accuracy >= 75) {
       sounds.playSuccess();
-      setFeedback(`❤️ Excellent! You remembered ${correctCount} out of ${targetItems.length} groceries!`);
+      setFeedback(`❤️ Excellent! You remembered ${correctCount} out of ${targetItems.length} items!`);
     } else {
-      setFeedback(`😊 Good practice! You remembered ${correctCount} groceries.`);
+      setFeedback(`😊 Good practice! You remembered ${correctCount} items.`);
     }
 
     setTimeout(() => {
@@ -93,21 +93,21 @@ export default function MemoryBasket({ onComplete, onExit, reshuffleKey = 0 }) {
   return (
     <GameContainer
       title="Memory Basket"
-      subtitle={`Level ${currentLevel} • Remember ${targetItems.length} Groceries`}
+      subtitle={`Level ${currentLevel} • Remember ${targetItems.length} Everyday Items`}
       onExit={onExit}
       instructionText={
         phase === 'memorize'
           ? `Look carefully at these ${targetItems.length} items. Remember them for your basket.`
-          : "Which things were on your shopping list? Tap them to put them in your basket."
+          : "Which things were on your list? Tap them to put them in your basket."
       }
     >
       {phase === 'memorize' ? (
         <div className="space-y-6 text-center">
-          <div className="bg-[#FFF8E1] p-4 rounded-2xl border border-[#FDE68A]">
-            <p className="text-base font-extrabold text-[#854D0E]">
+          <div className="bg-[#FFF6E5] p-4 rounded-2xl border border-[#F3E2C4]">
+            <p className="text-base font-extrabold text-[#D98A1E]">
               👀 Remember these {targetItems.length} items for your basket:
             </p>
-            <p className="text-xs text-amber-700 font-semibold mt-1">
+            <p className="text-xs text-amber-800 font-semibold mt-1">
               Time remaining: {countdown} seconds
             </p>
           </div>
@@ -116,10 +116,10 @@ export default function MemoryBasket({ onComplete, onExit, reshuffleKey = 0 }) {
             {targetItems.map(item => (
               <div
                 key={item.id}
-                className="bg-white p-5 rounded-3xl border-2 border-[#2F6FED] shadow-md flex flex-col items-center justify-center space-y-2 transform hover:scale-105 transition-all"
+                className="bg-white p-5 rounded-3xl border-2 border-[#1E5E3A] shadow-md flex flex-col items-center justify-center space-y-2 transform hover:scale-105 transition-all"
               >
                 <span className="text-5xl">{item.icon || item.emoji}</span>
-                <span className="text-base font-extrabold text-[#172B4D]">
+                <span className="text-base font-extrabold text-[#162832]">
                   {item.name}
                 </span>
               </div>
@@ -132,7 +132,7 @@ export default function MemoryBasket({ onComplete, onExit, reshuffleKey = 0 }) {
               variant="primary"
               size="lg"
               fullWidth
-              className="bg-[#2F6FED] text-white font-bold"
+              className="bg-[#1E5E3A] hover:bg-[#164E30] text-white font-bold"
             >
               I'm Ready Now →
             </Button>
@@ -140,15 +140,15 @@ export default function MemoryBasket({ onComplete, onExit, reshuffleKey = 0 }) {
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="bg-[#EAF2FF] p-3.5 rounded-2xl border border-[#CFE1FF] flex items-center justify-between">
+          <div className="bg-[#EBF5EE] p-3.5 rounded-2xl border border-[#D8E2D9] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ShoppingBasket className="w-5 h-5 text-[#2F6FED]" />
-              <span className="text-xs font-extrabold text-[#172B4D]">
+              <ShoppingBasket className="w-5 h-5 text-[#1E5E3A]" />
+              <span className="text-xs font-extrabold text-[#162832]">
                 Basket: {selectedIds.length} of {targetItems.length} items selected
               </span>
             </div>
             {selectedIds.length === targetItems.length && (
-              <span className="text-xs font-bold text-emerald-600 bg-white px-2 py-0.5 rounded-full">
+              <span className="text-xs font-bold text-emerald-700 bg-white px-2 py-0.5 rounded-full border border-emerald-200">
                 Basket Full
               </span>
             )}
@@ -171,17 +171,17 @@ export default function MemoryBasket({ onComplete, onExit, reshuffleKey = 0 }) {
                   onClick={() => handleToggleItem(item.id)}
                   className={`p-4 rounded-3xl border-2 transition-all flex flex-col items-center justify-center space-y-2 relative touch-target ${
                     isSelected
-                      ? 'bg-[#EAF2FF] border-[#2F6FED] shadow-md scale-102'
-                      : 'bg-white border-slate-200 hover:border-slate-300'
+                      ? 'bg-[#EBF5EE] border-[#1E5E3A] shadow-md scale-102'
+                      : 'bg-white border-[#D8E2D9] hover:border-[#1E5E3A]'
                   }`}
                 >
                   {isSelected && (
-                    <span className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#2F6FED] text-white flex items-center justify-center">
+                    <span className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#1E5E3A] text-white flex items-center justify-center">
                       <CheckCircle2 className="w-4 h-4" />
                     </span>
                   )}
                   <span className="text-4xl">{item.icon || item.emoji}</span>
-                  <span className="text-sm font-extrabold text-[#172B4D]">
+                  <span className="text-sm font-extrabold text-[#162832]">
                     {item.name}
                   </span>
                 </button>
@@ -196,7 +196,7 @@ export default function MemoryBasket({ onComplete, onExit, reshuffleKey = 0 }) {
               variant="primary"
               size="xl"
               fullWidth
-              className="bg-[#2F6FED] text-white font-extrabold text-lg shadow-lg disabled:opacity-50"
+              className="bg-[#1E5E3A] hover:bg-[#164E30] text-white font-extrabold text-lg shadow-lg disabled:opacity-50"
             >
               Check My Basket ({selectedIds.length}/{targetItems.length})
             </Button>

@@ -5,10 +5,12 @@ import { useApp } from '../../context/AppContext';
 import { GAME_LEVEL_CONFIGS } from '../../utils/adaptiveEngine';
 
 const ALL_CARD_ITEMS = [
-  { id: 'flower', emoji: '🌸', name: 'Flower' },
-  { id: 'bird', emoji: '🐦', name: 'Bird' },
-  { id: 'clock', emoji: '⏰', name: 'Clock' },
-  { id: 'tea', emoji: '🫖', name: 'Teapot' },
+  { id: 'orchid', emoji: '🌸', name: 'Hill Orchid' },
+  { id: 'tea', emoji: '🫖', name: 'Tea Kettle' },
+  { id: 'flute', emoji: '🪈', name: 'Bamboo Flute' },
+  { id: 'bell', emoji: '🔔', name: 'Puja Bell' },
+  { id: 'sun', emoji: '☀️', name: 'Warm Sun' },
+  { id: 'bird', emoji: '🐦', name: 'Singing Bird' },
 ];
 
 export default function MemoryTwin({ onComplete, onExit }) {
@@ -101,11 +103,11 @@ export default function MemoryTwin({ onComplete, onExit }) {
     >
       <div className="space-y-4">
         {/* Friendly Instruction & Feedback */}
-        <div className="p-4 rounded-2xl bg-[#EAF2FF] border border-[#CFE1FF] text-center">
-          <p className="text-base font-bold text-[#172B4D]">
+        <div className="p-4 rounded-2xl bg-[#EBF5EE] border border-[#D8E2D9] text-center">
+          <p className="text-base font-bold text-[#162832]">
             {feedback}
           </p>
-          <p className="text-xs text-[#2F6FED] font-semibold mt-1">
+          <p className="text-xs text-[#1E5E3A] font-semibold mt-1">
             Pairs found: {matchedIds.length} of {activeItems.length}
           </p>
         </div>
@@ -126,17 +128,20 @@ export default function MemoryTwin({ onComplete, onExit }) {
                   isMatched
                     ? 'bg-[#E8F5E9] border-2 border-[#A5D6A7] scale-95 opacity-85'
                     : isFlipped
-                    ? 'bg-white border-2 border-[#2F6FED] shadow-md scale-100'
-                    : 'bg-gradient-to-br from-[#2F6FED] to-[#2052b8] text-white hover:brightness-105 active:scale-95 border-2 border-white'
+                    ? 'bg-white border-2 border-[#1E5E3A] shadow-md scale-100'
+                    : 'bg-gradient-to-br from-[#1E5E3A] via-[#1B4D3E] to-[#143B30] text-white hover:brightness-105 active:scale-95 border-2 border-white/60 shadow-sm relative overflow-hidden'
                 }`}
               >
                 {isFlipped ? (
                   <div className="animate-in zoom-in-75 duration-150 flex flex-col items-center">
                     <span className="text-4xl mb-1">{card.emoji}</span>
-                    <span className="text-xs font-bold text-slate-700">{card.name}</span>
+                    <span className="text-xs font-bold text-[#162832]">{card.name}</span>
                   </div>
                 ) : (
-                  <span className="text-3xl text-white/80 font-bold">?</span>
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="text-2xl text-[#C68215] font-black">✦</span>
+                    <span className="text-[10px] uppercase font-bold text-emerald-200 tracking-widest mt-0.5">Pair</span>
+                  </div>
                 )}
               </button>
             );

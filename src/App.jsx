@@ -147,7 +147,7 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[#E2E8F0] flex flex-col items-center justify-start antialiased text-[#172B4D]">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[#E5ECE6] flex flex-col items-center justify-start antialiased text-[#162832]">
       {/* SIH Presentation Demo Toolbar */}
       <DemoToolbar />
 
@@ -157,12 +157,12 @@ function MainApp() {
       }`}>
         <div className={`w-full bg-white shadow-2xl transition-all duration-300 relative overflow-hidden flex flex-col ${
           viewMode === 'mobile-frame'
-            ? 'max-w-[430px] min-h-[820px] max-h-[920px] h-[90vh] rounded-[44px] border-[10px] border-[#0F172A] ring-1 ring-slate-900/10'
+            ? 'max-w-[430px] min-h-[820px] max-h-[920px] h-[90vh] rounded-[44px] border-[10px] border-[#162832] ring-1 ring-slate-900/10'
             : 'max-w-6xl min-h-screen rounded-none'
         }`}>
           {/* Mobile Speaker & Camera Notch (when in mobile frame) */}
           {viewMode === 'mobile-frame' && (
-            <div className="w-full h-5 bg-[#0F172A] flex items-center justify-center -mt-0.5 z-40">
+            <div className="w-full h-5 bg-[#162832] flex items-center justify-center -mt-0.5 z-40">
               <div className="w-20 h-3.5 bg-black rounded-full flex items-center justify-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-slate-900" />
                 <div className="w-1.5 h-1.5 rounded-full bg-slate-800" />

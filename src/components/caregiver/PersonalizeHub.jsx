@@ -167,26 +167,26 @@ export default function PersonalizeHub() {
   return (
     <div className="space-y-6 pb-24">
       {/* Header */}
-      <div className="p-5 rounded-3xl bg-[#EAF2FF] border border-[#CFE1FF] flex items-center justify-between">
+      <div className="p-5 rounded-3xl bg-[#EBF5EE] border border-[#D8E2D9] flex items-center justify-between">
         <div>
-          <span className="text-xs font-bold text-[#2F6FED] uppercase tracking-wider">
+          <span className="text-xs font-bold text-[#1E5E3A] uppercase tracking-wider">
             Caregiver Controls
           </span>
-          <h2 className="text-2xl font-extrabold text-[#172B4D] mt-0.5">
+          <h2 className="text-2xl font-extrabold text-[#162832] mt-0.5">
             Personalize Patient Companion
           </h2>
           <p className="text-sm text-slate-600 font-medium">
             Everything you enter here immediately updates {patientData?.profile?.preferredName || patientData?.profile?.fullName || 'the patient'}'s experience.
           </p>
         </div>
-        <div className="w-12 h-12 rounded-2xl bg-white text-[#2F6FED] flex items-center justify-center text-2xl shadow-sm">
+        <div className="w-12 h-12 rounded-2xl bg-white text-[#1E5E3A] border border-[#D8E2D9] flex items-center justify-center text-2xl shadow-sm">
           ✏️
         </div>
       </div>
 
       {/* Success Toast */}
       {successToast && (
-        <div className="p-4 rounded-2xl bg-[#E8F5E9] border border-[#C8E6C9] text-[#2E7D32] text-sm font-bold flex items-center gap-2 shadow-sm animate-in fade-in">
+        <div className="p-4 rounded-2xl bg-[#EBF5EE] border border-[#D8E2D9] text-[#1E5E3A] text-sm font-bold flex items-center gap-2 shadow-sm animate-in fade-in">
           <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
           <span>{successToast}</span>
         </div>
@@ -198,7 +198,7 @@ export default function PersonalizeHub() {
           <div className="flex items-center gap-2">
             <span className="text-xl">👨‍👩‍👧</span>
             <div>
-              <h3 className="text-lg font-extrabold text-[#172B4D]">
+              <h3 className="text-lg font-extrabold text-[#162832]">
                 Family & People I Know
               </h3>
               <p className="text-xs text-slate-500 font-medium">
@@ -236,15 +236,15 @@ export default function PersonalizeHub() {
                       className="w-11 h-11 rounded-xl object-cover border border-slate-200"
                     />
                   ) : (
-                    <div className="w-11 h-11 rounded-xl bg-[#EAF2FF] text-[#2F6FED] flex items-center justify-center text-lg font-bold">
+                    <div className="w-11 h-11 rounded-xl bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9] flex items-center justify-center text-lg font-bold">
                       {person.name[0]}
                     </div>
                   )}
                   <div>
-                    <h4 className="text-sm font-extrabold text-[#172B4D]">
+                    <h4 className="text-sm font-extrabold text-[#162832]">
                       {person.name}
                     </h4>
-                    <span className="text-xs font-bold text-[#2F6FED]">
+                    <span className="text-xs font-bold text-[#1E5E3A]">
                       {person.relation} {person.phone ? `• ${person.phone}` : ''}
                     </span>
                   </div>
@@ -269,7 +269,7 @@ export default function PersonalizeHub() {
           <div className="flex items-center gap-2">
             <span className="text-xl">👨‍⚕️</span>
             <div>
-              <h3 className="text-lg font-extrabold text-[#172B4D]">
+              <h3 className="text-lg font-extrabold text-[#162832]">
                 Family Doctor Contact
               </h3>
               <p className="text-xs text-slate-500 font-medium">
@@ -289,16 +289,16 @@ export default function PersonalizeHub() {
         </div>
 
         {doctorContact ? (
-          <div className="p-3.5 rounded-2xl bg-[#E8F5E9] border border-[#C8E6C9] flex items-center justify-between">
+          <div className="p-3.5 rounded-2xl bg-[#EBF5EE] border border-[#D8E2D9] flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-[#2E7D32] flex items-center justify-center text-xl">
+              <div className="w-10 h-10 rounded-xl bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9] flex items-center justify-center text-xl">
                 👨‍⚕️
               </div>
               <div>
-                <h4 className="text-sm font-extrabold text-[#172B4D]">
+                <h4 className="text-sm font-extrabold text-[#162832]">
                   {doctorContact.value}
                 </h4>
-                <span className="text-xs text-[#2E7D32] font-bold">
+                <span className="text-xs text-[#1E5E3A] font-bold">
                   ✓ Available in patient emergency help
                 </span>
               </div>
@@ -316,7 +316,7 @@ export default function PersonalizeHub() {
         <div className="flex items-center gap-2 mb-4">
           <span className="text-xl">🏠</span>
           <div>
-            <h3 className="text-lg font-extrabold text-[#172B4D]">
+            <h3 className="text-lg font-extrabold text-[#162832]">
               Home Address & Safe-Zone Perimeter
             </h3>
             <p className="text-xs text-slate-500 font-medium">
@@ -335,7 +335,7 @@ export default function PersonalizeHub() {
                 type="text"
                 value={homeAddress}
                 onChange={(e) => setHomeAddress(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium text-[#172B4D]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium text-[#162832]"
                 placeholder="e.g. 14 Lake Road, Kolkata"
               />
             </div>
@@ -348,7 +348,7 @@ export default function PersonalizeHub() {
                 type="text"
                 value={homeCity}
                 onChange={(e) => setHomeCity(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium text-[#172B4D]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium text-[#162832]"
                 placeholder="e.g. Kolkata"
               />
             </div>
@@ -359,7 +359,7 @@ export default function PersonalizeHub() {
               <label className="text-xs font-bold text-slate-600">
                 Safe-Zone Geofence Perimeter:
               </label>
-              <span className="text-xs font-extrabold text-[#2F6FED] bg-[#EAF2FF] px-2 py-0.5 rounded-full">
+              <span className="text-xs font-extrabold text-[#1E5E3A] bg-[#EBF5EE] border border-[#D8E2D9] px-2 py-0.5 rounded-full">
                 {safeZone} meters
               </span>
             </div>
@@ -370,7 +370,7 @@ export default function PersonalizeHub() {
               step="50"
               value={safeZone}
               onChange={(e) => setSafeZone(e.target.value)}
-              className="w-full accent-[#2F6FED] cursor-pointer"
+              className="w-full accent-[#1E5E3A] cursor-pointer"
             />
           </div>
 
@@ -386,7 +386,7 @@ export default function PersonalizeHub() {
           <div className="flex items-center gap-2">
             <span className="text-xl">💊</span>
             <div>
-              <h3 className="text-lg font-extrabold text-[#172B4D]">
+              <h3 className="text-lg font-extrabold text-[#162832]">
                 Scheduled Medicines
               </h3>
               <p className="text-xs text-slate-500 font-medium">
@@ -421,7 +421,7 @@ export default function PersonalizeHub() {
                     💊
                   </div>
                   <div>
-                    <h4 className="text-sm font-extrabold text-[#172B4D]">
+                    <h4 className="text-sm font-extrabold text-[#162832]">
                       {med.name}
                     </h4>
                     <span className="text-xs font-semibold text-slate-500">
@@ -432,7 +432,7 @@ export default function PersonalizeHub() {
 
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    med.taken ? 'bg-[#E8F5E9] text-[#2E7D32]' : 'bg-amber-100 text-amber-800'
+                    med.taken ? 'bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9]' : 'bg-amber-100 text-amber-800'
                   }`}>
                     {med.taken ? 'Taken' : 'Pending'}
                   </span>
@@ -456,7 +456,7 @@ export default function PersonalizeHub() {
           <div className="flex items-center gap-2">
             <span className="text-xl">✨</span>
             <div>
-              <h3 className="text-lg font-extrabold text-[#172B4D]">
+              <h3 className="text-lg font-extrabold text-[#162832]">
                 Important Memories & Facts
               </h3>
               <p className="text-xs text-slate-500 font-medium">
@@ -484,10 +484,10 @@ export default function PersonalizeHub() {
             {patientData.memories.map(mem => (
               <div
                 key={mem.id}
-                className="p-3 rounded-2xl bg-[#FFF8E1] border border-[#FDE68A] flex items-center justify-between"
+                className="p-3 rounded-2xl bg-[#FFF6E5] border border-[#F3E2C4] flex items-center justify-between"
               >
                 <div>
-                  <h4 className="text-sm font-extrabold text-[#172B4D]">
+                  <h4 className="text-sm font-extrabold text-[#162832]">
                     {mem.title}
                   </h4>
                   <p className="text-xs text-slate-700 font-medium mt-0.5">
@@ -497,7 +497,7 @@ export default function PersonalizeHub() {
 
                 <button
                   onClick={() => deleteMemory(mem.id)}
-                  className="p-1.5 text-amber-800 hover:text-rose-600 rounded-lg ml-2"
+                  className="p-1.5 text-[#D98A1E] hover:text-rose-600 rounded-lg ml-2"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -513,7 +513,7 @@ export default function PersonalizeHub() {
           <div className="flex items-center gap-2">
             <span className="text-xl">✅</span>
             <div>
-              <h3 className="text-lg font-extrabold text-[#172B4D]">
+              <h3 className="text-lg font-extrabold text-[#162832]">
                 To-Do List & Daily Tasks
               </h3>
               <p className="text-xs text-slate-500 font-medium">
@@ -551,8 +551,8 @@ export default function PersonalizeHub() {
                     onClick={() => toggleTodo(todo.id)}
                     className={`w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
                       todo.completed
-                        ? 'bg-[#2E7D32] text-white'
-                        : 'border-2 border-slate-300 hover:border-[#2F6FED] bg-white text-transparent'
+                        ? 'bg-[#1E5E3A] text-white'
+                        : 'border-2 border-slate-300 hover:border-[#1E5E3A] bg-white text-transparent'
                     }`}
                     title={todo.completed ? "Mark active" : "Mark completed"}
                   >
@@ -560,22 +560,22 @@ export default function PersonalizeHub() {
                   </button>
 
                   <div>
-                    <h4 className={`text-sm font-extrabold ${todo.completed ? 'line-through text-slate-400' : 'text-[#172B4D]'}`}>
+                    <h4 className={`text-sm font-extrabold ${todo.completed ? 'line-through text-slate-400' : 'text-[#162832]'}`}>
                       {todo.title}
                     </h4>
                     <div className="flex items-center gap-2 mt-0.5">
                       {todo.time && (
-                        <span className="text-xs font-semibold text-[#2F6FED]">
+                        <span className="text-xs font-semibold text-[#1E5E3A]">
                           ⏰ {todo.time}
                         </span>
                       )}
                       {todo.recurrence && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAF2FF] text-[#2F6FED]">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9]">
                           Repeat: {todo.recurrence}
                         </span>
                       )}
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        todo.completed ? 'bg-[#E8F5E9] text-[#2E7D32]' : 'bg-amber-100 text-amber-800'
+                        todo.completed ? 'bg-[#EBF5EE] text-[#1E5E3A]' : 'bg-amber-100 text-amber-800'
                       }`}>
                         {todo.completed ? 'Completed' : 'Active'}
                       </span>
@@ -586,7 +586,7 @@ export default function PersonalizeHub() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleOpenEditTodo(todo)}
-                    className="p-2 text-slate-400 hover:text-[#2F6FED] rounded-lg hover:bg-white transition-colors"
+                    className="p-2 text-slate-400 hover:text-[#1E5E3A] rounded-lg hover:bg-white transition-colors"
                     title="Edit Task"
                   >
                     <Edit3 className="w-4 h-4" />
@@ -613,7 +613,7 @@ export default function PersonalizeHub() {
         <div className="flex items-center gap-2 mb-4">
           <span className="text-xl">🧠</span>
           <div>
-            <h3 className="text-lg font-extrabold text-[#172B4D]">
+            <h3 className="text-lg font-extrabold text-[#162832]">
               Game Difficulty & Cognitive Pacing
             </h3>
             <p className="text-xs text-slate-500 font-medium">
@@ -627,7 +627,7 @@ export default function PersonalizeHub() {
             <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
               Current Active Level:
             </span>
-            <span className="px-3 py-1 rounded-full bg-[#EAF2FF] text-[#2F6FED] font-extrabold text-xs">
+            <span className="px-3 py-1 rounded-full bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9] font-extrabold text-xs">
               Level {patientData.cognitiveStats?.currentLevel || 1} • {
                 (patientData.cognitiveStats?.currentLevel || 1) === 1 ? 'Easy' : (patientData.cognitiveStats?.currentLevel || 1) === 2 ? 'Medium' : 'Hard'
               }
@@ -637,7 +637,7 @@ export default function PersonalizeHub() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               { level: 1, name: 'Level 1 (Easy)', desc: '2 pairs, 3 basket items (10s), calm pace', color: 'bg-emerald-50 border-emerald-300 text-emerald-900' },
-              { level: 2, name: 'Level 2 (Medium)', desc: '3 pairs, 4 basket items (8s), standard recall', color: 'bg-blue-50 border-blue-300 text-blue-900' },
+              { level: 2, name: 'Level 2 (Medium)', desc: '3 pairs, 4 basket items (8s), standard recall', color: 'bg-[#EBF5EE] border-[#D8E2D9] text-[#1E5E3A]' },
               { level: 3, name: 'Level 3 (Hard)', desc: '4 pairs, 5 basket items (6s), higher stimulation', color: 'bg-amber-50 border-amber-300 text-amber-900' }
             ].map(lvl => {
               const isSelected = (patientData.cognitiveStats?.currentLevel || 1) === lvl.level;
@@ -651,16 +651,16 @@ export default function PersonalizeHub() {
                   }}
                   className={`p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-white border-[#2F6FED] shadow-md ring-2 ring-[#2F6FED]/20'
+                      ? 'bg-white border-[#1E5E3A] shadow-md ring-2 ring-[#1E5E3A]/20'
                       : 'bg-white/60 border-slate-200 hover:border-slate-300 text-slate-700'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-extrabold text-sm text-[#172B4D]">
+                    <span className="font-extrabold text-sm text-[#162832]">
                       {lvl.name}
                     </span>
                     {isSelected && (
-                      <span className="w-5 h-5 rounded-full bg-[#2F6FED] text-white flex items-center justify-center text-xs">
+                      <span className="w-5 h-5 rounded-full bg-[#1E5E3A] text-white flex items-center justify-center text-xs">
                         ✓
                       </span>
                     )}
@@ -694,7 +694,7 @@ export default function PersonalizeHub() {
               required
               value={personForm.name}
               onChange={(e) => setPersonForm({ ...personForm, name: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               placeholder="e.g. Priya"
             />
           </div>
@@ -704,7 +704,7 @@ export default function PersonalizeHub() {
             <select
               value={personForm.relation}
               onChange={(e) => setPersonForm({ ...personForm, relation: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
             >
               <option value="Daughter">Daughter</option>
               <option value="Son">Son</option>
@@ -724,7 +724,7 @@ export default function PersonalizeHub() {
                 <img
                   src={personForm.avatar}
                   alt="Preview"
-                  className="w-12 h-12 rounded-xl object-cover border-2 border-[#2F6FED]"
+                  className="w-12 h-12 rounded-xl object-cover border-2 border-[#1E5E3A]"
                 />
               ) : (
                 <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400">
@@ -741,7 +741,7 @@ export default function PersonalizeHub() {
               <button
                 type="button"
                 onClick={() => personFileRef.current?.click()}
-                className="px-3 py-2 rounded-xl bg-[#EAF2FF] text-[#2F6FED] text-xs font-bold border border-[#CFE1FF]"
+                className="px-3 py-2 rounded-xl bg-[#EBF5EE] text-[#1E5E3A] text-xs font-bold border border-[#D8E2D9]"
               >
                 <Upload className="w-3.5 h-3.5 inline mr-1" />
                 Upload Member Photo
@@ -755,7 +755,7 @@ export default function PersonalizeHub() {
               type="tel"
               value={personForm.phone}
               onChange={(e) => setPersonForm({ ...personForm, phone: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               placeholder="e.g. +91 98300 11223"
             />
           </div>
@@ -766,7 +766,7 @@ export default function PersonalizeHub() {
               type="text"
               value={personForm.notes}
               onChange={(e) => setPersonForm({ ...personForm, notes: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               placeholder="e.g. Visits every evening after work"
             />
           </div>
@@ -792,7 +792,7 @@ export default function PersonalizeHub() {
               required
               value={doctorForm.name}
               onChange={(e) => setDoctorForm({ ...doctorForm, name: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               placeholder="e.g. Dr. Debashish Bose"
             />
           </div>
@@ -804,7 +804,7 @@ export default function PersonalizeHub() {
               required
               value={doctorForm.phone}
               onChange={(e) => setDoctorForm({ ...doctorForm, phone: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               placeholder="e.g. +91 98301 23456"
             />
           </div>
@@ -830,7 +830,7 @@ export default function PersonalizeHub() {
               required
               value={medicineForm.name}
               onChange={(e) => setMedicineForm({ ...medicineForm, name: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               placeholder="e.g. Morning Blood Pressure (5mg)"
             />
           </div>
@@ -842,7 +842,7 @@ export default function PersonalizeHub() {
                 type="text"
                 value={medicineForm.time}
                 onChange={(e) => setMedicineForm({ ...medicineForm, time: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
                 placeholder="e.g. 8:00 AM"
               />
             </div>
@@ -852,7 +852,7 @@ export default function PersonalizeHub() {
               <select
                 value={medicineForm.tag}
                 onChange={(e) => setMedicineForm({ ...medicineForm, tag: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               >
                 <option value="Morning">Morning</option>
                 <option value="Afternoon">Afternoon</option>
@@ -868,7 +868,7 @@ export default function PersonalizeHub() {
               type="text"
               value={medicineForm.notes}
               onChange={(e) => setMedicineForm({ ...medicineForm, notes: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               placeholder="e.g. Take with warm water after breakfast"
             />
           </div>
@@ -894,7 +894,7 @@ export default function PersonalizeHub() {
               required
               value={memoryForm.title}
               onChange={(e) => setMemoryForm({ ...memoryForm, title: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               placeholder="e.g. Hometown Roots or Wedding Anniversary"
             />
           </div>
@@ -906,7 +906,7 @@ export default function PersonalizeHub() {
               required
               value={memoryForm.detail}
               onChange={(e) => setMemoryForm({ ...memoryForm, detail: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               placeholder="e.g. Born and grew up in Ballygunge, loves gardening."
             />
           </div>
@@ -932,7 +932,7 @@ export default function PersonalizeHub() {
               required
               value={todoForm.title}
               onChange={(e) => setTodoForm({ ...todoForm, title: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               placeholder="e.g. Go for 20 minute evening walk"
             />
           </div>
@@ -944,7 +944,7 @@ export default function PersonalizeHub() {
                 type="text"
                 value={todoForm.time}
                 onChange={(e) => setTodoForm({ ...todoForm, time: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
                 placeholder="e.g. 6:00 PM"
               />
             </div>
@@ -954,7 +954,7 @@ export default function PersonalizeHub() {
               <select
                 value={todoForm.recurrence}
                 onChange={(e) => setTodoForm({ ...todoForm, recurrence: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               >
                 <option value="Daily">Daily</option>
                 <option value="Once">Once</option>
@@ -988,7 +988,7 @@ export default function PersonalizeHub() {
               required
               value={todoForm.title}
               onChange={(e) => setTodoForm({ ...todoForm, title: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               placeholder="e.g. Go for 20 minute evening walk"
             />
           </div>
@@ -1000,7 +1000,7 @@ export default function PersonalizeHub() {
                 type="text"
                 value={todoForm.time}
                 onChange={(e) => setTodoForm({ ...todoForm, time: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
                 placeholder="e.g. 6:00 PM"
               />
             </div>
@@ -1010,7 +1010,7 @@ export default function PersonalizeHub() {
               <select
                 value={todoForm.recurrence}
                 onChange={(e) => setTodoForm({ ...todoForm, recurrence: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#2F6FED] focus:outline-none text-sm font-medium"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-[#1E5E3A] focus:ring-1 focus:ring-[#1E5E3A] focus:outline-none text-sm font-medium"
               >
                 <option value="Daily">Daily</option>
                 <option value="Once">Once</option>

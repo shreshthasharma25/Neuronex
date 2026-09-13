@@ -621,6 +621,19 @@ export async function createAndLinkPatientDB(caregiverId, patientFields) {
     });
     if (lErr) throw lErr;
 
+    if (patientFields.cognitiveScore !== undefined && patientFields.cognitiveScore !== null) {
+      try {
+        await supabase.from("cognitive_sessions").insert({
+          id: "cs-" + Date.now().toString(36),
+          patient_id: newPid,
+          game_name: "Cognitive Assessment",
+          accuracy: Number(patientFields.cognitiveScore) || 75,
+          time_taken: "1m 45s",
+          difficulty_level: Number(patientFields.cognitiveScore) > 80 ? 2 : 1,
+        });
+      } catch {}
+    }
+
     return { success: true, patientId: newPid };
   } catch (err) {
     console.error("createAndLinkPatientDB error:", err);

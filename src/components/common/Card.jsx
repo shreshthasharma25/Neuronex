@@ -9,12 +9,15 @@ export default function Card({
   ...props
 }) {
   const variantStyles = {
-    white: "bg-white border border-[#E2E8F0] shadow-sm",
-    lightBlue: "bg-[#EAF2FF] border border-[#CFE1FF] text-[#172B4D]",
-    softYellow: "bg-[#FFF8E1] border border-[#FDE68A] text-[#172B4D]",
-    softGreen: "bg-[#E8F5E9] border border-[#C8E6C9] text-[#172B4D]",
-    softRed: "bg-[#FDECEC] border border-[#FECACA] text-[#172B4D]",
-    primary: "bg-[#2F6FED] text-white border border-transparent shadow-md shadow-[#2F6FED]/20",
+    white: "bg-white border border-[#D8E2D9] shadow-sm",
+    lightBlue: "bg-[#EBF5EE] border border-[#C3E2CD] text-[#162832]",
+    teaLight: "bg-[#EBF5EE] border border-[#C3E2CD] text-[#162832]",
+    softYellow: "bg-[#FFF6E5] border border-[#F7D59A] text-[#162832]",
+    mugaLight: "bg-[#FFF6E5] border border-[#F7D59A] text-[#162832]",
+    softGreen: "bg-[#EBF5EE] border border-[#C3E2CD] text-[#162832]",
+    softRed: "bg-[#FDF2F2] border border-[#F5C2C2] text-[#162832]",
+    primary: "bg-[#1E5E3A] text-white border border-transparent shadow-md shadow-[#1E5E3A]/20",
+    bamboo: "bg-[#FAF7F2] border border-[#E5DFD3] text-[#162832]",
   };
 
   const isClickable = Boolean(onClick) || interactive;

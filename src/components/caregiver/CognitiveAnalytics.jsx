@@ -2,6 +2,8 @@ import React from 'react';
 import Card from '../common/Card';
 import { useApp } from '../../context/AppContext';
 import { Brain, Target, RotateCcw, Puzzle, TrendingUp, Clock, CheckCircle2, AlertCircle, Info, Calendar, Sparkles, Layers } from 'lucide-react';
+import { TeaLeafSprig, RegionalTextileBorder } from '../common/CulturalMotifs';
+import { calculatePatientStatus, getPatientCognitiveScore } from '../../utils/patientStatusEngine';
 
 export default function CognitiveAnalytics() {
   const { patientData } = useApp();
@@ -47,7 +49,7 @@ export default function CognitiveAnalytics() {
       icon: '🧠',
       score: cognitiveStats?.categories?.memory || 0,
       level: categoryLevels.memory || 1,
-      color: 'bg-[#2F6FED]',
+      color: 'bg-[#1E5E3A]',
       description: 'Face & relationship recognition, personal history'
     },
     {
@@ -65,7 +67,7 @@ export default function CognitiveAnalytics() {
       icon: '🎯',
       score: cognitiveStats?.categories?.attention || 0,
       level: categoryLevels.attention || 1,
-      color: 'bg-amber-500',
+      color: 'bg-[#D98A1E]',
       description: 'Visual scene observation & detail discrimination'
     },
     {
@@ -74,27 +76,40 @@ export default function CognitiveAnalytics() {
       icon: '🧩',
       score: cognitiveStats?.categories?.sequencing || 0,
       level: categoryLevels.sequencing || 1,
-      color: 'bg-purple-600',
+      color: 'bg-[#2E6B52]',
       description: 'Circadian routine ordering & step-by-step logic'
     }
   ];
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-24">
-      {/* Header */}
-      <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#EAF2FF] border border-[#CFE1FF] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <span className="text-[11px] sm:text-xs font-bold text-[#2F6FED] uppercase tracking-wider">
-            Caregiver Observational Monitoring
-          </span>
-          <h2 className="text-lg sm:text-2xl font-extrabold text-[#172B4D] mt-0.5">
-            Recent Game Performance & Trends
+      {/* Himalayan Cognitive Sanctuary Header */}
+      <div className="p-5 sm:p-6 rounded-3xl sm:rounded-4xl bg-gradient-to-r from-[#1E5E3A] via-[#164E30] to-[#0F3520] text-white border-2 border-[#D98A1E]/30 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden">
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 flex-wrap mb-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-[#E5C158] text-[10px] sm:text-xs font-extrabold uppercase tracking-wider border border-white/20 backdrop-blur-xs">
+              <TeaLeafSprig className="w-3.5 h-3.5" color="#E5C158" />
+              <span>Caregiver Observational Monitoring</span>
+            </div>
+            {(() => {
+              const statusObj = calculatePatientStatus(patientData);
+              const score = getPatientCognitiveScore(patientData);
+              return (
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-extrabold border bg-white/95 shadow-xs ${statusObj.badgeClass}`}>
+                  <span className={`w-2 h-2 rounded-full ${statusObj.dotClass}`} />
+                  <span>Status: {statusObj.label} ({score}%)</span>
+                </span>
+              );
+            })()}
+          </div>
+          <h2 className="text-xl sm:text-2xl font-extrabold font-serif tracking-tight text-white">
+            Cognitive Elevation & Performance Trends
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 font-medium">
-            Non-clinical behavioral observations and adaptive game progress for {preferredName}
+          <p className="text-xs sm:text-sm text-emerald-100 font-medium mt-1 max-w-lg">
+            Gentle behavioral observations, waypoint accuracy, and adaptive cognitive trends for {preferredName}
           </p>
         </div>
-        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white text-[#2F6FED] flex items-center justify-center text-xl sm:text-2xl shadow-sm flex-shrink-0 self-start sm:self-auto">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/15 text-white border border-white/25 flex items-center justify-center text-2xl sm:text-3xl shadow-md flex-shrink-0 self-start sm:self-auto backdrop-blur-xs">
           📊
         </div>
       </div>
@@ -105,7 +120,7 @@ export default function CognitiveAnalytics() {
           <span className="text-[10px] sm:text-xs font-bold text-slate-500 block mb-1">
             Games Completed
           </span>
-          <span className="text-2xl sm:text-3xl font-extrabold text-[#172B4D]">
+          <span className="text-2xl sm:text-3xl font-extrabold text-[#162832]">
             {cognitiveStats?.gamesCompleted || 0}
           </span>
           <span className="text-[10px] sm:text-[11px] font-bold text-emerald-600 block mt-1 truncate">
@@ -117,10 +132,10 @@ export default function CognitiveAnalytics() {
           <span className="text-[10px] sm:text-xs font-bold text-slate-500 block mb-1">
             Recent Accuracy
           </span>
-          <span className="text-2xl sm:text-3xl font-extrabold text-[#2F6FED]">
+          <span className="text-2xl sm:text-3xl font-extrabold text-[#1E5E3A]">
             {hasData ? `${cognitiveStats?.averageAccuracy || 0}%` : '--'}
           </span>
-          <span className="text-[10px] sm:text-[11px] font-bold text-[#2F6FED] block mt-1 truncate">
+          <span className="text-[10px] sm:text-[11px] font-bold text-[#1E5E3A] block mt-1 truncate">
             {hasData ? 'Average across attempts' : 'Awaiting data'}
           </span>
         </div>
@@ -153,18 +168,18 @@ export default function CognitiveAnalytics() {
       {/* RECENT PERFORMANCE SUMMARY CARD */}
       {history.length > 0 && (
         <Card variant="white" className="p-4 sm:p-5 bg-gradient-to-br from-slate-50 to-white">
-          <h3 className="text-sm sm:text-base font-extrabold text-[#172B4D] mb-3 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#2F6FED]" />
+          <h3 className="text-sm sm:text-base font-extrabold text-[#162832] mb-3 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#1E5E3A]" />
             <span>Recent Game Performance</span>
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
             {history.slice(0, 3).map((s, idx) => (
               <div key={idx} className="p-3 bg-white rounded-2xl border border-slate-200 shadow-xs">
                 <div className="flex justify-between items-start">
-                  <span className="font-extrabold text-sm text-[#172B4D]">
+                  <span className="font-extrabold text-sm text-[#162832]">
                     {s.gameName}
                   </span>
-                  <span className="text-xs font-black text-[#2F6FED]">
+                  <span className="text-xs font-black text-[#1E5E3A]">
                     {s.accuracy}%
                   </span>
                 </div>
@@ -182,14 +197,14 @@ export default function CognitiveAnalytics() {
       <Card variant="white" className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 sm:mb-5">
           <div>
-            <h3 className="text-base sm:text-lg font-extrabold text-[#172B4D]">
+            <h3 className="text-base sm:text-lg font-extrabold text-[#162832]">
               Personalized Game Difficulty & Progress
             </h3>
             <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
               Independent adaptive difficulty levels (Level 1–5) and engagement by domain
             </p>
           </div>
-          <span className="text-xs font-bold text-[#2F6FED] bg-[#EAF2FF] px-2.5 py-1 rounded-full flex items-center gap-1 self-start sm:self-auto">
+          <span className="text-xs font-bold text-[#1E5E3A] bg-[#EBF5EE] border border-[#D8E2D9] px-2.5 py-1 rounded-full flex items-center gap-1 self-start sm:self-auto">
             <Layers className="w-3 h-3" />
             <span>Multi-Level Adaptive</span>
           </span>
@@ -202,7 +217,7 @@ export default function CognitiveAnalytics() {
                 <div className="flex items-center gap-2">
                   <span className="text-lg sm:text-xl">{cat.icon}</span>
                   <div>
-                    <span className="font-extrabold text-xs sm:text-sm text-[#172B4D] block">
+                    <span className="font-extrabold text-xs sm:text-sm text-[#162832] block">
                       {cat.label}
                     </span>
                     <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">
@@ -211,7 +226,7 @@ export default function CognitiveAnalytics() {
                   </div>
                 </div>
                 <div className="flex items-center sm:block gap-2 justify-between sm:text-right pt-1 sm:pt-0">
-                  <span className="inline-block px-2 py-0.5 rounded-lg bg-[#EAF2FF] text-[#2F6FED] text-[10px] sm:text-xs font-black">
+                  <span className="inline-block px-2 py-0.5 rounded-lg bg-[#EBF5EE] text-[#1E5E3A] border border-[#D8E2D9] text-[10px] sm:text-xs font-black">
                     Level {cat.level}
                   </span>
                   <span className="text-[11px] sm:text-xs font-extrabold text-slate-600 block sm:mt-0.5">
@@ -236,7 +251,7 @@ export default function CognitiveAnalytics() {
       <Card variant="white" className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div>
-            <h3 className="text-base sm:text-lg font-extrabold text-[#172B4D]">
+            <h3 className="text-base sm:text-lg font-extrabold text-[#162832]">
               Weekly Engagement & Accuracy
             </h3>
             <p className="text-[11px] sm:text-xs text-slate-500 font-medium mt-0.5">
@@ -256,9 +271,9 @@ export default function CognitiveAnalytics() {
               <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 mb-1">
                 {trend.accuracy > 0 ? `${trend.accuracy}%` : '-'}
               </span>
-              <div className="w-6 sm:w-10 bg-[#EAF2FF] rounded-t-xl h-24 relative flex items-end justify-center overflow-hidden">
+              <div className="w-6 sm:w-10 bg-[#EBF5EE] rounded-t-xl h-24 relative flex items-end justify-center overflow-hidden">
                 <div
-                  className="w-full bg-[#2F6FED] rounded-t-xl transition-all duration-500"
+                  className="w-full bg-[#1E5E3A] rounded-t-xl transition-all duration-500"
                   style={{ height: `${trend.accuracy}%` }}
                 />
               </div>
@@ -274,7 +289,7 @@ export default function CognitiveAnalytics() {
       {history.length > 0 && (
         <Card variant="white" className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-extrabold text-[#172B4D]">
+            <h3 className="text-lg font-extrabold text-[#162832]">
               Game Session History
             </h3>
             <span className="text-xs text-slate-400 font-bold">
@@ -285,7 +300,7 @@ export default function CognitiveAnalytics() {
             {history.map((h, i) => (
               <div key={h.id || i} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
                 <div>
-                  <h4 className="font-extrabold text-sm text-[#172B4D]">
+                  <h4 className="font-extrabold text-sm text-[#162832]">
                     {h.gameName}
                   </h4>
                   <span className="text-xs text-slate-500 font-medium">
@@ -293,7 +308,7 @@ export default function CognitiveAnalytics() {
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-sm font-extrabold text-[#2F6FED] block">
+                  <span className="text-sm font-extrabold text-[#1E5E3A] block">
                     {h.accuracy}% Accuracy
                   </span>
                   <span className="text-xs text-slate-500 font-semibold">

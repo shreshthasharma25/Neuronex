@@ -32,15 +32,16 @@ export default function Button({
   };
 
   const variantStyles = {
-    primary: "bg-[#2F6FED] text-white hover:bg-[#255ecf] shadow-md shadow-[#2F6FED]/20 border border-transparent",
-    secondary: "bg-[#EAF2FF] text-[#2F6FED] hover:bg-[#dbe7ff] border border-[#d0e1fd]",
-    yellow: "bg-[#FFC857] text-[#172B4D] hover:bg-[#f5bc43] shadow-sm font-bold border border-[#f0b538]",
-    softYellow: "bg-[#FFF8E1] text-[#B45309] hover:bg-[#fef3c7] border border-[#fde68a]",
-    emergency: "bg-[#FDECEC] text-[#D32F2F] hover:bg-[#fcdede] border-2 border-[#fca5a5] font-bold shadow-sm",
-    emergencySolid: "bg-[#D32F2F] text-white hover:bg-[#b71c1c] font-bold shadow-lg shadow-red-500/25",
-    success: "bg-[#E8F5E9] text-[#2E7D32] hover:bg-[#d5eed7] border border-[#c8e6c9] font-bold",
-    outline: "bg-white text-[#172B4D] hover:bg-slate-50 border-2 border-slate-200",
-    ghost: "bg-transparent text-[#172B4D] hover:bg-slate-100",
+    // North Eastern Themed Variants
+    primary: "bg-[#1E5E3A] text-white hover:bg-[#164E30] shadow-md shadow-[#1E5E3A]/25 border border-[#174A2E]",
+    secondary: "bg-[#EBF5EE] text-[#1E5E3A] hover:bg-[#DDF0E2] border border-[#C3E2CD] font-bold",
+    yellow: "bg-[#D98A1E] text-white hover:bg-[#C27915] shadow-md shadow-[#D98A1E]/25 font-bold border border-[#B36F10]",
+    softYellow: "bg-[#FFF6E5] text-[#92540B] hover:bg-[#FDF0D0] border border-[#F7D59A] font-bold",
+    emergency: "bg-[#FDF2F2] text-[#C92A2A] hover:bg-[#FCE5E5] border-2 border-[#F5B5B5] font-bold shadow-sm",
+    emergencySolid: "bg-[#C92A2A] text-white hover:bg-[#A82020] font-bold shadow-lg shadow-[#C92A2A]/25",
+    success: "bg-[#EBF5EE] text-[#1E5E3A] hover:bg-[#DDF0E2] border border-[#C3E2CD] font-bold",
+    outline: "bg-white text-[#162832] hover:bg-[#FAF7F2] border-2 border-[#D8E2D9] font-bold",
+    ghost: "bg-transparent text-[#162832] hover:bg-[#EBF5EE] hover:text-[#1E5E3A]",
   };
 
   return (

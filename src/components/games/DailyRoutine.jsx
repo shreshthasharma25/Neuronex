@@ -89,15 +89,15 @@ export default function DailyRoutine({ onComplete, onExit, reshuffleKey = 0 }) {
     >
       <div className="space-y-6 text-center">
         {/* Clock visual */}
-        <div className="w-24 h-24 mx-auto rounded-3xl bg-[#EAF2FF] border-2 border-[#CFE1FF] text-[#2F6FED] flex items-center justify-center text-4xl shadow-sm">
+        <div className="w-24 h-24 mx-auto rounded-3xl bg-[#EBF5EE] border-2 border-[#D8E2D9] text-[#1E5E3A] flex items-center justify-center text-4xl shadow-sm">
           ⏰
         </div>
 
         <div>
-          <span className="text-xs font-extrabold text-[#2F6FED] uppercase tracking-wider">
+          <span className="text-xs font-extrabold text-[#1E5E3A] uppercase tracking-wider">
             Daily Circadian Step
           </span>
-          <h3 className="text-2xl font-extrabold text-[#172B4D] mt-1">
+          <h3 className="text-2xl font-extrabold text-[#162832] mt-1">
             {activeQ.question}
           </h3>
           <p className="text-sm text-slate-500 font-semibold mt-1">
@@ -120,7 +120,7 @@ export default function DailyRoutine({ onComplete, onExit, reshuffleKey = 0 }) {
           {activeQ.options.map((opt, idx) => {
             const isSelected = selected === opt;
             const isCorrect = opt === activeQ.correctAnswer;
-            let btnStyle = 'bg-white border-2 border-slate-200 hover:border-[#2F6FED] text-[#172B4D]';
+            let btnStyle = 'bg-white border-2 border-[#D8E2D9] hover:border-[#1E5E3A] text-[#162832]';
 
             if (selected !== null) {
               if (isCorrect) {

@@ -186,25 +186,25 @@ export function evaluateAdaptiveDifficulty(history = [], currentLevel = 1, categ
 // ── Reshuffle Content Generators ──────────────────────────────────────────
 
 const BASKET_ITEM_POOLS = [
-  // Fruits & Kitchen
-  { id: 'apple', name: 'Fresh Apple', icon: '🍎' },
-  { id: 'banana', name: 'Ripe Banana', icon: '🍌' },
-  { id: 'tea', name: 'Morning Tea', icon: '🍵' },
-  { id: 'bread', name: 'Warm Bread', icon: '🍞' },
-  { id: 'orange', name: 'Juicy Orange', icon: '🍊' },
-  { id: 'milk', name: 'Cold Milk', icon: '🥛' },
-  { id: 'honey', name: 'Pure Honey', icon: '🍯' },
-  { id: 'biscuit', name: 'Tea Biscuit', icon: '🍪' },
+  // Familiar Kitchen & Regional Produce
+  { id: 'kazi-nemu', name: 'Assam Lemon (Kazi Nemu)', icon: '🍋' },
+  { id: 'malbhog-banana', name: 'Ripe Banana (Malbhog)', icon: '🍌' },
+  { id: 'assam-tea', name: 'Assam Tea Leaves', icon: '🍵' },
+  { id: 'fresh-ginger', name: 'Fresh Hill Ginger', icon: '🫚' },
+  { id: 'rice-pitha', name: 'Warm Rice Pitha', icon: '🥟' },
+  { id: 'mustard-oil', name: 'Mustard Oil Jar', icon: '🫙' },
+  { id: 'wild-honey', name: 'Hill Forest Honey', icon: '🍯' },
+  { id: 'tea-biscuit', name: 'Tea Biscuit', icon: '🍪' },
 
-  // Household & Familiar Keepsakes
-  { id: 'book', name: 'Favorite Book', icon: '📖' },
-  { id: 'key', name: 'House Key', icon: '🔑' },
-  { id: 'glasses', name: 'Reading Glasses', icon: '👓' },
-  { id: 'clock', name: 'Desk Clock', icon: '⏰' },
-  { id: 'umbrella', name: 'Umbrella', icon: '☂️' },
-  { id: 'flower', name: 'Garden Rose', icon: '🌹' },
-  { id: 'cup', name: 'Porcelain Cup', icon: '☕' },
-  { id: 'bell', name: 'Brass Bell', icon: '🔔' },
+  // Everyday Household & Cultural Keepsakes
+  { id: 'bamboo-basket', name: 'Bamboo Basket (Khorahi)', icon: '🧺' },
+  { id: 'muga-gamusa', name: 'Woven Gamusa', icon: '🧣' },
+  { id: 'reading-glasses', name: 'Reading Glasses', icon: '👓' },
+  { id: 'prayer-bell', name: 'Brass Puja Bell', icon: '🔔' },
+  { id: 'clay-cup', name: 'Clay Tea Cup (Kulhar)', icon: '☕' },
+  { id: 'monsoon-umbrella', name: 'Bamboo Umbrella', icon: '☂️' },
+  { id: 'bamboo-flute', name: 'Bamboo Flute', icon: '🪈' },
+  { id: 'hand-fan', name: 'Woven Hand Fan (Bisoni)', icon: '🪭' },
 ];
 
 /**
@@ -241,14 +241,14 @@ export function generateMemoryBasketSession(level = 1, previousIds = []) {
 }
 
 const MEMORY_TWIN_PAIRS_POOL = [
+  { id: 'tea-cup', icon: '☕', name: 'Morning Tea' },
+  { id: 'orchid', icon: '🌸', name: 'Hill Orchid' },
   { id: 'sun', icon: '☀️', name: 'Warm Sun' },
-  { id: 'tree', icon: '🌳', name: 'Green Tree' },
-  { id: 'cup', icon: '☕', name: 'Morning Cup' },
-  { id: 'flower', icon: '🌸', name: 'Blossom' },
-  { id: 'book', icon: '📚', name: 'Story Book' },
-  { id: 'music', icon: '🎵', name: 'Melody' },
-  { id: 'house', icon: '🏡', name: 'Cozy House' },
-  { id: 'star', icon: '⭐', name: 'Bright Star' },
+  { id: 'flute', icon: '🪈', name: 'Bamboo Flute' },
+  { id: 'banyan', icon: '🌳', name: 'Banyan Tree' },
+  { id: 'bell', icon: '🔔', name: 'Brass Bell' },
+  { id: 'house', icon: '🏡', name: 'Hill Home' },
+  { id: 'star', icon: '⭐', name: 'Evening Star' },
 ];
 
 /**
@@ -346,12 +346,13 @@ export function generateDailyRoutineSession(routineSteps = [], level = 1) {
   const config = GAME_LEVEL_CONFIGS['daily-routine'][level] || GAME_LEVEL_CONFIGS['daily-routine'][1];
 
   const defaultRoutine = [
-    { time: "07:00 AM", activity: "Morning Tea & Quiet Time" },
+    { time: "07:00 AM", activity: "Morning Assam Tea & Veranda Rest" },
     { time: "08:00 AM", activity: "Morning Medicine" },
-    { time: "08:30 AM", activity: "Breakfast" },
-    { time: "10:00 AM", activity: "Gentle Walk" },
-    { time: "01:00 PM", activity: "Lunch" },
-    { time: "08:00 PM", activity: "Evening Rest & Dinner" }
+    { time: "08:30 AM", activity: "Warm Breakfast" },
+    { time: "10:00 AM", activity: "Gentle Courtyard Garden Walk" },
+    { time: "01:00 PM", activity: "Afternoon Meal" },
+    { time: "05:00 PM", activity: "Evening Tea & Family Time" },
+    { time: "08:00 PM", activity: "Dinner & Quiet Rest" }
   ];
 
   const steps = (routineSteps && routineSteps.length >= 3) ? routineSteps : defaultRoutine;

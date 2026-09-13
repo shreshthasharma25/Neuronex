@@ -191,7 +191,7 @@ export default function EmergencyModal({ isOpen, onClose }) {
             className={`p-4 rounded-2xl border text-xs font-semibold ${
               phoneNotice.type === 'error'
                 ? 'bg-rose-50 border-rose-200 text-rose-800'
-                : 'bg-blue-50 border-blue-200 text-blue-900'
+                : 'bg-[#EBF5EE] border-[#C3E2CD] text-[#1E5E3A]'
             }`}
           >
             <div className="flex items-start gap-2">
@@ -202,7 +202,7 @@ export default function EmergencyModal({ isOpen, onClose }) {
                   <div className="flex items-center gap-2 pt-1">
                     <a
                       href={`tel:${phoneNotice.phone}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2F6FED] text-white rounded-xl font-mono text-sm font-bold shadow-sm"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1E5E3A] text-white rounded-xl font-mono text-sm font-bold shadow-sm"
                     >
                       <Phone className="w-3.5 h-3.5" />
                       <span>{phoneNotice.phone}</span>
@@ -221,17 +221,17 @@ export default function EmergencyModal({ isOpen, onClose }) {
             familyMembers.map((fam, idx) => (
               <div
                 key={fam.id || `fam-${idx}`}
-                className="p-4 rounded-3xl bg-[#EAF2FF] border-2 border-[#2F6FED]/40 shadow-sm space-y-3"
+                className="p-4 rounded-3xl bg-[#EBF5EE] border-2 border-[#C3E2CD] shadow-sm space-y-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#2F6FED] text-white flex items-center justify-center text-xl flex-shrink-0 shadow-md">
+                  <div className="w-12 h-12 rounded-2xl bg-[#1E5E3A] text-white flex items-center justify-center text-xl flex-shrink-0 shadow-md">
                     ❤️
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <span className="text-base font-extrabold text-[#172B4D] block truncate">
+                    <span className="text-base font-extrabold text-[#162832] block truncate">
                       {fam.name}
                     </span>
-                    <span className="text-xs font-semibold text-[#2F6FED] block truncate">
+                    <span className="text-xs font-semibold text-[#1E5E3A] block truncate">
                       {fam.relation ? `${fam.relation} • ` : ''}{fam.phone || t('emergency.noPhoneSaved', { name: fam.name })}
                     </span>
                   </div>
@@ -241,7 +241,7 @@ export default function EmergencyModal({ isOpen, onClose }) {
                   <button
                     type="button"
                     onClick={() => handleCall(fam.name, fam.phone)}
-                    className="py-3 px-3 rounded-2xl bg-[#2F6FED] hover:bg-[#2058c4] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
+                    className="py-3 px-3 rounded-2xl bg-[#1E5E3A] hover:bg-[#164E30] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
                   >
                     <Phone className="w-4 h-4" />
                     <span>{t('emergency.callButton')}</span>
@@ -270,7 +270,7 @@ export default function EmergencyModal({ isOpen, onClose }) {
                 <button
                   type="button"
                   onClick={handleSwitchToCaregiver}
-                  className="text-xs font-bold text-[#2F6FED] hover:underline mt-1.5 inline-block"
+                  className="text-xs font-bold text-[#1E5E3A] hover:underline mt-1.5 inline-block"
                 >
                   {t('emergency.addInCaregiver')}
                 </button>
@@ -280,16 +280,16 @@ export default function EmergencyModal({ isOpen, onClose }) {
 
           {/* CALL & WHATSAPP CAREGIVER (IF CONFIGURED) */}
           {primaryCaregiver && (
-            <div className="p-4 rounded-3xl bg-[#FFF8E1] border-2 border-[#FFC857] shadow-sm space-y-3">
+            <div className="p-4 rounded-3xl bg-[#FFF6E5] border-2 border-[#F7D59A] shadow-sm space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#FFC857] text-[#172B4D] flex items-center justify-center text-xl flex-shrink-0 shadow-md">
+                <div className="w-12 h-12 rounded-2xl bg-[#D98A1E] text-white flex items-center justify-center text-xl flex-shrink-0 shadow-md">
                   🩺
                 </div>
                 <div className="text-left flex-1 min-w-0">
-                  <span className="text-base font-extrabold text-[#172B4D] block truncate">
+                  <span className="text-base font-extrabold text-[#162832] block truncate">
                     {primaryCaregiver.name} {primaryCaregiver.title ? `(${primaryCaregiver.title})` : ''}
                   </span>
-                  <span className="text-xs font-semibold text-[#854D0E] block truncate">
+                  <span className="text-xs font-semibold text-[#92540B] block truncate">
                     {primaryCaregiver.phone || t('emergency.noPhoneSaved', { name: primaryCaregiver.name })}
                   </span>
                 </div>
@@ -299,7 +299,7 @@ export default function EmergencyModal({ isOpen, onClose }) {
                 <button
                   type="button"
                   onClick={() => handleCall(primaryCaregiver.name, primaryCaregiver.phone)}
-                  className="py-3 px-3 rounded-2xl bg-[#D97706] hover:bg-[#b45309] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
+                  className="py-3 px-3 rounded-2xl bg-[#D98A1E] hover:bg-[#B36F10] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
                 >
                   <Phone className="w-4 h-4" />
                   <span>{t('emergency.callButton')}</span>
@@ -318,13 +318,13 @@ export default function EmergencyModal({ isOpen, onClose }) {
 
           {/* CALL & WHATSAPP DOCTOR (IF CONFIGURED) */}
           {doctorInfo ? (
-            <div className="p-4 rounded-3xl bg-white border-2 border-slate-200 shadow-sm space-y-3">
+            <div className="p-4 rounded-3xl bg-white border-2 border-[#D8E2D9] shadow-sm space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#E8F5E9] text-[#2E7D32] flex items-center justify-center text-xl flex-shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-[#EBF5EE] text-[#1E5E3A] flex items-center justify-center text-xl flex-shrink-0 border border-[#C3E2CD]">
                   👨‍⚕️
                 </div>
                 <div className="text-left flex-1 min-w-0">
-                  <span className="text-base font-extrabold text-[#172B4D] block truncate">
+                  <span className="text-base font-extrabold text-[#162832] block truncate">
                     {t('emergency.callDoctor')}
                   </span>
                   <span className="text-xs font-semibold text-slate-600 block truncate">
@@ -337,7 +337,7 @@ export default function EmergencyModal({ isOpen, onClose }) {
                 <button
                   type="button"
                   onClick={() => handleCall("Doctor", doctorInfo.value)}
-                  className="py-3 px-3 rounded-2xl bg-[#2E7D32] hover:bg-[#1b5e20] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
+                  className="py-3 px-3 rounded-2xl bg-[#1E5E3A] hover:bg-[#164E30] text-white font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
                 >
                   <Phone className="w-4 h-4" />
                   <span>{t('emergency.callButton')}</span>
@@ -368,7 +368,7 @@ export default function EmergencyModal({ isOpen, onClose }) {
 
           {/* Standard Emergency Services (Clearly Labeled) */}
           <div className="pt-1">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block mb-2">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 block mb-2">
               {t('emergency.publicServices')}
             </span>
 
@@ -376,14 +376,14 @@ export default function EmergencyModal({ isOpen, onClose }) {
             <button
               type="button"
               onClick={() => handleCall("Emergency Ambulance", "108")}
-              className="w-full p-4 rounded-2xl bg-[#FDECEC] hover:bg-[#fcdddd] border-2 border-[#FCA5A5] text-[#D32F2F] flex items-center justify-between transition-all duration-150 active:scale-[0.98] shadow-sm touch-target mb-2.5"
+              className="w-full p-4 rounded-2xl bg-[#FDF2F2] hover:bg-[#FCE5E5] border-2 border-[#F5C2C2] text-[#C92A2A] flex items-center justify-between transition-all duration-150 active:scale-[0.98] shadow-sm touch-target mb-2.5"
             >
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-[#D32F2F] text-white flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
+                <div className="w-11 h-11 rounded-xl bg-[#C92A2A] text-white flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
                   🚑
                 </div>
                 <div className="text-left">
-                  <span className="text-base font-extrabold text-[#D32F2F] block">
+                  <span className="text-base font-extrabold text-[#C92A2A] block">
                     {t('emergency.ambulance')}
                   </span>
                   <span className="text-xs font-bold text-rose-700">
@@ -391,7 +391,7 @@ export default function EmergencyModal({ isOpen, onClose }) {
                   </span>
                 </div>
               </div>
-              <Phone className="w-6 h-6 text-[#D32F2F]" />
+              <Phone className="w-6 h-6 text-[#C92A2A]" />
             </button>
 
             {/* Call Police */}

@@ -24,10 +24,10 @@ export default function FamilyMemory({ onComplete, onExit, reshuffleKey = 0 }) {
         onExit={onExit}
       >
         <div className="py-8 text-center space-y-4">
-          <div className="w-20 h-20 rounded-3xl bg-[#FFF8E1] text-amber-600 flex items-center justify-center mx-auto text-4xl shadow-sm">
+          <div className="w-20 h-20 rounded-3xl bg-[#FFF6E5] text-[#D98A1E] border border-[#F3E2C4] flex items-center justify-center mx-auto text-4xl shadow-sm">
             👨‍👩‍👧
           </div>
-          <h3 className="text-2xl font-extrabold text-[#172B4D]">
+          <h3 className="text-2xl font-extrabold text-[#162832]">
             No Family Memories Yet
           </h3>
           <p className="text-base text-slate-600 font-medium max-w-sm mx-auto leading-relaxed">
@@ -132,17 +132,17 @@ export default function FamilyMemory({ onComplete, onExit, reshuffleKey = 0 }) {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="text-5xl text-[#2F6FED]">
+            <div className="text-5xl text-[#1E5E3A]">
               {currentQ.type === 'person' ? '👤' : '📸'}
             </div>
           )}
         </div>
 
         <div>
-          <span className="text-xs font-extrabold text-[#2F6FED] uppercase tracking-wider">
+          <span className="text-xs font-extrabold text-[#1E5E3A] uppercase tracking-wider">
             {currentQ.type === 'person' ? `Family Person • ${currentQ.person?.name}` : 'Family Keepsake'}
           </span>
-          <h3 className="text-2xl font-extrabold text-[#172B4D] mt-1">
+          <h3 className="text-2xl font-extrabold text-[#162832] mt-1">
             {currentQ.question}
           </h3>
           <p className="text-sm text-slate-500 font-semibold mt-0.5">
@@ -165,7 +165,7 @@ export default function FamilyMemory({ onComplete, onExit, reshuffleKey = 0 }) {
           {currentQ.options.map((opt, idx) => {
             const isSelected = selectedOption === opt;
             const isCorrectAnswer = opt.toLowerCase() === currentQ.correctAnswer.toLowerCase();
-            let buttonStyle = 'bg-white border-2 border-slate-200 hover:border-[#2F6FED] text-[#172B4D]';
+            let buttonStyle = 'bg-white border-2 border-[#D8E2D9] hover:border-[#1E5E3A] text-[#162832]';
 
             if (selectedOption !== null) {
               if (isCorrectAnswer) {
